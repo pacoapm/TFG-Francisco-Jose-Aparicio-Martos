@@ -1,0 +1,51 @@
+\chapter{Algoritmos de entrenamiento}
+
+En el campo del machine learning los algoritmos más usados son las redes neuronales. Con este tipo de algoritmos los ordenadores son capaces de realizar predicciones, encontrar patrones y replicar acciones que un ser humano puede hacer, como por ejemplo: el reconocimiento y la clasificación de objetos. Para que las redes neuronales puedan hacer estas tareas es necesario realizar un entrenamiento con grandes bases de datos. En el proceso de entrenamiento a la red neuronal (en el caso del aprendizaje supervisado) se le muestra ejemplos de los problemas que tiene que resolver junto a su solución y en función de si ha conseguido resolver o no el problema la red se actualizará. 
+
+Los métodos que se usan para enseñar a la redes neuronales se conocen como algoritmos de entrenamiento. Un buen algoritmo de entrenamiento tiene que ser capaz de poder mejorar el desempeño de la red neuronal en la base de datos de entrenamiento.
+
+Actualmente el algoritmo más usado es el backpropagation \cite{RefWorks:RefID:6-rumelhart1986learning} debido a su capacidad de encontrar buenos resultados y a su eficiencia. Desde que se inventó este algoritmo ha sido el más estudiado creandose numerosas variantes cuyo objetivo era el de mejorar los puntos débiles de este algoritmo. Terminar de introducir el estado del arte...
+
+A continuación voy a realizar una presentación de cada uno de los algoritmos presentados anteriormente explicando su funcionamiento y mostrando su pseudocódigo.
+\newpage
+\section{Backpropagation}
+
+El algoritmo Backpropagation, abreviatura de ``backward propagation error", es un algoritmo de aprendizaje supervisado para redes neuronales que hace uso del gradiente descendente. Se trata de una generalización de la regla delta del perceptron para las redes neuronales multicapa. Su funcionamiento se basa en calcular el gradiente de la función de error con respecto a los pesos de la red. Para calcular los gradientes para cada capa primero se calculan los vectores de sensibilidad los cuales cuantifican cuanto cambia el error con respecto a $s^{(l)}$ siendo $s^{(l)} = (W^{(L)})x^{(l-1)}$ el resultado de mulpilcar los pesos de la capa l, $W^{(L)}$, con el resultado de la capa $l-1$, $x^{(l-1)}$. Calculadas las sensibilidades el siguiente paso es calcular los gradientes, para ello se multiplicara cada vector de sensibilidad por su vector de pesos correspondientes. Finalmente para actualizar la red se usará la regla del gradiente descendente para recalcular los pesos.
+
+primero calcula el gradiente de la última capa, tras eso, haciendo uso de la regla de la cadena propaga los gradientes hacia las capas anteriores, de ahí el concepto de ``bacward". Este proceso de propagar los gradientes hacia atrás permite calcular los gradientes de cada capa eficientemente.
+
+\begin{algorithm}
+   \caption{Backpropagation para calcular la sensiblidad}
+   \KwData{$w = \{W^{1},...,W^{L}\}$; $D = (x_{1},y_{1}) ... (x_{N},y_{N})$}
+   \KwResult{el error $E_{in}(w)$ y el gradiente $g = \{G^{1},...,G^{L}\}$}
+   Feedforward \ref{tab:Feedforward}
+\end{algorithm}
+
+
+\section{HSIC Bottleneck}
+
+El algoritmo HSIC Bottleneck se introduce en el año 2019 como alternativa a backpropagation para el entrenamiento de redes neuronales. La propuesta se basa en la teoría de la información, más específicamente en los principios de la desigualdad de Fano y la información mutua. En el contexto de las redes neuronales la desigualdad de Fano indica que la probabilidad de clasificar erróneamente depende de la entropía condicional $H(Y|X)$, siendo Y la etiqueta y X la entrada. Además la información mutua puede ser escrita de la siguiente forma: $I(X,Y) = H(Y) - H(Y|X)$. Debido a que la entropía de las etiquetas es constante con respecto a los pesos de la red, cuando la probabilidad de fallar en la clasificación es baja, $H(Y|X)$ es también bajo mientras que la información mutua es alta. 
+
+El algoritmo no usa directamente la información mutua debido a que se produciría overfitting, es por ello que se emplea una aproximación del infromation bottleneck llamado criterio de independencia HSIC para caracterizar la dependencia entre las distintas capas. El objetivo es que por cada capa de la red maximizar el HSIC entre la activación de la capa y la salida deseada y minimizar el HSIC entre la activación de la capa y la entrada.
+
+\begin{algorithm}
+   \caption{Entrenamiento HSIC sin formato}
+   \KwData{$X_{j} \epsilon R^{mxd_{x}}$: data batch $j$, $Y_{j} \epsilon R^{mxd_{y}}$: label batch j,  
+   capa $T_{i}$ parametrizado por $\{\theta|W_{i}b_{i}\}$, $i \epsilon \{1,...,L\}:$ iterador de capas, $m:$ tamaño del batch, $n:$ numero de muestras, $\alpha:$ learning rate}
+   \KwResult{red HSIC entrenada  $T_{i}($·$):\mathds{R}^{d_{i-1}} \rightarrow \mathds{R}^{d_{i}}$, $i \epsilon \{1,...,L\}$}
+   
+    \For{$j \epsilon \{1,...,n/m\}$}{
+        \For{$i \epsilon \{1,...,L\}$}{
+            $Z_{i} = T_{i-1}(Z_{i-1})$   //$Z_{0} = X_{j}$ \\
+            $g_{i} = \nabla_{\theta}(nHSIC(Z_{i},X_{j}) - \beta nHSIC(Z_{i},Y_{j}))$ \\
+            $\theta_{i} \gets \theta_{i} - \alpha g_{i}$
+        }
+    }  
+   
+\end{algorithm}
+
+
+
+\section{Syntethic gradient}
+
+\section{Feedback alignment}

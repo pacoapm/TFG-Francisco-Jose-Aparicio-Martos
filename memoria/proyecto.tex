@@ -3,7 +3,8 @@
 \usepackage{listings}
 \usepackage[utf8]{inputenc}
 \usepackage[spanish]{babel}
-
+\usepackage{dsfont} %paquete para leras matemáticas
+\usepackage{amsmath} %paquete para las matrices
 % \usepackage[style=list, number=none]{glossary} %
 %\usepackage{titlesec}
 %\usepackage{pailatino}
@@ -16,7 +17,8 @@
 \makeatother
 
 
-%\usepackage[chapter]{algorithm}
+\usepackage{algorithm2e}
+\RestyleAlgo{ruled}
 \RequirePackage{verbatim}
 %\RequirePackage[Glenn]{fncychap}
 \usepackage{fancyhdr}
@@ -26,6 +28,7 @@
 \usepackage{longtable}
 
 \usepackage[pdfborder={000}]{hyperref} %referencia
+
 
 % ********************************************************************
 % Re-usable information
@@ -70,7 +73,7 @@ pdfproducer = {pdflatex}
 %\usepackage[style=long, cols=2,border=plain,toc=true,number=none]{glossary}
 % \makeglossary
 
-% Definición de comandos que me son tiles:
+% Definición de comandos que me son utiles:
 %\renewcommand{\indexname}{Índice alfabético}
 %\renewcommand{\glossaryname}{Glosario}
 
@@ -184,11 +187,15 @@ pdfproducer = {pdflatex}
 
 \input{capitulos/01_Introduccion}
 %
-%\input{capitulos/02_EspecificacionRequisitos}
+\input{capitulos/02_EspecificacionRequisitos}
 %
-%\input{capitulos/03_Planificacion}
+\input{capitulos/03_Planificacion}
 %
-%\input{capitulos/04_Analisis}
+\input{capitulos/04_Analisis}
+%
+\input{capitulos/Preliminar}
+%
+\input{capitulos/05_AlgoritmosEntrenamiento}
 %
 %\input{capitulos/05_Diseno}
 %
@@ -201,9 +208,9 @@ pdfproducer = {pdflatex}
 %%\chapter{Conclusiones y Trabajos Futuros}
 %
 %
-%%\nocite{*}
-%\bibliography{bibliografia/bibliografia}\addcontentsline{toc}{chapter}{Bibliografía}
-%\bibliographystyle{miunsrturl}
+\nocite{*}
+\bibliography{bibliografia/bibliografia}\addcontentsline{toc}{chapter}{Bibliografía}
+\bibliographystyle{plain}
 %
 %\appendix
 %\input{apendices/manual_usuario/manual_usuario}
