@@ -1,6 +1,8 @@
 \chapter{Preliminar}
 
-Este capítulo esta destinado a explicar los métodos, algoritmos o herramientas que se van a utilizar en los algoritmos a estudiar con el objetivo de no tener que repetir su significado y funcionamiento.
+Este capítulo esta destinado a explicar los métodos, algoritmos o herramientas que se van a utilizar en los algoritmos a estudiar con el objetivo de no tener que repetir su significado o funcionamiento.
+
+
 \section{Propagación hacia delante}
 
 La propagación forward o hacia delante es el proceso que se realiza para calcular la hipótesis de la red neuronal. Consiste en ir pasando la información de capa a capa, empezando por la inicial y llegando hasta la de salida. El proceso que se lleva a cabo es multiplicar la entrada por la matriz de pesos de la primera capa, a este resultado se le aplica la función de activación que se esté usando en la red. Este proceso se repite hasta llegar a la capa final, en la que la función de activación dependiendo del problema puede ser la identidad, softmax, entropía cruzada, etc.
@@ -23,4 +25,20 @@ La propagación forward o hacia delante es el proceso que se realiza para calcul
    } 
    $h(x) = x^{(L)}$
    \label{tab:Feedforward}
+\end{algorithm}
+
+\section{Gradiente descendente}
+
+El gradiente descendente es una técnica básica de optimización de funciones en los algoritmos de machine learning. Consiste en calcular el mínimo de una función de forma iterativa haciendo uso de la derivada de la función a estudiar. 
+
+La ejecución del algoritmo se inicia desde un punto aleatorio de la función. Para dirigirse hacia el mínimo más cercano el algoritmo calcula la derivada de la función en dicho punto y se desplaza en sentido contrario a esta. 
+
+\begin{algorithm}
+   \caption{Gradiente descendente}
+   \KwData{$w_{0}$: punto de partida; $\theta$: función a optimizar; $max\_iter$: numero máximo de iteraciones; $\eta$ learning rate}
+   \KwResult{un mínimo de la función}
+   $w \gets x_{0}$\\
+   \For{i = 1 hasta $max\_iter$ }{
+        $w = w - \eta f'(w)$
+   } 
 \end{algorithm}

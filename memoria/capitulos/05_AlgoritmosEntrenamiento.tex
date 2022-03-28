@@ -8,19 +8,68 @@ Actualmente el algoritmo más usado es el backpropagation \cite{RefWorks:RefID:6
 
 A continuación voy a realizar una presentación de cada uno de los algoritmos presentados anteriormente explicando su funcionamiento y mostrando su pseudocódigo.
 \newpage
-\section{Backpropagation}
+\section{Backpropagation} \label{tab:Backprop}
 
-El algoritmo Backpropagation, abreviatura de ``backward propagation error", es un algoritmo de aprendizaje supervisado para redes neuronales que hace uso del gradiente descendente. Se trata de una generalización de la regla delta del perceptron para las redes neuronales multicapa. Su funcionamiento se basa en calcular el gradiente de la función de error con respecto a los pesos de la red. Para calcular los gradientes para cada capa primero se calculan los vectores de sensibilidad los cuales cuantifican cuanto cambia el error con respecto a $s^{(l)}$ siendo $s^{(l)} = (W^{(L)})x^{(l-1)}$ el resultado de mulpilcar los pesos de la capa l, $W^{(L)}$, con el resultado de la capa $l-1$, $x^{(l-1)}$. Calculadas las sensibilidades el siguiente paso es calcular los gradientes, para ello se multiplicara cada vector de sensibilidad por su vector de pesos correspondientes. Finalmente para actualizar la red se usará la regla del gradiente descendente para recalcular los pesos.
-
-primero calcula el gradiente de la última capa, tras eso, haciendo uso de la regla de la cadena propaga los gradientes hacia las capas anteriores, de ahí el concepto de ``bacward". Este proceso de propagar los gradientes hacia atrás permite calcular los gradientes de cada capa eficientemente.
+El algoritmo Backpropagation, abreviatura de ``backward propagation error", es un algoritmo de aprendizaje supervisado para redes neuronales que hace uso del gradiente descendente. Se trata de una generalización de la regla delta del perceptron para las redes neuronales multicapa. Su funcionamiento se basa en calcular el gradiente de la función de error con respecto a los pesos de la red. Para calcular los gradientes de cada capa primero se calculan los vectores de sensibilidad los cuales cuantifican cuanto cambia el error con respecto a $s^{(l)}$ siendo $s^{(l)} = (W^{(L)})x^{(l-1)}$ el resultado de multiplicar los pesos de la capa $l$, $W^{(L)}$, con el resultado de la capa $l-1$, $x^{(l-1)}$. Calculadas las sensibilidades el siguiente paso es calcular los gradientes, para ello se multiplicara cada vector de sensibilidad, $\delta^{(l)}$, por los resultados de cada capa, $x^{(l)}$. Finalmente para actualizar la red se usará la regla del gradiente descendente.
 
 \begin{algorithm}
-   \caption{Backpropagation para calcular la sensiblidad}
-   \KwData{$w = \{W^{1},...,W^{L}\}$; $D = (x_{1},y_{1}) ... (x_{N},y_{N})$}
-   \KwResult{el error $E_{in}(w)$ y el gradiente $g = \{G^{1},...,G^{L}\}$}
-   Feedforward \ref{tab:Feedforward}
+   \caption{Backpropagation para calcular la sensibilidad}
+   \KwData{Un punto de la muestra $(x,y)$; las matrices de pesos, $w = \{W^{1},...,W^{L}\}$; la función de activación $\theta$}
+   \KwResult{La sensibilidad  $\delta^{(l)}$ para $l = \{L,...,1\}$}
+   Ejecutamos el proceso Feedforward \ref{tab:Feedforward} para obtener:\\
+   $s^{(l)}$ para $l = \{L,...,1\}$ \\
+   $x^{(l)}$ para $l = \{L,...,1\}$ \\  
+   $\delta^{(L)} \gets 2(x^{(L)-y})\theta'(s^{(L)})$ \\
+   \For{$l = L - 1$ hasta $1$}{
+        $\delta^{(l)} = \theta'(s^{(l)}) \otimes [W^{(l+1)}\delta^{(l+1)}]$
+   }
+   
+   \label{tab:Backprop_alg}
 \end{algorithm}
 
+\begin{algorithm}
+   \caption{Proceso del calculo de gradientes $g = \nabla E_{in}(w)$ y la función de error $E_{in}(w)$}
+   \KwData{$w = \{W^{1},...,W^{L}\}$; $D = (x_{1},y_{1}) ... (x_{N},y_{N})$}
+   \KwResult{el error $E_{in}(w)$ y los gradientes $g = \{G^{1},...,G^{L}\}$}
+   Inicialización: $E_{in} = 0$ y $G^{(l)} = 0 $ para $l = 1,...,L$ \\
+   \For{por cada punto en la muestra $(x_{n}, y_{n}), n = 1,...,N$}{
+        Calculamos $x^{(l)}$ para $l = 1,...,L$ [forward propagation] \ref{tab:Feedforward} \\
+        Calculamos $\delta^{(l)}$ para $l = 1,...,L$ [backpropagation] \ref{tab:Backprop_alg} \\
+        \For{$l = 1,...,L$}{
+            $G^{(l)}(x_{n}) = [x^{(l-1)}(\delta^{(l)})^{T}]$ \\
+            $G^{(l)} \gets G^{(l)} + \frac{1}{N}G^{(l)}(x_{n}) $
+        }
+        
+   }
+\end{algorithm}
+
+La actualización de los pesos se hará con el uso del gradiente descendente el cual dependiendo de la estrategia usada se hará tras calcular los gradientes con un solo punto de la muestra, con un subconjunto o con todos los datos.
+
+\subsection{Eficiencia}
+
+A continuación, en este subapartado voy a realizar el análisis de la complejidad computacional del algoritmo. Para poder realizar el análisis lo primero que tendremos que saber es cual es la complejidad computacional de la multiplicación de matrices, ya que es una operación que se usa en todas las fases del algoritmo.
+
+\begin{algorithm}
+   \caption{Multiplicación de matrices}
+   \KwData{$A_{nxn}$ y $B_{nxn}$, matrices a multiplicar}
+   \KwResult{$C_{nxn}$, matriz producto}
+   Inicialización: $C = 0$\\
+   \For{i = 0 to n}{
+    \For{j = 0 to n}{
+     \For{k = 0 to n}{
+        $C_{ij} = C_{ij} + A_{ik}B_{kj}$
+     }    
+    }
+   }
+\end{algorithm}
+
+La multiplicación de matrices se compone de 3 bucles, el primero recorre las filas, el segundo las columnas y el tercero se encarga de realizar la suma y producto de los componentes. Esta última operación, anidada en el tercer bucle tiene complejidad $O(1)$. Al haber 3 bucles anidados y cada uno de estos se ejecutan n veces, esta operación se ejecutará $n^{3}$, por lo tanto la multiplicación de matrices tiene complejidad $O(n^3)$. Sabiendo esto podemos analizar la complejidad del backpropagation.
+
+ La primera fase del backpropagation es el feedforward, si recordamos este algoritmo lleva la entrada a traves de la red mediante multiplicaciones de matrices hasta conseguir la salida, es por ello que consta de L iteraciones, siendo L el número de capas. Por cada una de estas capas se realiza una multiplicación de matrices que es $O(n^3)$, por lo tanto la complejidad es $O(n^3L)$, como $n>L$, $O(n^4)$.
+
+Realizado el feedforward se realiza el calculo del gradiente de la salida, cuya complejidad es $O(n)$, y se comienza con el calculo de los vectores de sensibilidad en un bucle que realiza $L-1$ iteraciones. Para calcular cada vector se realiza una multiplicación de matrices de eficiencia $O(n^3)$, por lo tanto calcular estos vectores es $O(n^4)$. El siguiente paso es calcular los gradientes el cual tiene la misma eficiencia $O(n^4)$. 
+
+Los 3 pasos anteriores se realizaran n veces por lo tanto, $O(n(n^4+n^4+n^4))$, es decir, que el algoritmo de backpropagation tiene una complejidad computacional de $O(n^5)$.
 
 \section{HSIC Bottleneck}
 
@@ -44,8 +93,64 @@ El algoritmo no usa directamente la información mutua debido a que se producir�
    
 \end{algorithm}
 
+\subsection{Eficiencia}
 
 
-\section{Syntethic gradient}
+El algoritmo se compone de dos bucles, uno que recorre los minibatches y otro que recorre las capas, por lo tanto tenemos bucles de $n/m$ iteraciones y $L$ iteraciones, siendo $n$ el número de muestras, $m$ el tamaño de los minibatches y $L$ el número de capas. Dentro de los bucles anidados encontramos una multiplicación de matrices cuya eficiencia es $O(n^3)$. La siguiente operacion es el calculo de HSIC que como se indica en el paper su complejidad computacional depende del número de datos que le pasemos $m$, siendo $O(m^2)$, como $m < n$, lo podemos escribir como $O(n^2)$. Finalmente el último paso se trata de una actualización de los pesos de los pesos de la capa mediante gradiente descendente, por lo tanto tiene una eficiencia de $O(n^2)$. 
+
+Como ya sabemos las eficiencias de las operaciones que se realizan dentro de los bucles solo nos falta multiplicarlas por los bucles para hallar la complejidad del algoritmo. Se trata de dos bucles anidades por lo tanto $O(n^{2}(n^{3}+n^{2}+n^{2})) = O(n^{5}+n^{4}+n^{4}) = O(n^{5})$.
+
+
+\section{Synthetic gradient}
+
+Synthetic Gradient es un algoritmo propuesto por la empresa DeepMind. La característica principal de este algoritmo es que entrena la red mediante gradiente descendente haciendo uso de gradientes sintéticos, es decir, gradientes resultantes de la predicción de una red neuronal auxiliar. El problema que intenta resolver este algoritmo es el del bloqueo que se produce en el backpropagation. Cuando una capa envía información hacia delante, tiene que esperar a que esta información llegue hasta la capa de salida de la red, se calcule el error, se calculo el gradiente y que se propague capa por capa. Para eliminar esta espera se introducen entre las capas unos módulos llamados módulos de comunicación que se encargarán de calcular los gradientes sintéticos. 
+
+El funcionamiento que siguen estas redes es el siguiente: la red recibe la entrada y comienza con el proceso de feedforward. Suponiendo que introducimos un modulo de comunicación entre cada pareja de capas contiguas, en cada paso del feedforward la información se transmite a la capa i+1 y al modulo de comunicación i+1. Este modulo de comunicación (un perceptron multicapa MLP) procesará el mensaje y realizará una predicción del gradiente correspondiente. El gradiente se envía a la capa i y esta se actualizara por gradiente descendente. Cuando se alcanza la última capa se calcula el error y se calcula el gradiente real que se irá propagando hacia atrás en varias iteraciones. El gradiente real se usará para actualizar los módulos de comunicación para que estos consigan hacer predicciones cada vez más precisas.
+
+\begin{algorithm}
+   \caption{Synthetic gradient (supongo un modulo por pareja de capas)}
+   \KwData{$w = \{W^{1},...,W^{L}\}$; $D = (x_{1},y_{1}) ... (x_{N},y_{N})$}
+   \KwResult{Red entrenada por synthetic gradient}
+   \For{por cada punto en la muestra $(x_{n}, y_{n}), n = 1,...,N$}{
+        \For{$i = 0$ to $L$}{
+            Feedforward  a la capa $i+1$ y al modulo $i+1$ \\
+            Calculo de synthetic gradient (Feedforward red modulo) \\
+            Actualizar capa $i$
+        }
+        
+        \For{$i = L-1$ to $1$}{
+            Calcular gradiente con Backprop \\
+            Actualizar modulo i
+        }
+        
+   }
+\end{algorithm}
+
+\subsection{Eficiencia}
+
 
 \section{Feedback alignment}
+
+El algoritmo de feedback alignment \cite{RefWorks:RefID:9-lillicrap2016random} se trata de una alternativa a backpropagation que propone como mejora el uso de matrices aleatorias fijadas de antemano para la retropropagación de valores en vez de usar la matriz traspuesta de los pesos de la red. Esta idea surge debido a que el algoritmo de backpropagation no es posible biológicamente ya que el cerebro debería de tener las mismas conexiones para las fases hacia delante y hacia atrás, cosa que no ocurre. El hecho de usar las mismas matrices de pesos en ambas fases acarrea el problema del transporte de pesos \cite{RefWorks:RefID:10-grossberg1987competitive}, cuyo nombre se debe a que para poder actualizar los pesos correctamente los pesos se ``transportan" hacia detrás al propagar el error. 
+
+El algoritmo a pesar de usar pesos aleatorios fijados consigue encontrar las soluciones debido a la siguiente propiedad: cualquier matriz $B$ de pesos aleatorias es válida para el aprendizaje si cumple $e^{T}WBe>0$, es decir, que la señal de enseñanza de la matiz $Be$ no difiera en más de 90º a la usada por el backpropagation $W^{T}e$, por lo tanto B empuja a la red prácticamente en la misma dirección en la que lo haría $W$. Para acelerar el aprendizaje se tendría que estrechar la diferencia entre las direcciones de ambas matrices, pero esto no es necesario ya que se realiza automáticamente por el alineamiento. Este fenómeno se produce debido a que $B$ influye en $W$ en el proceso de aprendizaje pues este se actualiza en base a $B$ lo que produce dicho alineamiento.
+
+\begin{algorithm}
+   \caption{Backpropagation para calcular la sensibilidad}
+   \KwData{Un punto de la muestra $(x,y)$; las matrices de pesos, $w = \{W^{1},...,W^{L}\}$; la matriz de pesos aleatorios $b = \{B^{1},...,B^{L}\}$; la función de activación $\theta$}
+   \KwResult{La sensibilidad  $\delta^{(l)}$ para $l = \{L,...,1\}$}
+   Ejecutamos el proceso Feedforward \ref{tab:Feedforward} para obtener:\\
+   $s^{(l)}$ para $l = \{L,...,1\}$ \\
+   $x^{(l)}$ para $l = \{L,...,1\}$ \\  
+   $\delta^{(L)} \gets 2(x^{(L)-y})\theta'(s^{(L)})$ \\
+   \For{$l = L - 1$ hasta $1$}{
+        $\delta^{(l)} = \theta'(s^{(l)}) \otimes [B^{(l+1)}\delta^{(l+1)}]$
+   }
+   
+\end{algorithm}
+
+El resto de procesos se realiza de manera idéntica al algoritmo de backpropagation \ref{tab:Backprop}.
+
+\subsection{Eficiencia}
+
+Al realizar las mismas operaciones que el algoritmo de Backpropagation tiene la misma eficiencia, es decir, $O(n^{5})$
