@@ -21,17 +21,21 @@ import os
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
+        self.quant = torch.quantization.QuantStub()
         self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
             nn.Linear(28*28,4),
             nn.ReLU(),
             nn.Linear(4,10)
         )
+        self.dequant = torch.quantization.DeQuantStub()
 
     def forward(self, x):
+        x = self.quant(x)
         x = self.flatten(x)
         x = self.linear_relu_stack(x)
         output = F.log_softmax(x, dim=1)
+        output = self.dequant(output)
         return output
 
 
@@ -86,7 +90,7 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=6, metavar='N',
+    parser.add_argument('--epochs', type=int, default=20, metavar='N',
                         help='number of epochs to train (default: 14)')
     parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
                         help='learning rate (default: 1.0)')
@@ -145,7 +149,7 @@ def main():
         scheduler.step()
     """  
         
-    #cuantizacion post training dynamic, solo se cuantiza la inferencia
+    #cuantizacion qat
     model = model.to("cpu")
     model_to_quantize = copy.deepcopy(model)
     qconfig_dict = {"":torch.quantization.get_default_qat_qconfig('qnnpack')}

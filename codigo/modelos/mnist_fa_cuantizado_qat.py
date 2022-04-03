@@ -79,6 +79,7 @@ def print_size_of_model(model):
     os.remove('temp.p')
 
 
+
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -100,14 +101,14 @@ def main():
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
-    parser.add_argument('--save-model', action='store_true', default=False,
+    parser.add_argument('--save-model', action='store_true', default=True,
                         help='For Saving the current Model')
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
     torch.manual_seed(args.seed)
 
-    device = torch.device("cuda" if use_cuda else "cpu")
+    device = torch.device("cpu")
 
     train_kwargs = {'batch_size': args.batch_size}
     test_kwargs = {'batch_size': args.test_batch_size}
@@ -136,33 +137,35 @@ def main():
     optimizer = optim.Adadelta(biomodel.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
-    for epoch in range(1, args.epochs + 1):
+    """for epoch in range(1, args.epochs + 1):
         train(args, biomodel, device, train_loader, optimizer, epoch)
         test(biomodel, device, test_loader)
-        scheduler.step()
+        scheduler.step()"""
 
     biomodel = biomodel.to("cpu")
     model_to_quantize = copy.deepcopy(biomodel)
-    model_to_quantize.eval()
-    qconfig_dict = {"":torch.quantization.default_dynamic_qconfig}
-    model_prepared = quantize_fx.prepare_fx(model_to_quantize, qconfig_dict)
+    qconfig_dict = {"":torch.quantization.get_default_qat_qconfig('qnnpack')}
+    model_to_quantize.train()
     
+    model_prepared = quantize_fx.prepare_qat_fx(model_to_quantize, qconfig_dict)
+    # training loop (not shown)
+    for epoch in range(1, args.epochs + 1):
+        train(args, model_prepared, device, train_loader, optimizer, epoch)
+        #test(model_prepared, device, test_loader)
+        scheduler.step()
+    
+    # quantize
     model_quantized = quantize_fx.convert_fx(model_prepared)
-    test(model_quantized, torch.device("cpu"), test_loader)
+    model_quantized.eval()
+    test(model_quantized, device, test_loader)
     
-    print("Tamaño sin cuantizar")
     print_size_of_model(biomodel)
-    print("Tamaño con cuantizacion")
     print_size_of_model(model_quantized)
     
     
-    #print(model_quantized.linear_relu_stack[0].weight)
-
-    
-    
-    if args.save_model:
+    """if args.save_model:
         torch.save(biomodel.state_dict(), "../pesosModelos/mnist_fa.pt")
-        torch.save(model_quantized.state_dict(), "../pesosModelos/mnist_fa_cuantizado.pt")
+        torch.save(model_quantized.state_dict(), "../pesosModelos/mnist_fa_cuantizado.pt")"""
 
 
 if __name__ == '__main__':
