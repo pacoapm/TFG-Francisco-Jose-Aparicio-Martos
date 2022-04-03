@@ -14,8 +14,10 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
+import torch.quantization.quantize_fx as quantize_fx
+import copy
+import os
 
-torch.set_default_dtype(torch.float16)
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -67,6 +69,14 @@ def test(model, device, test_loader):
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
+    
+def print_size_of_model(model):
+    if isinstance(model, torch.jit.RecursiveScriptModule):
+        torch.jit.save(model, "temp.p")
+    else:
+        torch.jit.save(torch.jit.script(model), "temp.p")
+    print("Size (MB):", os.path.getsize("temp.p")/1e6)
+    os.remove("temp.p")
 
 
 def main():
@@ -90,7 +100,7 @@ def main():
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
-    parser.add_argument('--save-model', action='store_true', default=False,
+    parser.add_argument('--save-model', action='store_true', default=True,
                         help='For Saving the current Model')
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
@@ -118,6 +128,9 @@ def main():
                        transform=transform)
     train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
     test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
+    
+    
+    
 
     model = Net().to(device)
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
@@ -125,11 +138,29 @@ def main():
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
-        test(model, device, test_loader)
+        #test(model, device, test_loader)
         scheduler.step()
+        
+        
+    #cuantizacion post training dynamic, solo se cuantiza la inferencia
+    model = model.to("cpu")
+    model_to_quantize = copy.deepcopy(model)
+    model_to_quantize.eval()
+    qconfig_dict = {"":torch.quantization.default_dynamic_qconfig}
+    model_prepared = quantize_fx.prepare_fx(model_to_quantize, qconfig_dict)
+    
+    model_quantized = quantize_fx.convert_fx(model_prepared)
+    test(model_quantized, torch.device("cpu"), test_loader)
+    
+    print("modelo original")
+    print_size_of_model(model)
+    print("modelo cuantizado")
+    print_size_of_model(model_quantized)
+    
+    
 
     if args.save_model:
-        torch.save(model.state_dict(), "mnist_cnn.pt")
+        torch.save(model_quantized.state_dict(), "../pesosModelos/mnist_backprop_cuantizada.pt")
 
 
 if __name__ == '__main__':

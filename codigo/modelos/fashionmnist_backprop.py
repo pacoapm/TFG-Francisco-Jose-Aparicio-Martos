@@ -109,14 +109,12 @@ def main():
         test_kwargs.update(cuda_kwargs)
 
     transform=transforms.Compose([
-        transforms.ToTensor(),
-        #media y desviación típica de la base de datos MNIST
-        transforms.Normalize((0.1307,), (0.3081,))
+        transforms.ToTensor()
         ])
     
-    dataset1 = datasets.MNIST('../data', train=True, download=True,
+    dataset1 = datasets.FashionMNIST('../data', train=True, download=True,
                        transform=transform)
-    dataset2 = datasets.MNIST('../data', train=False,
+    dataset2 = datasets.FashionMNIST('../data', train=False,
                        transform=transform)
     
     train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
@@ -133,7 +131,7 @@ def main():
         scheduler.step()
 
     if args.save_model:
-        torch.save(model.state_dict(), "../pesosModelos/mnist_backprop.pt")
+        torch.save(model.state_dict(), "../pesosModelos/Fashionmnist_backprop.pt")
 
 
 if __name__ == '__main__':

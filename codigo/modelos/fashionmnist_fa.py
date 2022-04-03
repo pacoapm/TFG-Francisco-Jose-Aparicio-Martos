@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Apr  1 14:07:05 2022
+Created on Sun Apr  3 11:45:20 2022
 
 @author: francisco
 """
-
 from __future__ import print_function
 import argparse
 import torch
@@ -14,6 +13,9 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
+
+from biotorch.benchmark.run import Benchmark
+from biotorch.module.biomodule import BioModule
 
 
 class Net(nn.Module):
@@ -109,31 +111,29 @@ def main():
         test_kwargs.update(cuda_kwargs)
 
     transform=transforms.Compose([
-        transforms.ToTensor(),
-        #media y desviación típica de la base de datos MNIST
-        transforms.Normalize((0.1307,), (0.3081,))
+        transforms.ToTensor()
         ])
-    
-    dataset1 = datasets.MNIST('../data', train=True, download=True,
+    dataset1 = datasets.FashionMNIST('../data', train=True, download=True,
                        transform=transform)
-    dataset2 = datasets.MNIST('../data', train=False,
+    dataset2 = datasets.FashionMNIST('../data', train=False,
                        transform=transform)
-    
     train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
     test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
-
-    model = Net().to(device)
-    optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
+    
+    
+    model = Net()
+    biomodel = BioModule(model,mode="fa")
+    biomodel = biomodel.to(device)
+    optimizer = optim.Adadelta(biomodel.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
-    
     for epoch in range(1, args.epochs + 1):
-        train(args, model, device, train_loader, optimizer, epoch)
-        test(model, device, test_loader)
+        train(args, biomodel, device, train_loader, optimizer, epoch)
+        test(biomodel, device, test_loader)
         scheduler.step()
 
     if args.save_model:
-        torch.save(model.state_dict(), "../pesosModelos/mnist_backprop.pt")
+        torch.save(biomodel.state_dict(), "../pesosModelos/Fashionmnist_fa.pt")
 
 
 if __name__ == '__main__':
