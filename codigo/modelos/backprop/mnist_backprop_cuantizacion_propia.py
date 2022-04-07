@@ -16,18 +16,14 @@ from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
 
-import brevitas.nn as qnn
-
-
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        bit_width = 3
         self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
-            qnn.QuantLinear(28*28,4,bias=True,weight_bit_width=bit_width,return_quant_tensor=True),
-            qnn.QuantReLU(weight_bit_width=bit_width,return_quant_tensor=True),
-            qnn.QuantLinear(4,10,bias=True,weight_bit_width=bit_width,return_quant_tensor=True)
+            nn.Linear(28*28,4),
+            nn.ReLU(),
+            nn.Linear(4,10)
         )
 
     def forward(self, x):
@@ -94,7 +90,7 @@ def main():
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
-    parser.add_argument('--save-model', action='store_true', default=False,
+    parser.add_argument('--save-model', action='store_true', default=True,
                         help='For Saving the current Model')
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
@@ -118,9 +114,9 @@ def main():
         transforms.Normalize((0.1307,), (0.3081,))
         ])
     
-    dataset1 = datasets.MNIST('../../data', train=True, download=True,
+    dataset1 = datasets.MNIST('../data', train=True, download=True,
                        transform=transform)
-    dataset2 = datasets.MNIST('../../data', train=False,
+    dataset2 = datasets.MNIST('../data', train=False,
                        transform=transform)
     
     train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
