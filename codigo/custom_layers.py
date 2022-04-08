@@ -27,34 +27,36 @@ class LinearC(nn.Linear):
         return torch.round(input=output,decimals=10) 
 
 
-class Net(nn.Module):
+class CustomNet(nn.Module):
     def __init__(self):
-        super(Net, self).__init__()
+        super(CustomNet, self).__init__()
         self.flatten = nn.Flatten()
-        self.linear_relu_stack = nn.Sequential(
-            nn.Linear(28*28,4),
-            nn.ReLU(),
-            nn.Linear(4,10)
-        )
+        self.l1 = nn.Linear(28*28,4)
+        self.relu = nn.ReLU()
+        self.l2 = nn.Linear(4,10)
+        self.softmax = nn.LogSoftmax()
+        
 
-    def forward(self, x):
+    def forward(self,x):
         x = self.flatten(x)
-        x = self.linear_relu_stack(x)
-        output = F.log_softmax(x, dim=1)
-        return output
+        x = self.l1(x)
+        x = self.l2(self.relu(x))
+        return self.softmax(x)
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
+    ouput = 0
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
+        #print(output)
         loss = F.nll_loss(output, target)
         loss.backward()
-        print(model.linear_relu_stack[0].weight.grad)
-        print(model.linear_relu_stack[2].weight.grad)
-        hola = input()
+        """print(model.linear_relu_stack[0].weight.grad)
+        print(model.linear_relu_stack[2].weight.grad)"""
+        #hola = input()
         optimizer.step()
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
@@ -62,6 +64,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
                 100. * batch_idx / len(train_loader), loss.item()))
             if args.dry_run:
                 break
+    print(output)
 
 
 def test(model, device, test_loader):
@@ -146,10 +149,26 @@ def main():
             parameter.register_hook(lambda grad: torch.round(input=grad,decimals=val))
         
         return model
+    
+    def create_backward_hooks( model :nn.Module, decimals: int) -> nn.Module:
+        for parameter in model.parameters():
+                parameter.register_hook(lambda grad: torch.round(input=grad,decimals=decimals))
+        return model
+    
+    def forward_hook(module, inputs, outputs):
+        return torch.round(input=outputs,decimals=2)
+        
+    
+    def create_forward_hooks(model :nn.Module, decimals: int) -> nn.Module:
+        for layer in model.children():
+            layer.register_forward_hook(forward_hook)
+            print(layer)
+        return model
 
 
-    model = Net()
-    model = gradient_clipper(model,2)
+    model = CustomNet()
+    model = create_backward_hooks(model,4)
+    #model = create_forward_hooks(model,2)
     """model.linear_relu_stack[0].register_full_backward_hook(printgradnorm)
     model.linear_relu_stack[2].register_full_backward_hook(printgradnorm)"""
     model = model.to(device)
