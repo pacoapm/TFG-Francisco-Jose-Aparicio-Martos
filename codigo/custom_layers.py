@@ -32,9 +32,9 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
-            LinearC(28*28,4),
+            nn.Linear(28*28,4),
             nn.ReLU(),
-            LinearC(4,10)
+            nn.Linear(4,10)
         )
 
     def forward(self, x):
@@ -87,7 +87,7 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=6, metavar='N',
+    parser.add_argument('--epochs', type=int, default=1, metavar='N',
                         help='number of epochs to train (default: 14)')
     parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
                         help='learning rate (default: 1.0)')
@@ -138,11 +138,17 @@ def main():
             input_gradient = (torch.round(input=grad_input[0],decimals=10),)
             return input_gradient
         
+    def gradient_clipper(model: nn.Module, val: int) -> nn.Module:
+        for parameter in model.parameters():
+            parameter.register_hook(lambda grad: torch.round(input=grad,decimals=val))
+        
+        return model
 
 
     model = Net()
-    model.linear_relu_stack[0].register_full_backward_hook(printgradnorm)
-    model.linear_relu_stack[2].register_full_backward_hook(printgradnorm)
+    model = gradient_clipper(model,1)
+    """model.linear_relu_stack[0].register_full_backward_hook(printgradnorm)
+    model.linear_relu_stack[2].register_full_backward_hook(printgradnorm)"""
     model = model.to(device)
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
