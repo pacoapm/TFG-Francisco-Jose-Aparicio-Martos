@@ -52,6 +52,9 @@ def train(args, model, device, train_loader, optimizer, epoch):
         output = model(data)
         loss = F.nll_loss(output, target)
         loss.backward()
+        print(model.linear_relu_stack[0].weight.grad)
+        print(model.linear_relu_stack[2].weight.grad)
+        hola = input()
         optimizer.step()
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
@@ -146,7 +149,7 @@ def main():
 
 
     model = Net()
-    model = gradient_clipper(model,1)
+    model = gradient_clipper(model,2)
     """model.linear_relu_stack[0].register_full_backward_hook(printgradnorm)
     model.linear_relu_stack[2].register_full_backward_hook(printgradnorm)"""
     model = model.to(device)
