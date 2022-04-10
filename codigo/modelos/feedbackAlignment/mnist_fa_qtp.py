@@ -15,6 +15,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
+from biotorch.benchmark.run import Benchmark
+from biotorch.module.biomodule import BioModule
 
 class LinearC(nn.Linear):
     def __init__(self, in_features: int, out_features: int, bias: bool = True,device=None, dtype=None) -> None:
@@ -144,8 +146,8 @@ def main():
 
     torch.manual_seed(args.seed)
 
-    device = torch.device("cuda" if use_cuda else "cpu")
-
+    #device = torch.device("cuda" if use_cuda else "cpu")
+    device = torch.device("cpu")
     train_kwargs = {'batch_size': args.batch_size}
     test_kwargs = {'batch_size': args.test_batch_size}
     if use_cuda:
@@ -161,9 +163,9 @@ def main():
         transforms.Normalize((0.1307,), (0.3081,))
         ])
     
-    dataset1 = datasets.MNIST('./data', train=True, download=True,
+    dataset1 = datasets.MNIST('../../data', train=True, download=True,
                        transform=transform)
-    dataset2 = datasets.MNIST('./data', train=False,
+    dataset2 = datasets.MNIST('../../data', train=False,
                        transform=transform)
     
     train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
@@ -201,7 +203,7 @@ def main():
     #model = create_forward_hooks(model,2)
     """model.linear_relu_stack[0].register_full_backward_hook(printgradnorm)
     model.linear_relu_stack[2].register_full_backward_hook(printgradnorm)"""
-    
+    model = BioModule(model,mode="fa")
     model = model.to(device)
     
     for layer in model.children():
