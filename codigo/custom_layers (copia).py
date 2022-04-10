@@ -22,53 +22,26 @@ class LinearC(nn.Linear):
         
 
     def forward(self,x):
-        output = super().forward(torch.round(input=x,decimals=10))
-        F.linear()
+        output = super().forward(x)
         #print(output)
-        return output 
-    
-class my_round_func(torch.autograd.Function):
-    @staticmethod
-    def forward(ctx, input):
-        ctx.input = input
-        return torch.round(input=input,decimals=3)
-
-    @staticmethod
-    def backward(ctx, grad_output):
-        grad_input = grad_output.clone()
-        return grad_input
+        return torch.round(input=output,decimals=10) 
 
 
 class CustomNet(nn.Module):
     def __init__(self):
         super(CustomNet, self).__init__()
-        #self.round = my_round_func.apply
         self.flatten = nn.Flatten()
         self.l1 = nn.Linear(28*28,4)
         self.relu = nn.ReLU()
         self.l2 = nn.Linear(4,10)
-        self.softmax = nn.LogSoftmax(dim=1)
-        self.precision = 15
+        self.softmax = nn.LogSoftmax()
         
 
     def forward(self,x):
         x = self.flatten(x)
-        #print(x)
-        x = my_round_func.apply(x)
-        #print(x)
         x = self.l1(x)
-        #print(x)
-        x = my_round_func.apply(x)
-        #print(x)
         x = self.l2(self.relu(x))
-        #print(x)
-        x = my_round_func.apply(x)
-        #print(x)
-        x = self.softmax(x)
-        #print(x)
-        x = my_round_func.apply(x)
-        #print(x)
-        return x
+        return self.softmax(x)
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
@@ -76,8 +49,23 @@ def train(args, model, device, train_loader, optimizer, epoch):
     output = 0
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
+        data = torch.round(data)
         optimizer.zero_grad()
+        """for layer in model.children():
+            if type(layer) == nn.Linear:
+                #print(layer.weight.data)
+                layer.weight.data = torch.round(input=layer.weight.data,decimals =3)
+                #layer.weight = torch.round(input=layer.weight,decimals =3)"""
+                
+        """for layer in model.children():
+            if type(layer) == nn.Linear:
+                print(layer.weight.data)
+                #layer.weight.data = torch.round(input=layer.weight.data,decimals =3)
+                #layer.weight = torch.round(input=layer.weight,decimals =3)"""
+                
         output = model(data)
+        #output = torch.round(input=output, decimals = 3)
+        #print(output)
         #print(output)
         loss = F.nll_loss(output, target)
         loss.backward()
@@ -182,7 +170,7 @@ def main():
                 parameter.register_hook(lambda grad: torch.round(input=grad,decimals=decimals))
         return model
     
-    def forward_hook(module, inputs, outputs):
+    def forward_hook(module, inputs,outputs):
         print(outputs)
         
     
@@ -194,18 +182,11 @@ def main():
 
 
     model = CustomNet()
-    #model = create_backward_hooks(model,4)
+    model = create_backward_hooks(model,4)
     #model = create_forward_hooks(model,2)
     """model.linear_relu_stack[0].register_full_backward_hook(printgradnorm)
     model.linear_relu_stack[2].register_full_backward_hook(printgradnorm)"""
-    
     model = model.to(device)
-    
-    for layer in model.children():
-        if type(layer) == nn.Linear:
-            #print(layer.weight.data)
-            layer.weight.data = torch.round(input=layer.weight.data,decimals =3)
-            #layer.weight = torch.round(input=layer.weight,decimals =3)"""
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
