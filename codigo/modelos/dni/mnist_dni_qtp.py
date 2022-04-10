@@ -74,6 +74,86 @@ def one_hot(indexes, n_classes):
     )
     return Variable(result)
 
+#copiado del propio dni para crear la version cuantizada
+
+class BasicSynthesizerQ(torch.nn.Module):
+    """Basic `Synthesizer` based on an MLP with ReLU activation.
+
+    Args:
+        output_dim: Dimensionality of the synthesized `messages`.
+        n_hidden (optional): Number of hidden layers. Defaults to 0.
+        hidden_dim (optional): Dimensionality of the hidden layers. Defaults to
+            `output_dim`.
+        trigger_dim (optional): Dimensionality of the trigger. Defaults to
+            `output_dim`.
+        context_dim (optional): Dimensionality of the context. If `None`, do
+            not use context. Defaults to `None`.
+    """
+
+    def __init__(self, output_dim, n_hidden=0, hidden_dim=None,
+                 trigger_dim=None, context_dim=None):
+        super().__init__()
+        if hidden_dim is None:
+            hidden_dim = output_dim
+        if trigger_dim is None:
+            trigger_dim = output_dim
+
+        top_layer_dim = output_dim if n_hidden == 0 else hidden_dim
+
+        self.input_trigger = torch.nn.Linear(
+            in_features=trigger_dim, out_features=top_layer_dim
+        )
+
+        if context_dim is not None:
+            self.input_context = torch.nn.Linear(
+                in_features=context_dim, out_features=top_layer_dim
+            )
+        else:
+            self.input_context = None
+
+        self.layers = torch.nn.ModuleList([
+            torch.nn.Linear(
+                in_features=hidden_dim,
+                out_features=(
+                    hidden_dim if layer_index < n_hidden - 1 else output_dim
+                )
+            )
+            for layer_index in range(n_hidden)
+        ])
+
+        # zero-initialize the last layer, as in the paper
+        if n_hidden > 0:
+            nn.init.constant(self.layers[-1].weight, 0)
+        else:
+            nn.init.constant(self.input_trigger.weight, 0)
+            if context_dim is not None:
+                nn.init.constant(self.input_context.weight, 0)
+
+    def forward(self, trigger, context):
+        """Synthesizes a `message` based on `trigger` and `context`.
+
+        Args:
+            trigger: `trigger` to synthesize the `message` based on. Size:
+                (`batch_size`, `trigger_dim`).
+            context: `context` to condition the synthesizer. Ignored if
+                `context_dim` has not been specified in the constructor. Size:
+                (`batch_size`, `context_dim`).
+
+        Returns:
+            The synthesized `message`.
+        """
+        last = my_round_func.apply(self.input_trigger(trigger))
+
+        if self.input_context is not None:
+            last += my_round_func.apply(self.input_context(context))
+            
+        last = my_round_func.apply(last)
+
+        for layer in self.layers:
+            last = my_round_func.apply(layer(my_round_func.apply(F.relu(last))))
+
+        return last
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -88,7 +168,7 @@ class Net(nn.Module):
             else:
                 context_dim = None
             self.backward_interface = dni.BackwardInterface(
-                dni.BasicSynthesizer(
+                BasicSynthesizerQ(
                     output_dim=4, n_hidden=1, context_dim=context_dim
                 )
             )
@@ -120,6 +200,7 @@ class Net(nn.Module):
 
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
+    output = 0
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
@@ -133,6 +214,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
                 100. * batch_idx / len(train_loader), loss.item()))
             if args.dry_run:
                 break
+    
 
 
 def test(model, device, test_loader):
@@ -155,6 +237,7 @@ def test(model, device, test_loader):
     
 def create_backward_hooks( model :nn.Module, decimals: int) -> nn.Module:
     for parameter in model.parameters():
+            #print(parameter)
             parameter.register_hook(lambda grad: torch.round(input=grad,decimals=decimals))
     return model
 
@@ -190,6 +273,9 @@ def main():
     test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
 
     model = Net()
+    """for layer in model.children():
+        print(layer)
+    hol = input()"""
     model = create_backward_hooks(model, 3)
     model = model.to(device)
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
