@@ -50,6 +50,17 @@ parser.add_argument('--context', action='store_true', default=True,
 args = parser.parse_args()
 use_cuda = not args.no_cuda and torch.cuda.is_available()
 
+class my_round_func(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, input):
+        ctx.input = input
+        return torch.round(input=input,decimals=3)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        grad_input = grad_output.clone()
+        return grad_input
+
 def one_hot(indexes, n_classes):
     result = torch.FloatTensor(indexes.size() + (n_classes,))
     if args.no_cuda == False:
@@ -86,8 +97,11 @@ class Net(nn.Module):
     def forward(self, x, y = None):
         x = x.view(x.size()[0], -1)
         x = self.flatten(x)
+        x = my_round_func.apply(x)
         x = self.layer1(x)
+        x = my_round_func.apply(x)
         x = self.layer1_f(x)
+        x = my_round_func.apply(x)
         if args.dni and self.training:
             if args.context:
                 context = one_hot(y, 10)
@@ -95,10 +109,13 @@ class Net(nn.Module):
                 context = None
             with dni.synthesizer_context(context):
                 x = self.backward_interface(x)
+                x = my_round_func.apply(x)
         x = self.layer2(x)
+        x = my_round_func.apply(x)
         
-        output = F.log_softmax(x, dim=1)
-        return output
+        x = F.log_softmax(x, dim=1)
+        x = my_round_func.apply(x)
+        return x
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
@@ -135,6 +152,11 @@ def test(model, device, test_loader):
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
+    
+def create_backward_hooks( model :nn.Module, decimals: int) -> nn.Module:
+    for parameter in model.parameters():
+            parameter.register_hook(lambda grad: torch.round(input=grad,decimals=decimals))
+    return model
 
 
 def main():
@@ -167,7 +189,9 @@ def main():
     train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
     test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
 
-    model = Net().to(device)
+    model = Net()
+    model = create_backward_hooks(model, 3)
+    model = model.to(device)
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
