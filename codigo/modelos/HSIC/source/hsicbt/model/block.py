@@ -11,6 +11,8 @@ def get_activation(atype):
         nonlinear = nn.Sigmoid() 
     elif atype=='elu':
         nonlinear = nn.ELU()
+    elif atype=="logsoftmax":
+        nonlinear = nn.LogSoftmax(dim=1)
 
     return nonlinear
 
@@ -43,10 +45,10 @@ def makeblock_dense(in_dim, out_dim, atype):
     layer = nn.Linear(in_dim, out_dim)
     bn = nn.BatchNorm1d(out_dim, affine=False)
     if atype=='linear':
-        out = nn.Sequential(*[layer, bn])
+        out = nn.Sequential(*[layer,bn])
     else:
         nonlinear = get_activation(atype)
-        out = nn.Sequential(*[layer, bn, nonlinear])
+        out = nn.Sequential(*[layer, bn,nonlinear])
     return out
 
 def makeblock_conv(in_chs, out_chs, atype, stride=1):
