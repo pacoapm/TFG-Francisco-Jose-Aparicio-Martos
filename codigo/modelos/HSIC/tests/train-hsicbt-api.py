@@ -98,14 +98,21 @@ config_dict['epochs'] = 5
 train_loader, test_loader = get_dataset_from_code('mnist', 128)
 
 # # # simple fully-connected model
-model = ModelLinear(hidden_width=4,
+"""model = ModelLinear(hidden_width=4,
                     n_layers=1,
                     atype='relu',
-                    last_hidden_width=4,
+                    last_hidden_width=10,
+                    model_type='simple-dense',
+                    data_code='mnist')"""
+
+model = ModelLinear(hidden_width=256,
+                    n_layers=5,
+                    atype='relu',
+                    last_hidden_width=10,
                     model_type='simple-dense',
                     data_code='mnist')
 
-final_layer = ModelVanilla(hidden_width=4)
+final_layer = ModelVanilla(hidden_width=10)
 final_layer = final_layer.to(torch.device("cuda"))
 
 """# # # start to train
@@ -135,7 +142,7 @@ optimizer = torch.optim.SGD( filter(lambda p: p.requires_grad, final_layer.param
 
 train_loader, test_loader = get_dataset_from_code('mnist', 128)
 
-epochs = 10
+epochs = 5
 for cepoch in range(epochs):
     #train(args, model, torch.device('cuda'), train_loader, optimizer, cepoch)
     standard_train(cepoch, final_model, train_loader, optimizer, config_dict)
