@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Apr  3 11:45:20 2022
+Created on Fri Apr  1 14:07:05 2022
 
 @author: francisco
 """
+
 from __future__ import print_function
 import argparse
 import torch
@@ -14,11 +15,16 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
-from biotorch.benchmark.run import Benchmark
-from biotorch.module.biomodule import BioModule
-import torch.quantization.quantize_fx as quantize_fx
-import copy
-import os
+
+from PIL import Image
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+
+import captum
+from captum.attr import IntegratedGradients, Occlusion, LayerGradCam, LayerAttribution
+from captum.attr import visualization as viz
+
+import numpy as np
 
 
 class Net(nn.Module):
@@ -72,11 +78,6 @@ def test(model, device, test_loader):
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
-    
-def print_size_of_model(model):
-    torch.save(model.state_dict(), "temp.p")
-    print('Size (MB):', os.path.getsize("temp.p")/1e6)
-    os.remove('temp.p')
 
 
 def main():
@@ -86,7 +87,7 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=2, metavar='N',
+    parser.add_argument('--epochs', type=int, default=6, metavar='N',
                         help='number of epochs to train (default: 14)')
     parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
                         help='learning rate (default: 1.0)')
@@ -120,49 +121,67 @@ def main():
 
     transform=transforms.Compose([
         transforms.ToTensor(),
+        #media y desviación típica de la base de datos MNIST
         transforms.Normalize((0.1307,), (0.3081,))
         ])
-    dataset1 = datasets.MNIST('../data', train=True, download=True,
+    
+    dataset1 = datasets.MNIST('../../data', train=True, download=True,
                        transform=transform)
-    dataset2 = datasets.MNIST('../data', train=False,
+    dataset2 = datasets.MNIST('../../data', train=False,
                        transform=transform)
+    
     train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
     test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
     
     
-    model = Net()
-    biomodel = BioModule(model,mode="fa")
-    biomodel = biomodel.to(device)
-    optimizer = optim.Adadelta(biomodel.parameters(), lr=args.lr)
+
+    model = Net().to(device)
+    optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
+    
     for epoch in range(1, args.epochs + 1):
-        train(args, biomodel, device, train_loader, optimizer, epoch)
-        test(biomodel, device, test_loader)
+        train(args, model, device, train_loader, optimizer, epoch)
+        test(model, device, test_loader)
         scheduler.step()
 
-    biomodel = biomodel.to("cpu")
-    model_to_quantize = copy.deepcopy(biomodel)
-    model_to_quantize.eval()
-    qconfig_dict = {"":torch.quantization.default_dynamic_qconfig}
-    model_prepared = quantize_fx.prepare_fx(model_to_quantize, qconfig_dict)
-    
-    model_quantized = quantize_fx.convert_fx(model_prepared)
-    test(model_quantized, torch.device("cpu"), test_loader)
-    
-    print("Tamaño sin cuantizar")
-    print_size_of_model(biomodel)
-    print("Tamaño con cuantizacion")
-    print_size_of_model(model_quantized)
-    
-    
-    #print(model_quantized.linear_relu_stack[0].weight)
-
-    
-    
     if args.save_model:
-        torch.save(biomodel.state_dict(), "../pesosModelos/mnist_fa.pt")
-        torch.save(model_quantized.state_dict(), "../pesosModelos/mnist_fa_cuantizado.pt")
+        torch.save(model.state_dict(), "../pesosModelos/mnist_backprop.pt")
+        
+    
+    model =  model.to(torch.device("cpu"))
+    images, labels = next(iter(train_loader))
+    plt.imshow(images[0].reshape(28,28), cmap = "gray")
+    
+    integrated_gradients = IntegratedGradients(model)
+    pred_score, pred_label = torch.topk(model(images[0]),1)
+    pred_label.squeeze_()
+    print(images[0].shape)
+    
+    attributions_ig = integrated_gradients.attribute(images[0].unsqueeze(0), target=pred_label, n_steps = 200)
+    print("atrib: ",attributions_ig.shape)
+    print("imagen: ",images[0].unsqueeze(0).shape)
+    
+    
+    # Show the original image for comparison
+    _ = viz.visualize_image_attr(None, np.transpose(images[0].cpu().detach().numpy(),(1,2,0)), 
+                          method="original_image", title="Original Image")
+    
+    default_cmap = LinearSegmentedColormap.from_list('custom blue', 
+                                                     [(0, '#ffffff'),
+                                                      (0.25, '#0000ff'),
+                                                      (1, '#0000ff')], N=256)
+    
+    print(np.transpose(attributions_ig.squeeze(0).cpu().detach().numpy(),(1,2,0)).shape)
+    print(np.transpose(images[0].cpu().detach().numpy(),(1,2,0)).shape)
+    
+    _ = viz.visualize_image_attr(np.transpose(attributions_ig.squeeze(0).cpu().detach().numpy(),(1,2,0)),
+                                 np.transpose(images[0].cpu().detach().numpy(),(1,2,0)),
+                                 method='heat_map',
+                                 cmap=default_cmap,
+                                 show_colorbar=True,
+                                 sign='positive',
+                                 title='Integrated Gradients')
 
 
 if __name__ == '__main__':
