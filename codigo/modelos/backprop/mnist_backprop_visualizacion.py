@@ -27,6 +27,10 @@ from captum.attr import visualization as viz
 import numpy as np
 
 
+import sys
+sys.path.insert(1, '../../')
+from custom_funcs import my_round_func,train,test,create_backward_hooks,ASYMM,minmax
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -44,40 +48,6 @@ class Net(nn.Module):
         return output
 
 
-def train(args, model, device, train_loader, optimizer, epoch):
-    model.train()
-    for batch_idx, (data, target) in enumerate(train_loader):
-        data, target = data.to(device), target.to(device)
-        optimizer.zero_grad()
-        output = model(data)
-        loss = F.nll_loss(output, target)
-        loss.backward()
-        optimizer.step()
-        if batch_idx % args.log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
-            if args.dry_run:
-                break
-
-
-def test(model, device, test_loader):
-    model.eval()
-    test_loss = 0
-    correct = 0
-    with torch.no_grad():
-        for data, target in test_loader:
-            data, target = data.to(device), target.to(device)
-            output = model(data)
-            test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
-            pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
-            correct += pred.eq(target.view_as(pred)).sum().item()
-
-    test_loss /= len(test_loader.dataset)
-
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
 
 
 def main():
@@ -87,7 +57,7 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=6, metavar='N',
+    parser.add_argument('--epochs', type=int, default=1, metavar='N',
                         help='number of epochs to train (default: 14)')
     parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
                         help='learning rate (default: 1.0)')
@@ -150,8 +120,11 @@ def main():
         
     
     model =  model.to(torch.device("cpu"))
+    #minimo,maximo = minmax(model)
     images, labels = next(iter(train_loader))
-    plt.imshow(images[0].reshape(28,28), cmap = "gray")
+    #print(ASYMM(model(images),minimo,maximo,2))
+    
+    
     
     integrated_gradients = IntegratedGradients(model)
     pred_score, pred_label = torch.topk(model(images[0]),1)
@@ -164,8 +137,9 @@ def main():
     
     
     # Show the original image for comparison
-    _ = viz.visualize_image_attr(None, np.transpose(images[0].cpu().detach().numpy(),(1,2,0)), 
-                          method="original_image", title="Original Image")
+    """_ = viz.visualize_image_attr(None, np.transpose(images[0].cpu().detach().numpy(),(1,2,0)), 
+                          method="heat_map", title="Original Image", cmap = 'gray')"""
+    plt.imshow(images[0].reshape(28,28), cmap = "gray")
     
     default_cmap = LinearSegmentedColormap.from_list('custom blue', 
                                                      [(0, '#ffffff'),

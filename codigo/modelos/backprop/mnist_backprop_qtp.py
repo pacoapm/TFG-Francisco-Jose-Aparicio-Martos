@@ -17,7 +17,7 @@ from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 import sys
 sys.path.insert(1, '../../')
-from custom_funcs import my_round_func,train,test,create_backward_hooks
+from custom_funcs import my_round_func,train,test,create_backward_hooks, train_loop
 
 
 class CustomNet(nn.Module):
@@ -29,7 +29,7 @@ class CustomNet(nn.Module):
         self.relu = nn.ReLU()
         self.l2 = nn.Linear(4,10)
         self.softmax = nn.LogSoftmax(dim=1)
-        self.precision = 15
+        
         
 
     def forward(self,x):
@@ -108,7 +108,8 @@ def main():
     
     
 
-
+    #version con redondeo
+    
     model = CustomNet()
     model = create_backward_hooks(model,4)
     
@@ -118,19 +119,27 @@ def main():
         if type(layer) == nn.Linear:
             #print(layer.weight.data)
             layer.weight.data = torch.round(input=layer.weight.data,decimals =3)
-            #layer.weight = torch.round(input=layer.weight,decimals =3)"""
-    optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
+            #layer.weight = torch.round(input=layer.weight,decimals =3)
+    """optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
     
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
         test(model, device, test_loader)
-        scheduler.step()
+        scheduler.step()"""
+        
+    
 
     if args.save_model:
         torch.save(model.state_dict(), "../pesosModelos/mnist_backprop.pt")
-
+        
+    #version cuantizada
+    
+    #primero entrenamos el modelo sin modificaciones
+    train_loop(model,args,device,train_loader,test_loader)
+    
+    #realizamos el entrenamiento aplicando cuantizaciones
 
 if __name__ == '__main__':
     main()
