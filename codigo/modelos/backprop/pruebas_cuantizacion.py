@@ -30,5 +30,12 @@ import numpy as np
 
 import sys
 sys.path.insert(1, '../../')
-from custom_funcs import my_round_func,train,test,create_backward_hooks,ASYMM,minmax
+from custom_funcs import my_round_func,train,test,create_backward_hooks,ASYMM,dASYMM,ASYMMf,minmax
 
+tensor = torch.Tensor([0.3,0.6,0.9,1,0,0.4,0.7,0.2])
+
+res1 = ASYMM(tensor, 0, 1, 2)
+print(tensor)
+res = ASYMMf(tensor, 0, 1, 3)
+print(res)
+print("Diferencia: ", torch.mean(torch.abs(tensor-res)))
