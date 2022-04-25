@@ -19,6 +19,9 @@ import sys
 sys.path.insert(1, '../../')
 from custom_funcs import my_round_func,train,test,create_backward_hooks, train_loop, minmax, actualizar_pesos
 from mnist_backprop_visualizacion import Net
+import custom_funcs
+
+
 
 
 class CustomNet(nn.Module):
@@ -124,6 +127,8 @@ def main():
     else:
         global_quantization = False
         
+    custom_funcs.n_bits = args.n_bits
+        
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
@@ -175,29 +180,15 @@ def main():
     #version cuantizada
     
     #cogemos los valores minimos y maximos de la red anterior
-    #if args.global_quantization:
-    
     minimo, maximo = minmax(model, global_quantization)
-    print(minimo,maximo)
     #creamos el modelo
     modelq = QuantNet(minimo, maximo, args.n_bits)
-    modelq = create_backward_hooks(modelq, 3)
+    modelq = create_backward_hooks(modelq)
     modelq = modelq.to(device)
     #cuantizamos los pesos
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
     #entrenamiento 
     train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
-    """else:
-        #creamos el modelo
-        modelq = QuantNet(minimo, maximo, args.n_bits)
-        
-        #cuantizamos los pesos
-        actualizar_pesos(modelq,args.n_bits)
-        #entrenamiento 
-        train_loop(modelq, args, device, train_loader, test_loader, True)"""
-        
-        
-    
     
     
 

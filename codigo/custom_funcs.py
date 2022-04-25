@@ -11,6 +11,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
+n_bits = 8
 
 #funcion sacada de https://discuss.pytorch.org/t/torch-round-gradient/28628/5
 """class my_round_func(torch.autograd.Function):
@@ -31,7 +32,7 @@ class my_round_func(torch.autograd.Function):
         ctx.input = input
         minimo = torch.min(input)
         maximo = torch.max(input)
-        return ASYMMf(input, minimo, maximo, 8)
+        return ASYMMf(input, minimo, maximo, n_bits)
         #return int_quant(scale, zero_point, bit_width, input)
 
     @staticmethod
@@ -44,7 +45,7 @@ def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = Fa
     output = 0
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
-        data = torch.round(input=data,decimals=3)
+        #data = torch.round(input=data,decimals=3)
         optimizer.zero_grad()
         output = model(data)
         #print(output)
@@ -66,7 +67,7 @@ def train_DNI(args, model, device, train_loader, optimizer, epoch):
     output = 0
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
-        data = torch.round(input=data,decimals=3)
+        #data = torch.round(input=data,decimals=3)
         optimizer.zero_grad()
         output = model(data,target)
         loss = F.nll_loss(output, target)
@@ -118,10 +119,10 @@ def train_loop(model, args, device, train_loader, test_loader, cuantizacion = Fa
 def hook(grad):
     minimo = torch.min(grad)
     maximo = torch.max(grad)
-    return ASYMMf(grad,minimo,maximo,8)
+    return ASYMMf(grad,minimo,maximo,n_bits)
 
 
-def create_backward_hooks( model :nn.Module, decimals: int) -> nn.Module:
+def create_backward_hooks( model :nn.Module) -> nn.Module:
     for parameter in model.parameters():
             parameter.register_hook(hook)
     return model
