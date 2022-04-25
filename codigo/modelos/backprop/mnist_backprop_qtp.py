@@ -165,9 +165,10 @@ def main():
     #version cuantizada
     
     #cogemos los valores minimos y maximos de la red anterior
+    
+    
     if args.global_quantization:
         minimo, maximo = minmax(model)
-        
         #creamos el modelo
         modelq = QuantNet(minimo, maximo, args.n_bits)
         model = create_backward_hooks(model, 0)
