@@ -165,8 +165,6 @@ def main():
     #version cuantizada
     
     #cogemos los valores minimos y maximos de la red anterior
-    
-    
     if args.global_quantization:
         minimo, maximo = minmax(model)
         #creamos el modelo

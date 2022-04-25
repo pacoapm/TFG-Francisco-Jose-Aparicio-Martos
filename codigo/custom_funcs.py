@@ -141,7 +141,7 @@ def minmax(modelo,glob = True):
     maximo = 0
     minimos = []
     maximos = []
-    for i in modelo.modules():
+    """for i in modelo.modules():
         print(type(i))
         if type(i) == nn.Linear:
             capa = i.weight.data
@@ -168,7 +168,18 @@ def minmax(modelo,glob = True):
             if min_capa < minimo:
                 minimo = min_capa
             if max_capa > maximo:
-                maximo = max_capa
+                maximo = max_capa"""
+                
+    for i in modelo.parameters():
+        min_capa = torch.min(i)
+        max_capa = torch.max(i)
+        
+        minimos.append(min_capa)
+        maximos.append(max_capa)
+        if min_capa < minimo:
+            minimo = min_capa
+        if max_capa > maximo:
+            maximo = max_capa
             
     if glob:
         return minimo,maximo
@@ -182,6 +193,7 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
             if glob == True:
                 layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
             else:
-                layer.weight.data = ASYMMf(layer.weight.data,minimo[i],maximo[i],n_bits)
-                i+=1
+                layer.bias.data = ASYMMf(layer.bias.data,minimo[i],maximo[i],n_bits)
+                layer.weight.data = ASYMMf(layer.weight.data,minimo[i+1],maximo[i+1],n_bits)
+                i+=2
     
