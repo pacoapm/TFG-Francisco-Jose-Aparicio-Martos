@@ -112,9 +112,19 @@ def main():
                         help='how many batches to wait before logging training status')
     parser.add_argument('--save-model', action='store_true', default=False,
                         help='For Saving the current Model')
-    parser.add_argument('--global-quantization', type=bool, default=True, metavar='G',help="indica si se realiza la cuantizacion a nivel global")
+    parser.add_argument('--global-quantization', type=int, default=0, metavar='G',help="indica si se realiza la cuantizacion a nivel global")
     parser.add_argument('--n-bits', type=int, default=8, metavar='N',help="numero de bits usados para la cuantizacion")
+    
+    
+    
     args = parser.parse_args()
+    
+    if args.global_quantization == 1:
+        global_quantization = True
+    else:
+        global_quantization = False
+        
+
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
     torch.manual_seed(args.seed)
@@ -165,24 +175,26 @@ def main():
     #version cuantizada
     
     #cogemos los valores minimos y maximos de la red anterior
-    if args.global_quantization:
-        minimo, maximo = minmax(model)
-        #creamos el modelo
-        modelq = QuantNet(minimo, maximo, args.n_bits)
-        model = create_backward_hooks(model, 0)
-        modelq = modelq.to(device)
-        #cuantizamos los pesos
-        actualizar_pesos(modelq,args.n_bits,minimo,maximo)
-        #entrenamiento 
-        train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo)
-    else:
+    #if args.global_quantization:
+    
+    minimo, maximo = minmax(model, global_quantization)
+    print(minimo,maximo)
+    #creamos el modelo
+    modelq = QuantNet(minimo, maximo, args.n_bits)
+    modelq = create_backward_hooks(modelq, 3)
+    modelq = modelq.to(device)
+    #cuantizamos los pesos
+    actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
+    #entrenamiento 
+    train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
+    """else:
         #creamos el modelo
         modelq = QuantNet(minimo, maximo, args.n_bits)
         
         #cuantizamos los pesos
         actualizar_pesos(modelq,args.n_bits)
         #entrenamiento 
-        train_loop(modelq, args, device, train_loader, test_loader, True)
+        train_loop(modelq, args, device, train_loader, test_loader, True)"""
         
         
     

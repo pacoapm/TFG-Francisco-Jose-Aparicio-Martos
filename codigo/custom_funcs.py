@@ -39,7 +39,7 @@ class my_round_func(torch.autograd.Function):
         grad_input = grad_output.clone()
         return grad_input
     
-def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None):
+def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True):
     model.train()
     output = 0
     for batch_idx, (data, target) in enumerate(train_loader):
@@ -52,14 +52,14 @@ def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = Fa
         loss.backward()
         optimizer.step()
         if cuantizacion:
-            actualizar_pesos(model, args.n_bits, minimo, maximo)
+            actualizar_pesos(model, args.n_bits, minimo, maximo, glob)
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.item()))
             if args.dry_run:
                 break
-    print(output)
+    #print(output)
     
 def train_DNI(args, model, device, train_loader, optimizer, epoch):
     model.train()
@@ -98,14 +98,14 @@ def test(model, device, test_loader):
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
     
-def train_loop(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None):
+def train_loop(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True):
     
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
     
     for epoch in range(1, args.epochs + 1):
-        train(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo)
+        train(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob)
         test(model, device, test_loader)
         scheduler.step()
     
@@ -126,12 +126,14 @@ def create_backward_hooks( model :nn.Module, decimals: int) -> nn.Module:
             parameter.register_hook(hook)
     return model
 
+#funcion de cuantizacion flotante -> entero
 def ASYMM(t, mini, maxi, n):
     return torch.round((t-mini)*((2**(n)-1)/(maxi-mini)))
 
+#funcion de decuantizacion entero -> flotante
 def dASYMM(t,mini,maxi,n):
     return t/((2**(n)-1)/(maxi-mini))+mini
-
+#funcion de cuantizacion flotante -> flotante
 def ASYMMf(t,mini,maxi,n):
     res = ASYMM(t,mini,maxi,n)
     return dASYMM(res,mini,maxi,n)
@@ -141,34 +143,6 @@ def minmax(modelo,glob = True):
     maximo = 0
     minimos = []
     maximos = []
-    """for i in modelo.modules():
-        print(type(i))
-        if type(i) == nn.Linear:
-            capa = i.weight.data
-            bias = i.bias.data
-            
-            min_weight = torch.min(capa)
-            max_weight = torch.max(capa)
-            min_bias = torch.min(bias)
-            max_bias = torch.max(bias)
-            
-            
-            if min_weight <= min_bias:
-                min_capa = min_weight
-            else:
-                min_capa = min_bias
-                
-            if max_weight >= max_bias:
-                max_capa = max_weight
-            else:
-                max_capa = max_bias
-                
-            minimos.append(min_capa)
-            maximos.append(max_capa)
-            if min_capa < minimo:
-                minimo = min_capa
-            if max_capa > maximo:
-                maximo = max_capa"""
                 
     for i in modelo.parameters():
         min_capa = torch.min(i)
@@ -190,7 +164,7 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
     i = 0
     for layer in modelo.children():
         if type(layer) == nn.Linear:
-            if glob == True:
+            if glob:
                 layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
             else:
                 layer.bias.data = ASYMMf(layer.bias.data,minimo[i],maximo[i],n_bits)
