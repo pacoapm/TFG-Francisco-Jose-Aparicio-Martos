@@ -119,8 +119,13 @@ def main():
                         help='how many batches to wait before logging training status')
     parser.add_argument('--save-model', action='store_true', default=False,
                         help='For Saving the current Model')
-    parser.add_argument('--global-quantization', type=int, default=1, metavar='G',help="indica si se realiza la cuantizacion a nivel global")
-    parser.add_argument('--n-bits', type=int, default=8, metavar='N',help="numero de bits usados para la cuantizacion")
+    parser.add_argument('--global-quantization', type=int, default=1, metavar='G',
+                        help="indica si se realiza la cuantizacion a nivel global (1) o local (0)")
+    parser.add_argument('--n-bits', type=int, default=8, metavar='N',
+                        help="numero de bits usados para la cuantizacion")
+    parser.add_argument('--dataset', type=str, default='MNIST', metavar='d',
+                        help="indica la base de datos a usar: MNIST O FMNIST")
+
     
     
     
@@ -140,7 +145,7 @@ def main():
 
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    train_loader,test_loader = load_dataset("FMNIST", args, device, use_cuda)
+    train_loader,test_loader = load_dataset(args.dataset, args, device, use_cuda)
     
     images, labels = next(iter(train_loader))
     imagen = images[0]
@@ -157,7 +162,7 @@ def main():
     
     #falta el redondeo de los pesos
         
-    train_loop(model,args,device,train_loader,test_loader)
+    loss, acc = train_loop(model,args,device,train_loader,test_loader)
 
     if args.save_model:
         torch.save(model.state_dict(), "../pesosModelos/mnist_backprop.pt")
@@ -174,10 +179,12 @@ def main():
     #cuantizamos los pesos
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
     #entrenamiento 
-    train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
+    lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
     
     visualizar_caracteristicas(model, imagen)
     visualizar_caracteristicas(modelq, imagen)
+
+    
     
     
 

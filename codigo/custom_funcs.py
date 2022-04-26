@@ -154,19 +154,25 @@ def test(model, device, test_loader):
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
+
+    return test_loss, 100. * correct / len(test_loader.dataset)
     
 def train_loop(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True):
     
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
-    
+    loss_list = []
+    acc_list = []
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob)
-        test(model, device, test_loader)
+        loss, acc = test(model, device, test_loader)
+        loss_list.append(loss)
+        acc_list.append(acc)
         scheduler.step()
     
-    
+    return loss_list, acc_list
+
 
 """def create_backward_hooks( model :nn.Module, decimals: int) -> nn.Module:
     for parameter in model.parameters():
@@ -180,7 +186,8 @@ def hook(grad):
 
 def create_backward_hooks( model :nn.Module) -> nn.Module:
     for parameter in model.parameters():
-            parameter.register_hook(hook)
+            if parameter.requires_grad:
+                parameter.register_hook(hook)
     return model
 
 #funcion de cuantizacion flotante -> entero

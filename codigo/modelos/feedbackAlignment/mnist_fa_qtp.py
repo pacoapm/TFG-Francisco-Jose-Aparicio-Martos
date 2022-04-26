@@ -22,14 +22,14 @@ from mnist_fa import Net
 
 import sys
 sys.path.insert(1, '../../')
-from custom_funcs import my_round_func,train,test,create_backward_hooks
-   
+from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas, load_dataset
+import custom_funcs
 
 
 
-class CustomNet(nn.Module):
+class QuantNet(nn.Module):
     def __init__(self):
-        super(CustomNet, self).__init__()
+        super(QuantNet, self).__init__()
         #self.round = my_round_func.apply
         self.flatten = nn.Flatten()
         self.l1 = nn.Linear(28*28,4)
@@ -85,60 +85,66 @@ def main():
                         help='how many batches to wait before logging training status')
     parser.add_argument('--save-model', action='store_true', default=False,
                         help='For Saving the current Model')
+    parser.add_argument('--global-quantization', type=int, default=1, metavar='G',
+                        help="indica si se realiza la cuantizacion a nivel global (1) o local (0)")
+    parser.add_argument('--n-bits', type=int, default=8, metavar='N',
+                        help="numero de bits usados para la cuantizacion")
+    parser.add_argument('--dataset', type=str, default='MNIST', metavar='d',
+                        help="indica la base de datos a usar: MNIST O FMNIST")
+
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
+    if args.global_quantization == 1:
+        global_quantization = True
+    else:
+        global_quantization = False
+        
+    custom_funcs.n_bits = args.n_bits
 
     torch.manual_seed(args.seed)
 
     #device = torch.device("cuda" if use_cuda else "cpu")
     device = torch.device("cpu")
-    train_kwargs = {'batch_size': args.batch_size}
-    test_kwargs = {'batch_size': args.test_batch_size}
-    if use_cuda:
-        cuda_kwargs = {'num_workers': 1,
-                       'pin_memory': True,
-                       'shuffle': True}
-        train_kwargs.update(cuda_kwargs)
-        test_kwargs.update(cuda_kwargs)
 
-    transform=transforms.Compose([
-        transforms.ToTensor(),
-        #media y desviación típica de la base de datos MNIST
-        transforms.Normalize((0.1307,), (0.3081,))
-        ])
-    
-    dataset1 = datasets.MNIST('../../data', train=True, download=True,
-                       transform=transform)
-    dataset2 = datasets.MNIST('../../data', train=False,
-                       transform=transform)
-    
-    train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
-    test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
+    train_loader,test_loader = load_dataset(args.dataset, args, device, use_cuda)
+
+    images, labels = next(iter(train_loader))
+    imagen = images[0]
 
 
-
-    model = CustomNet()
-    model = create_backward_hooks(model,4)
+    #entreno el modelo normal 
+    model = Net()
+    model = create_backward_hooks(model)
     
     model = BioModule(model,mode="fa")
     model = model.to(device)
-    
-    for layer in model.children():
-        if type(layer) == nn.Linear:
-            #print(layer.weight.data)
-            layer.weight.data = torch.round(input=layer.weight.data,decimals =3)
-            #layer.weight = torch.round(input=layer.weight,decimals =3)"""
-    optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
-    scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
-    
-    for epoch in range(1, args.epochs + 1):
-        train(args, model, device, train_loader, optimizer, epoch)
-        test(model, device, test_loader)
-        scheduler.step()
+    loss, acc = train_loop(model,args,device,train_loader,test_loader)
 
-    if args.save_model:
-        torch.save(model.state_dict(), "../pesosModelos/mnist_backprop.pt")
+
+    #version cuantizada
+    
+    #cogemos los valores minimos y maximos de la red anterior
+    minimo, maximo = minmax(model, global_quantization)
+    print("minimo: ", minimo,"\nmaximo: " ,maximo)
+    #creamos el modelo
+    modelq = QuantNet()
+    
+    modelq = BioModule(modelq,mode="fa")
+    modelq = create_backward_hooks(modelq)
+    
+    modelq = modelq.to(device)
+    #cuantizamos los pesos
+    actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
+    #entrenamiento 
+    lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
+    
+    visualizar_caracteristicas(model, imagen)
+    visualizar_caracteristicas(modelq, imagen)
+
+
+    """if args.save_model:
+        torch.save(model.state_dict(), "../pesosModelos/mnist_backprop.pt")"""
 
 
 if __name__ == '__main__':
