@@ -140,7 +140,7 @@ def main():
 
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    train_loader,test_loader = load_dataset("MNIST", args, device, use_cuda)
+    train_loader,test_loader = load_dataset("FMNIST", args, device, use_cuda)
     
     images, labels = next(iter(train_loader))
     imagen = images[0]
