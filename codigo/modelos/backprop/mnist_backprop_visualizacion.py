@@ -29,7 +29,7 @@ import numpy as np
 
 import sys
 sys.path.insert(1, '../../')
-from custom_funcs import my_round_func,train,test,create_backward_hooks,ASYMM,minmax
+from custom_funcs import my_round_func,train,test,create_backward_hooks,ASYMM,minmax,visualizar_caracteristicas
 
 class Net(nn.Module):
     def __init__(self):
@@ -120,42 +120,12 @@ def main():
         
     
     model =  model.to(torch.device("cpu"))
-    #minimo,maximo = minmax(model)
+    
     images, labels = next(iter(train_loader))
-    #print(ASYMM(model(images),minimo,maximo,2))
+    imagen = images[0]
     
+    visualizar_caracteristicas(model, imagen)
     
-    
-    integrated_gradients = IntegratedGradients(model)
-    pred_score, pred_label = torch.topk(model(images[0]),1)
-    pred_label.squeeze_()
-    print(images[0].shape)
-    
-    attributions_ig = integrated_gradients.attribute(images[0].unsqueeze(0), target=pred_label, n_steps = 200)
-    print("atrib: ",attributions_ig.shape)
-    print("imagen: ",images[0].unsqueeze(0).shape)
-    
-    
-    # Show the original image for comparison
-    """_ = viz.visualize_image_attr(None, np.transpose(images[0].cpu().detach().numpy(),(1,2,0)), 
-                          method="heat_map", title="Original Image", cmap = 'gray')"""
-    plt.imshow(images[0].reshape(28,28), cmap = "gray")
-    
-    default_cmap = LinearSegmentedColormap.from_list('custom blue', 
-                                                     [(0, '#ffffff'),
-                                                      (0.25, '#0000ff'),
-                                                      (1, '#0000ff')], N=256)
-    
-    print(np.transpose(attributions_ig.squeeze(0).cpu().detach().numpy(),(1,2,0)).shape)
-    print(np.transpose(images[0].cpu().detach().numpy(),(1,2,0)).shape)
-    
-    _ = viz.visualize_image_attr(np.transpose(attributions_ig.squeeze(0).cpu().detach().numpy(),(1,2,0)),
-                                 np.transpose(images[0].cpu().detach().numpy(),(1,2,0)),
-                                 method='heat_map',
-                                 cmap=default_cmap,
-                                 show_colorbar=True,
-                                 sign='positive',
-                                 title='Integrated Gradients')
 
 
 if __name__ == '__main__':

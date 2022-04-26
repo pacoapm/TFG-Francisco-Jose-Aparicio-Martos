@@ -113,9 +113,9 @@ def main():
     transform=transforms.Compose([
         transforms.ToTensor()
         ])
-    dataset1 = datasets.FashionMNIST('../data', train=True, download=True,
+    dataset1 = datasets.FashionMNIST('../../data', train=True, download=True,
                        transform=transform)
-    dataset2 = datasets.FashionMNIST('../data', train=False,
+    dataset2 = datasets.FashionMNIST('../../data', train=False,
                        transform=transform)
     train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
     test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)

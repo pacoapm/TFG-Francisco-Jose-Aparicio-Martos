@@ -18,6 +18,8 @@ from torch.optim.lr_scheduler import StepLR
 from biotorch.benchmark.run import Benchmark
 from biotorch.module.biomodule import BioModule
 
+from mnist_fa import Net
+
 import sys
 sys.path.insert(1, '../../')
 from custom_funcs import my_round_func,train,test,create_backward_hooks

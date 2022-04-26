@@ -17,12 +17,17 @@ from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 import sys
 sys.path.insert(1, '../../')
-from custom_funcs import my_round_func,train,test,create_backward_hooks, train_loop, minmax, actualizar_pesos
+from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas, load_dataset
 from mnist_backprop_visualizacion import Net
 import custom_funcs
 
-
-
+"""import os 
+ruta = os.getcwd()
+pos = ruta.find("codigo")
+print("ruta del codigo ", ruta[:pos+6])
+print(type(ruta))
+print(os.getcwd())
+hol = input()"""
 
 class CustomNet(nn.Module):
     def __init__(self):
@@ -57,7 +62,7 @@ class CustomNet(nn.Module):
         return x
     
 class QuantNet(nn.Module):
-    def __init__(self, mini, maxi, n_bits):
+    def __init__(self):
         super(QuantNet, self).__init__()
         #self.round = my_round_func.apply
         self.flatten = nn.Flatten()
@@ -65,29 +70,28 @@ class QuantNet(nn.Module):
         self.relu = nn.ReLU()
         self.l2 = nn.Linear(4,10)
         self.softmax = nn.LogSoftmax(dim=1)
-        self.mini = mini
-        self.maxi = maxi
-        self.nbits = n_bits
+       
         
         
 
     def forward(self,x):
+        print(x)
         x = self.flatten(x)
-        
+        print(x)
         x = my_round_func.apply(x)
-        
+        print(x)
         x = self.l1(x)
-        
+        print(x)
         x = my_round_func.apply(x)
-        
+        print(x)
         x = self.l2(self.relu(x))
-       
+        print(x)
         x = my_round_func.apply(x)
-        
+        print(x)
         x = self.softmax(x)
-        
+        print(x)
         x = my_round_func.apply(x)
-        
+        print(x)
         return x
 
 
@@ -136,29 +140,10 @@ def main():
 
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    train_kwargs = {'batch_size': args.batch_size}
-    test_kwargs = {'batch_size': args.test_batch_size}
-    if use_cuda:
-        cuda_kwargs = {'num_workers': 1,
-                       'pin_memory': True,
-                       'shuffle': True}
-        train_kwargs.update(cuda_kwargs)
-        test_kwargs.update(cuda_kwargs)
-
-    transform=transforms.Compose([
-        transforms.ToTensor(),
-        #media y desviación típica de la base de datos MNIST
-        transforms.Normalize((0.1307,), (0.3081,))
-        ])
+    train_loader,test_loader = load_dataset("FMNIST", args, device, use_cuda)
     
-    dataset1 = datasets.MNIST('../../data', train=True, download=True,
-                       transform=transform)
-    dataset2 = datasets.MNIST('../../data', train=False,
-                       transform=transform)
-    
-    train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
-    test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
-    
+    images, labels = next(iter(train_loader))
+    imagen = images[0]
     
 
     #version con redondeo
@@ -181,14 +166,18 @@ def main():
     
     #cogemos los valores minimos y maximos de la red anterior
     minimo, maximo = minmax(model, global_quantization)
+    print("minimo: ", minimo,"maximo: " ,maximo)
     #creamos el modelo
-    modelq = QuantNet(minimo, maximo, args.n_bits)
+    modelq = QuantNet()
     modelq = create_backward_hooks(modelq)
     modelq = modelq.to(device)
     #cuantizamos los pesos
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
     #entrenamiento 
     train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
+    
+    visualizar_caracteristicas(model, imagen)
+    visualizar_caracteristicas(modelq, imagen)
     
     
 

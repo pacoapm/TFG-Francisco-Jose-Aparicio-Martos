@@ -19,7 +19,7 @@ from biotorch.module.biomodule import BioModule
 
 import sys
 sys.path.insert(1, '../../')
-from custom_funcs import train,test
+from custom_funcs import train_loop
 
 class Net(nn.Module):
     def __init__(self):
@@ -95,13 +95,7 @@ def main():
     model = Net()
     biomodel = BioModule(model,mode="fa")
     biomodel = biomodel.to(device)
-    optimizer = optim.Adadelta(biomodel.parameters(), lr=args.lr)
-
-    scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
-    for epoch in range(1, args.epochs + 1):
-        train(args, biomodel, device, train_loader, optimizer, epoch)
-        test(biomodel, device, test_loader)
-        scheduler.step()
+    train_loop(model,args,device,train_loader,test_loader)
 
     if args.save_model:
         torch.save(biomodel.state_dict(), "../pesosModelos/mnist_fa.pt")

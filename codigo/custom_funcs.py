@@ -10,7 +10,18 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 import torch.optim as optim
+from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
+from PIL import Image
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+
+import captum
+from captum.attr import IntegratedGradients, Occlusion, LayerGradCam, LayerAttribution
+from captum.attr import visualization as viz
+
+import numpy as np
+
 n_bits = 8
 
 #funcion sacada de https://discuss.pytorch.org/t/torch-round-gradient/28628/5
@@ -39,6 +50,52 @@ class my_round_func(torch.autograd.Function):
     def backward(ctx, grad_output):
         grad_input = grad_output.clone()
         return grad_input
+    
+def load_dataset(dataset, args, device, use_cuda):
+    if dataset == "MNIST":
+        train_kwargs = {'batch_size': args.batch_size}
+        test_kwargs = {'batch_size': args.test_batch_size}
+        if use_cuda:
+            cuda_kwargs = {'num_workers': 1,
+                           'pin_memory': True,
+                           'shuffle': True}
+            train_kwargs.update(cuda_kwargs)
+            test_kwargs.update(cuda_kwargs)
+
+        transform=transforms.Compose([
+            transforms.ToTensor(),
+            #media y desviación típica de la base de datos MNIST
+            transforms.Normalize((0.1307,), (0.3081,))
+            ])
+        
+        dataset1 = datasets.MNIST('../../data', train=True, download=True,
+                           transform=transform)
+        dataset2 = datasets.MNIST('../../data', train=False,
+                           transform=transform)
+        
+        train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
+        test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
+    else:
+        train_kwargs = {'batch_size': args.batch_size}
+        test_kwargs = {'batch_size': args.test_batch_size}
+        if use_cuda:
+            cuda_kwargs = {'num_workers': 1,
+                           'pin_memory': True,
+                           'shuffle': True}
+            train_kwargs.update(cuda_kwargs)
+            test_kwargs.update(cuda_kwargs)
+
+        transform=transforms.Compose([
+            transforms.ToTensor()
+            ])
+        dataset1 = datasets.FashionMNIST('../../data', train=True, download=True,
+                           transform=transform)
+        dataset2 = datasets.FashionMNIST('../../data', train=False,
+                           transform=transform)
+        train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
+        test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
+        
+    return train_loader,test_loader
     
 def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True):
     model.train()
@@ -166,9 +223,37 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
     for layer in modelo.children():
         if type(layer) == nn.Linear:
             if glob:
-                layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
+                layer.weight.data = ASYMMf(layer.weight.data,minimo[0],maximo[0],n_bits)
             else:
                 layer.bias.data = ASYMMf(layer.bias.data,minimo[i],maximo[i],n_bits)
                 layer.weight.data = ASYMMf(layer.weight.data,minimo[i+1],maximo[i+1],n_bits)
                 i+=2
+                
+                
+def visualizar_caracteristicas(model, imagen):
+    model.to(torch.device("cpu"))
+    integrated_gradients = IntegratedGradients(model)
+    pred_score, pred_label = torch.topk(model(imagen),1)
+    pred_label.squeeze_()
+    
+    
+    attributions_ig = integrated_gradients.attribute(imagen.unsqueeze(0), target=pred_label, n_steps = 200)
+    
+    
+    
+    # Show the original image for comparison
+    plt.imshow(imagen.reshape(28,28), cmap = "gray")
+    
+    default_cmap = LinearSegmentedColormap.from_list('custom blue', 
+                                                     [(0, '#ffffff'),
+                                                      (0.25, '#0000ff'),
+                                                      (1, '#0000ff')], N=256)
+    
+    _ = viz.visualize_image_attr(np.transpose(attributions_ig.squeeze(0).cpu().detach().numpy(),(1,2,0)),
+                                 np.transpose(imagen.cpu().detach().numpy(),(1,2,0)),
+                                 method='heat_map',
+                                 cmap=default_cmap,
+                                 show_colorbar=True,
+                                 sign='positive',
+                                 title='Integrated Gradients')
     
