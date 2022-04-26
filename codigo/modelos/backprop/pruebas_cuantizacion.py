@@ -39,3 +39,6 @@ print(tensor)
 res = ASYMMf(tensor, 0, 1, 3)
 print(res)
 print("Diferencia: ", torch.mean(torch.abs(tensor-res)))
+
+tensor = torch.Tensor([1,1,1])
+print(tensor - 1)

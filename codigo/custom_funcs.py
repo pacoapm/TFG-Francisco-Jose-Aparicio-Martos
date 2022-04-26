@@ -6,6 +6,7 @@ Created on Wed Apr 20 14:41:51 2022
 @author: francisco
 """
 
+from cmath import nan
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
@@ -186,14 +187,44 @@ def create_backward_hooks( model :nn.Module) -> nn.Module:
 
 #funcion de cuantizacion flotante -> entero
 def ASYMM(t, mini, maxi, n):
+    """if mini == maxi:
+        return t 
+    else:
+        return torch.round((t-mini)*((2**(n)-1)/(maxi-mini)))"""
     return torch.round((t-mini)*((2**(n)-1)/(maxi-mini)))
 
 #funcion de decuantizacion entero -> flotante
 def dASYMM(t,mini,maxi,n):
+    """if mini == maxi:
+        return t
+    else:
+        return t/((2**(n)-1)/(maxi-mini))+mini"""
     return t/((2**(n)-1)/(maxi-mini))+mini
+
 #funcion de cuantizacion flotante -> flotante
 def ASYMMf(t,mini,maxi,n):
     res = ASYMM(t,mini,maxi,n)
+    
+
+    res = dASYMM(res,mini,maxi,n)
+    """if t.dim() == 1:
+        
+        if torch.isnan(res[0]):
+            print("\ntensor: ",t,"\n")
+            print("\mini: ",mini,"\n")
+            print("\maxi: ",maxi,"\n")
+            print("\n: ",n,"\n")
+            hola = input()
+        #print(res[0].item())
+
+    if t.dim() == 2:
+        if torch.isnan(res[0,0]):
+            print("\ntensor: ",t,"\n")
+            print("\nmini: ",mini,"\n")
+            print("\nmaxi: ",maxi,"\n")
+            print("\n: ",n,"\n")
+            hola = input()"""
+
     return dASYMM(res,mini,maxi,n)
 
 def minmax(modelo,glob = True):
@@ -203,8 +234,8 @@ def minmax(modelo,glob = True):
     maximos = []
                 
     for i in modelo.parameters():
-        min_capa = torch.min(i)
-        max_capa = torch.max(i)
+        min_capa = torch.min(i).item()
+        max_capa = torch.max(i).item()
         
         minimos.append(min_capa)
         maximos.append(max_capa)
@@ -223,7 +254,7 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
     for layer in modelo.children():
         if type(layer) == nn.Linear:
             if glob:
-                layer.weight.data = ASYMMf(layer.weight.data,minimo[0],maximo[0],n_bits)
+                layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
             else:
                 layer.bias.data = ASYMMf(layer.bias.data,minimo[i],maximo[i],n_bits)
                 layer.weight.data = ASYMMf(layer.weight.data,minimo[i+1],maximo[i+1],n_bits)

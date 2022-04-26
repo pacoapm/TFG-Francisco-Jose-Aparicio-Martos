@@ -75,23 +75,23 @@ class QuantNet(nn.Module):
         
 
     def forward(self,x):
-        print(x)
+        #print(x)
         x = self.flatten(x)
-        print(x)
+        #print(x)
         x = my_round_func.apply(x)
-        print(x)
+        #print(x)
         x = self.l1(x)
-        print(x)
+        #print(x)
         x = my_round_func.apply(x)
-        print(x)
+        #print(x)
         x = self.l2(self.relu(x))
-        print(x)
+        #print(x)
         x = my_round_func.apply(x)
-        print(x)
+        #print(x)
         x = self.softmax(x)
-        print(x)
+        #print(x)
         x = my_round_func.apply(x)
-        print(x)
+        #print(x)
         return x
 
 
@@ -119,7 +119,7 @@ def main():
                         help='how many batches to wait before logging training status')
     parser.add_argument('--save-model', action='store_true', default=False,
                         help='For Saving the current Model')
-    parser.add_argument('--global-quantization', type=int, default=0, metavar='G',help="indica si se realiza la cuantizacion a nivel global")
+    parser.add_argument('--global-quantization', type=int, default=1, metavar='G',help="indica si se realiza la cuantizacion a nivel global")
     parser.add_argument('--n-bits', type=int, default=8, metavar='N',help="numero de bits usados para la cuantizacion")
     
     
@@ -140,7 +140,7 @@ def main():
 
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    train_loader,test_loader = load_dataset("FMNIST", args, device, use_cuda)
+    train_loader,test_loader = load_dataset("MNIST", args, device, use_cuda)
     
     images, labels = next(iter(train_loader))
     imagen = images[0]
@@ -166,7 +166,7 @@ def main():
     
     #cogemos los valores minimos y maximos de la red anterior
     minimo, maximo = minmax(model, global_quantization)
-    print("minimo: ", minimo,"maximo: " ,maximo)
+    print("minimo: ", minimo,"\nmaximo: " ,maximo)
     #creamos el modelo
     modelq = QuantNet()
     modelq = create_backward_hooks(modelq)
