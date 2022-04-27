@@ -220,6 +220,10 @@ def dSYMM(t,maxi,n):
 
 def SYMMf(t,maxi,n):
     res = SYMM(t,maxi,n)
+    if maxi == 0:
+        print("t ",t)
+        print("maxi ", maxi)
+        hol = input()
     return dSYMM(res,maxi,n)
 
 def minmax(modelo,glob = True):

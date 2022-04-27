@@ -125,7 +125,8 @@ def main():
                         help="numero de bits usados para la cuantizacion")
     parser.add_argument('--dataset', type=str, default='MNIST', metavar='d',
                         help="indica la base de datos a usar: MNIST O FMNIST")
-
+    parser.add_argument('--modo', type=int, default=0, metavar='n',
+                        help="indica la cuantizacion a usar: ASYMM(0) o SYMM(1)")
     
     
     
@@ -137,7 +138,7 @@ def main():
         global_quantization = False
         
     custom_funcs.n_bits = args.n_bits
-    custom_funcs.modo = 1
+    custom_funcs.modo = args.modo
         
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()
@@ -198,10 +199,10 @@ def main():
     #visualizar_caracteristicas(model, imagen)
     #visualizar_caracteristicas(modelq, imagen)
 
-    nombre = "sinq_"+args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)
+    nombre = "sinq_"+args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)+"_modo"+str(args.modo)
     dibujar_loss_acc(loss,acc,args.epochs, nombre)
 
-    nombreq = "q_"+args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)
+    nombreq = "q_"+args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)+"_modo"+str(args.modo)
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
     
         
