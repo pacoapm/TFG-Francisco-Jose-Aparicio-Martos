@@ -17,7 +17,7 @@ from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 import sys
 sys.path.insert(1, '../../')
-from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas, load_dataset
+from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas, load_dataset, dibujar_loss_acc, maximof
 from mnist_backprop_visualizacion import Net
 import custom_funcs
 
@@ -137,6 +137,7 @@ def main():
         global_quantization = False
         
     custom_funcs.n_bits = args.n_bits
+    custom_funcs.modo = 1
         
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()
@@ -170,20 +171,40 @@ def main():
     #version cuantizada
     
     #cogemos los valores minimos y maximos de la red anterior
-    minimo, maximo = minmax(model, global_quantization)
-    print("minimo: ", minimo,"\nmaximo: " ,maximo)
-    #creamos el modelo
-    modelq = QuantNet()
-    modelq = create_backward_hooks(modelq)
-    modelq = modelq.to(device)
-    #cuantizamos los pesos
-    actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
-    #entrenamiento 
-    lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
-    
-    visualizar_caracteristicas(model, imagen)
-    visualizar_caracteristicas(modelq, imagen)
+    if custom_funcs.modo == 0:
+        minimo, maximo = minmax(model, global_quantization)
+        print("minimo: ", minimo,"\nmaximo: " ,maximo)
+        #creamos el modelo
+        modelq = QuantNet()
+        modelq = create_backward_hooks(modelq)
+        modelq = modelq.to(device)
+        #cuantizamos los pesos
+        actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
+        #entrenamiento 
+        lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
+    else:
+        maximo = maximof(model, global_quantization)
+        print("\nmaximo: " ,maximo)
+        minimo = 0
+        #creamos el modelo
+        modelq = QuantNet()
+        modelq = create_backward_hooks(modelq)
+        modelq = modelq.to(device)
+        #cuantizamos los pesos
+        actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
+        #entrenamiento 
+        lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
+        
+    #visualizar_caracteristicas(model, imagen)
+    #visualizar_caracteristicas(modelq, imagen)
 
+    nombre = "sinq_"+args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)
+    dibujar_loss_acc(loss,acc,args.epochs, nombre)
+
+    nombreq = "q_"+args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)
+    dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
+    
+        
     
     
     

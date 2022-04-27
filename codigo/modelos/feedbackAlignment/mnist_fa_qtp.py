@@ -22,7 +22,7 @@ from mnist_fa import Net
 
 import sys
 sys.path.insert(1, '../../')
-from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas, load_dataset
+from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas, load_dataset, dibujar_loss_acc
 import custom_funcs
 
 
@@ -139,9 +139,14 @@ def main():
     #entrenamiento 
     lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
     
-    visualizar_caracteristicas(model, imagen)
-    visualizar_caracteristicas(modelq, imagen)
+    #visualizar_caracteristicas(model, imagen)
+    #visualizar_caracteristicas(modelq, imagen)
 
+    nombre = "sinq_"+args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)
+    dibujar_loss_acc(loss,acc,args.epochs, nombre)
+
+    nombreq = "q_"+args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)
+    dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
 
     """if args.save_model:
         torch.save(model.state_dict(), "../pesosModelos/mnist_backprop.pt")"""

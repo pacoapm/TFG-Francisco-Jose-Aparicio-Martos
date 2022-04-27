@@ -22,6 +22,7 @@ from captum.attr import visualization as viz
 
 import numpy as np
 n_bits = 8
+modo = 0
 
 #funcion sacada de https://discuss.pytorch.org/t/torch-round-gradient/28628/5
 """class my_round_func(torch.autograd.Function):
@@ -179,9 +180,15 @@ def train_loop(model, args, device, train_loader, test_loader, cuantizacion = Fa
             parameter.register_hook(lambda grad: torch.round(input=grad,decimals=decimals))
     return model"""
 def hook(grad):
-    minimo = torch.min(grad)
-    maximo = torch.max(grad)
-    return ASYMMf(grad,minimo,maximo,n_bits)
+    
+    if modo == 0:
+        minimo = torch.min(grad)
+        maximo = torch.max(grad)
+        return ASYMMf(grad,minimo,maximo,n_bits)
+    else:
+        maximo = torch.max(torch.abs(grad))
+        return SYMMf(grad,maximo,n_bits)
+        
 
 
 def create_backward_hooks( model :nn.Module) -> nn.Module:
@@ -205,6 +212,16 @@ def ASYMMf(t,mini,maxi,n):
     res = ASYMM(t,mini,maxi,n)
     return dASYMM(res,mini,maxi,n)
 
+def SYMM(t,maxi,n):
+    return torch.round(t*((2**(n-1)-1)/maxi))
+
+def dSYMM(t,maxi,n):
+    return t*(maxi/(2**(n-1)-1))
+
+def SYMMf(t,maxi,n):
+    res = SYMM(t,maxi,n)
+    return dSYMM(res,maxi,n)
+
 def minmax(modelo,glob = True):
     minimo = 100
     maximo = 0
@@ -226,17 +243,41 @@ def minmax(modelo,glob = True):
         return minimo,maximo
     else:
         return minimos,maximos
+    
+def maximof(modelo,glob = True):
+    maxi = 0
+    maximos = []
+    for i in modelo.parameters():
+        max_actual = torch.max(torch.abs(i))
+        
+        maximos.append(max_actual)
+        
+        if max_actual > maxi:
+            maxi = max_actual
+            
+    if glob:
+        return maxi
+    else:
+        return maximos
 
 def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
     i = 0
     for layer in modelo.children():
         if type(layer) == nn.Linear:
             if glob:
-                layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
+                if modo == 0:
+                    layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
+                else:
+                    layer.weight.data = SYMMf(layer.weight.data,maximo,n_bits)
             else:
-                layer.bias.data = ASYMMf(layer.bias.data,minimo[i],maximo[i],n_bits)
-                layer.weight.data = ASYMMf(layer.weight.data,minimo[i+1],maximo[i+1],n_bits)
-                i+=2
+                if modo == 0:
+                    layer.bias.data = ASYMMf(layer.bias.data,minimo[i],maximo[i],n_bits)
+                    layer.weight.data = ASYMMf(layer.weight.data,minimo[i+1],maximo[i+1],n_bits)
+                    i+=2
+                else:
+                    layer.bias.data = SYMMf(layer.bias.data,maximo[i],n_bits)
+                    layer.weight.data = SYMMf(layer.weight.data,maximo[i+1],n_bits)
+                    i+= 2
 
 def visualizar_caracteristicas(model, imagen):
     model.to(torch.device("cpu"))
@@ -264,3 +305,26 @@ def visualizar_caracteristicas(model, imagen):
                                  show_colorbar=True,
                                  sign='positive',
                                  title='Integrated Gradients')
+
+def dibujar_loss_acc(loss,acc,epochs,nombre):
+    fig, ax = plt.subplots(1,2, figsize=(10,4))
+    
+    x = np.arange(0,epochs)
+    ax[0].plot(x,loss,'.-')
+    ax[0].set_title("Test loss")
+    ax[0].set_xlabel("epochs")
+    ax[0].set_ylabel("Loss")
+    ax[0].set_ylim(0,max(loss)+1)
+    #ax[0].set_xlim(0,epochs-1)
+
+    ax[1].plot(x,acc,'.-')
+    ax[1].set_title("Test acc")
+    ax[1].set_xlabel("epochs")
+    ax[1].set_ylabel("Accuracy")
+    ax[1].set_ylim(0,100)
+    #ax[1].set_xlim(0,epochs-1)
+
+
+    #plt.savefig("images/"+nombre)
+    plt.show()
+
