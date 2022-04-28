@@ -1,0 +1,3 @@
+numero bits;cuantizacion global/local;tipo cuantizacion;accuracy;loss;quantize accuraccy; quantize loss ;accuracy difference
+7;global;ASYMM;83.27;0.5666888214111329;19.27;2.2573716064453127;-64.0
+8;global;ASYMM;83.27;0.5666888214111329;79.14;0.6733258911132812;-4.1299999999999955

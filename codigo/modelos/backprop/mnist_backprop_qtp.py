@@ -17,7 +17,8 @@ from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 import sys
 sys.path.insert(1, '../../')
-from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas, load_dataset, dibujar_loss_acc, maximof
+from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas
+from custom_funcs import load_dataset, dibujar_loss_acc, maximof, generarInformacion, generarNombre, guardarDatos
 from mnist_backprop_visualizacion import Net
 import custom_funcs
 
@@ -199,14 +200,14 @@ def main():
     #visualizar_caracteristicas(model, imagen)
     #visualizar_caracteristicas(modelq, imagen)
 
-    nombre = "sinq_"+args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)+"_modo"+str(args.modo)
+    nombre = generarNombre(args,False)
     dibujar_loss_acc(loss,acc,args.epochs, nombre)
 
-    nombreq = "q_"+args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)+"_modo"+str(args.modo)
+    nombreq = generarNombre(args,True)
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
     
         
-    
+    guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc[-1],loss[-1],accq[-1],lossq[-1]))
     
     
 

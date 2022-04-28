@@ -22,7 +22,8 @@ from mnist_fa import Net
 
 import sys
 sys.path.insert(1, '../../')
-from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas, load_dataset, dibujar_loss_acc, maximof
+from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, generarNombre, generarInformacion
+from custom_funcs import  visualizar_caracteristicas, load_dataset, dibujar_loss_acc, maximof, actualizar_pesos_fa, guardarDatos
 import custom_funcs
 
 
@@ -139,7 +140,7 @@ def main():
         
         modelq = modelq.to(device)
         #cuantizamos los pesos
-        actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
+        actualizar_pesos_fa(modelq,args.n_bits,minimo,maximo, global_quantization)
         #entrenamiento 
         lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
     else:
@@ -154,18 +155,20 @@ def main():
         
         modelq = modelq.to(device)
         #cuantizamos los pesos
-        actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
+        actualizar_pesos_fa(modelq,args.n_bits,minimo,maximo, global_quantization)
         #entrenamiento 
         lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
     
     #visualizar_caracteristicas(model, imagen)
     #visualizar_caracteristicas(modelq, imagen)
 
-    nombre = "sinq_"+args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)+"_modo"+str(args.modo)
+    nombre = generarNombre(args,False)
     dibujar_loss_acc(loss,acc,args.epochs, nombre)
 
-    nombreq = "q_"+args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)+"_modo"+str(args.modo)
+    nombreq = generarNombre(args,True)
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
+    
+    guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc[-1],loss[-1],accq[-1],lossq[-1]))
 
     """if args.save_model:
         torch.save(model.state_dict(), "../pesosModelos/mnist_backprop.pt")"""

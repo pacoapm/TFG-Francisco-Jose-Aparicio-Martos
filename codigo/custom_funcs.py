@@ -16,11 +16,15 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 
+from biotorch.layers.fa_constructor.linear import Linear
+
 import captum
 from captum.attr import IntegratedGradients, Occlusion, LayerGradCam, LayerAttribution
 from captum.attr import visualization as viz
 
 import numpy as np
+
+import csv
 n_bits = 8
 modo = 0
 
@@ -43,7 +47,10 @@ class my_round_func(torch.autograd.Function):
         ctx.input = input
         minimo = torch.min(input)
         maximo = torch.max(input)
-        return ASYMMf(input, minimo, maximo, n_bits)
+        if modo == 0:
+            return ASYMMf(input, minimo, maximo, n_bits)
+        else:
+            return SYMMf(input,maximo,n_bits)
         #return int_quant(scale, zero_point, bit_width, input)
 
     @staticmethod
@@ -209,6 +216,8 @@ def dASYMM(t,mini,maxi,n):
     return t/((2**(n)-1)/(maxi-mini))+mini
 #funcion de cuantizacion flotante -> flotante
 def ASYMMf(t,mini,maxi,n):
+    if maxi == mini:
+        return t
     res = ASYMM(t,mini,maxi,n)
     return dASYMM(res,mini,maxi,n)
 
@@ -219,11 +228,12 @@ def dSYMM(t,maxi,n):
     return t*(maxi/(2**(n-1)-1))
 
 def SYMMf(t,maxi,n):
-    res = SYMM(t,maxi,n)
     if maxi == 0:
-        print("t ",t)
+        """print("t ",t)
         print("maxi ", maxi)
-        hol = input()
+        hol = input()"""
+        return t
+    res = SYMM(t,maxi,n)
     return dSYMM(res,maxi,n)
 
 def minmax(modelo,glob = True):
@@ -231,8 +241,11 @@ def minmax(modelo,glob = True):
     maximo = 0
     minimos = []
     maximos = []
-                
+    contador = 0       
     for i in modelo.parameters():
+        """contador += 1
+        print(i)
+        hol = input()"""
         min_capa = torch.min(i)
         max_capa = torch.max(i)
         
@@ -243,6 +256,7 @@ def minmax(modelo,glob = True):
         if max_capa > maximo:
             maximo = max_capa
             
+    #print("en total hay ", contador, " parametros")
     if glob:
         return minimo,maximo
     else:
@@ -251,13 +265,17 @@ def minmax(modelo,glob = True):
 def maximof(modelo,glob = True):
     maxi = 0
     maximos = []
+    
     for i in modelo.parameters():
+        
         max_actual = torch.max(torch.abs(i))
         
         maximos.append(max_actual)
         
         if max_actual > maxi:
             maxi = max_actual
+            
+    
             
     if glob:
         return maxi
@@ -266,22 +284,63 @@ def maximof(modelo,glob = True):
 
 def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
     i = 0
-    for layer in modelo.children():
-        if type(layer) == nn.Linear:
+    for layer in modelo.modules():
+        """print(layer)
+        hol = input()"""
+        if type(layer) == nn.Linear or isinstance(layer,Linear): 
+            """print("cuantizado")
+            hol = input()"""
             if glob:
                 if modo == 0:
+                    layer.bias.bias = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
                     layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
+                    
                 else:
+                    layer.bias.data = SYMMf(layer.bias.data,maximo,n_bits)
                     layer.weight.data = SYMMf(layer.weight.data,maximo,n_bits)
+                    
             else:
                 if modo == 0:
-                    layer.bias.data = ASYMMf(layer.bias.data,minimo[i],maximo[i],n_bits)
-                    layer.weight.data = ASYMMf(layer.weight.data,minimo[i+1],maximo[i+1],n_bits)
+                    layer.bias.data = ASYMMf(layer.bias.data,minimo[i+1],maximo[i+1],n_bits)
+                    layer.weight.data = ASYMMf(layer.weight.data,minimo[i],maximo[i],n_bits)
                     i+=2
                 else:
-                    layer.bias.data = SYMMf(layer.bias.data,maximo[i],n_bits)
-                    layer.weight.data = SYMMf(layer.weight.data,maximo[i+1],n_bits)
+                    layer.bias.data = SYMMf(layer.bias.data,maximo[i+1],n_bits)
+                    layer.weight.data = SYMMf(layer.weight.data,maximo[i],n_bits)
                     i+= 2
+                    
+def actualizar_pesos_fa(modelo,n_bits,minimo=None,maximo=None, glob = True):
+    i = 0
+    for layer in modelo.modules():
+        """print(layer)
+        hol = input()"""
+        if type(layer) == nn.Linear or isinstance(layer,Linear): 
+            """print("cuantizado")
+            hol = input()"""
+            if glob:
+                if modo == 0:
+                    layer.bias.bias = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
+                    layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
+                    layer.weight_backward.data = ASYMMf(layer.weight_backward.data,minimo,maximo,n_bits)
+                    layer.bias_backward.data = ASYMMf(layer.bias_backward.data,minimo,maximo,n_bits)
+                else:
+                    layer.bias.data = SYMMf(layer.bias.data,maximo,n_bits)
+                    layer.weight.data = SYMMf(layer.weight.data,maximo,n_bits)
+                    layer.weight_backward.data = SYMMf(layer.weight_backward.data,maximo,n_bits)
+                    layer.bias_backward.data = SYMMf(layer.bias_backward.data,maximo,n_bits)
+            else:
+                if modo == 0:
+                    layer.bias.data = ASYMMf(layer.bias.data,minimo[i+1],maximo[i+1],n_bits)
+                    layer.weight.data = ASYMMf(layer.weight.data,minimo[i],maximo[i],n_bits)
+                    layer.weight_backward.data = ASYMMf(layer.weight_backward.data,minimo[i+2],maximo[i+2],n_bits)
+                    layer.bias_backward.data = ASYMMf(layer.bias_backward.data,minimo[i+3],maximo[i+3],n_bits)
+                    i+=4
+                else:
+                    layer.bias.data = SYMMf(layer.bias.data,maximo[i+1],n_bits)
+                    layer.weight.data = SYMMf(layer.weight.data,maximo[i],n_bits)
+                    layer.weight_backward.data = SYMMf(layer.weight_backward.data,maximo[i+2],n_bits)
+                    layer.bias_backward.data = SYMMf(layer.bias_backward.data,maximo[i+3],n_bits)
+                    i+= 4
 
 def visualizar_caracteristicas(model, imagen):
     model.to(torch.device("cpu"))
@@ -329,6 +388,35 @@ def dibujar_loss_acc(loss,acc,epochs,nombre):
     #ax[1].set_xlim(0,epochs-1)
 
 
-    #plt.savefig("images/"+nombre)
-    plt.show()
+    plt.savefig("images/"+nombre)
+    #plt.show()
+    
+def generarNombre(args, quantize):
+    
+    if quantize:
+        nombre =  "sinq_"
+    else:
+        nombre =  "q_"
+    
+    return nombre + args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)+"_modo"+str(args.modo)
+
+def generarInformacion(args, acc, loss, accq, lossq):
+    if args.modo == 0:
+        modo = "ASYMM"
+    else:
+        modo = "SYMM"
+        
+    if args.global_quantization:
+        globalq = "global"
+    else:
+        globalq = "local"
+    
+    return str(args.n_bits)+";"+globalq+";"+modo+";"+str(acc)+";"+str(loss)+";"+str(accq)+";"+str(lossq)+";"+str(accq-acc)+"\n"
+            
+    
+def guardarDatos(archivo, informacion):
+    with open(archivo,'a') as f:
+        f.write(informacion)
+        #writer.writerow(informacion)
+    
 
