@@ -10,6 +10,9 @@ import torch
 import torch.nn.functional as F
 import argparse
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 parser.add_argument('--batch-size', type=int, default=128, metavar='N',
@@ -64,6 +67,8 @@ def test(model, device, test_loader):
     model.eval()
     test_loss = 0
     correct = 0
+    acc = 0
+    loss = 0
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
@@ -82,6 +87,33 @@ def test(model, device, test_loader):
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
+
+    acc = 100. * correct / len(test_loader.dataset)
+    loss = test_loss
+
+    return acc, loss
+
+def dibujar_loss_acc(loss,acc,epochs):
+    fig, ax = plt.subplots(1,2, figsize=(10,4))
+    
+    x = np.arange(0,epochs)
+    ax[0].plot(x,loss,'*-')
+    ax[0].set_title("Test loss")
+    ax[0].set_xlabel("epochs")
+    ax[0].set_ylabel("Loss")
+    ax[0].set_ylim(0,max(loss)+1)
+    #ax[0].set_xlim(0,epochs-1)
+
+    ax[1].plot(x,acc,'.-')
+    ax[1].set_title("Test acc")
+    ax[1].set_xlabel("epochs")
+    ax[1].set_ylabel("Accuracy")
+    ax[1].set_ylim(0,100)
+    #ax[1].set_xlim(0,epochs-1)
+
+
+    #plt.savefig("images/"+nombre)
+    plt.show()
 
 # # # configuration
 config_dict = {}
@@ -133,6 +165,7 @@ for cepoch in range(epochs):
     #test_acc, reord = get_accuracy_hsic(model,test_loader) falla
     #print("Precision: ", test_acc)
 
+#FORMATED TRAINING: entrenamiento de la ultima capa con sgd
 model.eval()
 final_model = ModelEnsemble(model,final_layer)
 final_model = final_model.to(torch.device("cuda"))
@@ -143,15 +176,22 @@ optimizer = torch.optim.SGD( filter(lambda p: p.requires_grad, final_layer.param
 train_loader, test_loader = get_dataset_from_code('mnist', 128)
 
 epochs = 5
+vacc = []
+vloss = []
 for cepoch in range(epochs):
     #train(args, model, torch.device('cuda'), train_loader, optimizer, cepoch)
     standard_train(cepoch, final_model, train_loader, optimizer, config_dict)
-    test(final_model,torch.device("cuda"),test_loader)
+    acc, loss = test(final_model,torch.device("cuda"),test_loader)
+    vacc.append(acc)
+    vloss.append(loss)
+
+
+dibujar_loss_acc(vloss,vacc,epochs)
 
 
 
 
-#FORMATED TRAINING: entrenamiento de la ultima capa con sgd
+
 
 
 
