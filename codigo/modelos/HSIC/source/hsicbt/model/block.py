@@ -1,5 +1,7 @@
 from .. import *
-
+import sys
+sys.path.insert(1, '/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo')
+from custom_funcs import QuantLayer
 
 def get_activation(atype):
 
@@ -40,6 +42,17 @@ def get_primative_block(model_type, hid_in, hid_out, atype):
         block = BasicResidualBlockConv(hid_in, hid_out, atype)
     return block
 
+def get_primative_quant_block(model_type, hid_in, hid_out, atype):
+    if model_type=='simple-dense':
+        block = makeQuantblock_dense(hid_in, hid_out, atype)
+    elif model_type=='simple-conv':
+        block = makeblock_conv(hid_in, hid_out, atype)
+    elif model_type=='resnet-dense':
+        block = BasicResidualBlockDense(hid_in, hid_out, atype)
+    elif model_type=='resnet-conv':
+        block = BasicResidualBlockConv(hid_in, hid_out, atype)
+    return block
+
 def makeblock_dense(in_dim, out_dim, atype):
     
     layer = nn.Linear(in_dim, out_dim)
@@ -49,6 +62,19 @@ def makeblock_dense(in_dim, out_dim, atype):
     else:
         nonlinear = get_activation(atype)
         out = nn.Sequential(*[layer, bn,nonlinear])
+    return out
+
+
+def makeQuantblock_dense(in_dim, out_dim, atype):
+    
+    layer = nn.Linear(in_dim, out_dim)
+    bn = nn.BatchNorm1d(out_dim, affine=False)
+    quant = QuantLayer()
+    if atype=='linear':
+        out = nn.Sequential(*[layer,quant,bn,quant])
+    else:
+        nonlinear = get_activation(atype)
+        out = nn.Sequential(*[layer,quant, bn,quant,nonlinear, quant])
     return out
 
 def makeblock_conv(in_chs, out_chs, atype, stride=1):

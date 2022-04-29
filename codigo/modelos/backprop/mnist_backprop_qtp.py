@@ -18,7 +18,7 @@ from torch.optim.lr_scheduler import StepLR
 import sys
 sys.path.insert(1, '../../')
 from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas
-from custom_funcs import load_dataset, dibujar_loss_acc, maximof, generarInformacion, generarNombre, guardarDatos
+from custom_funcs import load_dataset, dibujar_loss_acc, maximof, generarInformacion, generarNombre, guardarDatos, QuantLayer
 from mnist_backprop_visualizacion import Net
 import custom_funcs
 
@@ -39,26 +39,26 @@ class CustomNet(nn.Module):
         self.relu = nn.ReLU()
         self.l2 = nn.Linear(4,10)
         self.softmax = nn.LogSoftmax(dim=1)
-        
+        self.quant = QuantLayer()
         
         
 
     def forward(self,x):
         x = self.flatten(x)
         #print(x)
-        x = my_round_func.apply(x)
+        x = self.quant(x)#my_round_func.apply(x)
         #print(x)
         x = self.l1(x)
         #print(x)
-        x = my_round_func.apply(x)
+        x = self.quant(x)#my_round_func.apply(x)
         #print(x)
         x = self.l2(self.relu(x))
         #print(x)
-        x = my_round_func.apply(x)
+        x = self.quant(x)#my_round_func.apply(x)
         #print(x)
         x = self.softmax(x)
         #print(x)
-        x = my_round_func.apply(x)
+        x = self.quant(x)#my_round_func.apply(x)
         #print(x)
         return x
     
@@ -166,7 +166,7 @@ def main():
     if custom_funcs.modo == 0:
         minimo, maximo = minmax(model, global_quantization)
         #creamos el modelo
-        modelq = QuantNet()
+        modelq = CustomNet()
         modelq = create_backward_hooks(modelq)
         modelq = modelq.to(device)
         #cuantizamos los pesos

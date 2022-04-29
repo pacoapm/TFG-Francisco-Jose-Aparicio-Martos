@@ -57,6 +57,13 @@ class my_round_func(torch.autograd.Function):
     def backward(ctx, grad_output):
         grad_input = grad_output.clone()
         return grad_input
+    
+class QuantLayer(nn.Module):
+    def __init__(self):
+        super().__init__()
+    
+    def forward(self,x):
+        return my_round_func.apply(x)
 
 def load_dataset(dataset, args, device, use_cuda):
     if dataset == "MNIST":
