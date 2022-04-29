@@ -76,7 +76,7 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=6, metavar='N',
+    parser.add_argument('--epochs', type=int, default=10, metavar='N',
                         help='number of epochs to train (default: 14)')
     parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
                         help='learning rate (default: 1.0)')
@@ -112,16 +112,16 @@ def main():
         transforms.ToTensor()
         ])
     
-    dataset1 = datasets.FashionMNIST('../data', train=True, download=True,
+    dataset1 = datasets.FashionMNIST('../../data', train=True, download=True,
                        transform=transform)
-    dataset2 = datasets.FashionMNIST('../data', train=False,
+    dataset2 = datasets.FashionMNIST('../../data', train=False,
                        transform=transform)
     
     train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
     test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
 
     model = Net().to(device)
-    optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
+    """optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
     
@@ -131,7 +131,9 @@ def main():
         scheduler.step()
 
     if args.save_model:
-        torch.save(model.state_dict(), "../pesosModelos/Fashionmnist_backprop.pt")
+        torch.save(model.state_dict(), "../../pesosModelos/fmnist_backprop.pt")"""
+    model.load_state_dict(torch.load("../../pesosModelos/fmnist_backprop.pt"))
+    test(model, device, test_loader)
 
 
 if __name__ == '__main__':

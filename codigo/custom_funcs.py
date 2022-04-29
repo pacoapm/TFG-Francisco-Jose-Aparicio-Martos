@@ -15,7 +15,7 @@ from torch.optim.lr_scheduler import StepLR
 from PIL import Image
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
-
+from torch.autograd import Variable
 from biotorch.layers.fa_constructor.linear import Linear
 
 import captum
@@ -28,18 +28,18 @@ import csv
 n_bits = 8
 modo = 0
 
-#funcion sacada de https://discuss.pytorch.org/t/torch-round-gradient/28628/5
-"""class my_round_func(torch.autograd.Function):
-    @staticmethod
-    def forward(ctx, input):
-        ctx.input = input
-        return torch.round(input=input,decimals=3)
-        #return int_quant(scale, zero_point, bit_width, input)
-
-    @staticmethod
-    def backward(ctx, grad_output):
-        grad_input = grad_output.clone()
-        return grad_input"""
+def one_hot(indexes, n_classes, args):
+    result = torch.FloatTensor(indexes.size() + (n_classes,))
+    if args.no_cuda == False:
+        result = result.cuda()
+    result.zero_()
+    indexes_rank = len(indexes.size())
+    result.scatter_(
+        dim=indexes_rank,
+        index=indexes.data.unsqueeze(dim=indexes_rank),
+        value=1
+    )
+    return Variable(result)
     
 class my_round_func(torch.autograd.Function):
     @staticmethod
@@ -126,7 +126,7 @@ def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = Fa
                 break
     #print(output)
     
-def train_DNI(args, model, device, train_loader, optimizer, epoch):
+def train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True):
     model.train()
     output = 0
     for batch_idx, (data, target) in enumerate(train_loader):
@@ -137,6 +137,8 @@ def train_DNI(args, model, device, train_loader, optimizer, epoch):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
+        if cuantizacion:
+            actualizar_pesos(model,args.n_bits,minimo,maximo,glob)
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
@@ -174,6 +176,22 @@ def train_loop(model, args, device, train_loader, test_loader, cuantizacion = Fa
     acc_list = []
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob)
+        loss, acc = test(model, device, test_loader)
+        loss_list.append(loss)
+        acc_list.append(acc)
+        scheduler.step()
+    
+    return loss_list, acc_list
+
+def train_loop_dni(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True):
+    
+    optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
+
+    scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
+    loss_list = []
+    acc_list = []
+    for epoch in range(1, args.epochs + 1):
+        train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob)
         loss, acc = test(model, device, test_loader)
         loss_list.append(loss)
         acc_list.append(acc)

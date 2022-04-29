@@ -153,18 +153,8 @@ def main():
     images, labels = next(iter(train_loader))
     imagen = images[0]
     
-
-    #version con redondeo
-    
-    """model = CustomNet()
-    model = create_backward_hooks(model,4)
-    
-    model = model.to(device)"""
     model = Net()
     model = model.to(device)
-    
-    #falta el redondeo de los pesos
-        
     loss, acc = train_loop(model,args,device,train_loader,test_loader)
 
     if args.save_model:
@@ -175,7 +165,6 @@ def main():
     #cogemos los valores minimos y maximos de la red anterior
     if custom_funcs.modo == 0:
         minimo, maximo = minmax(model, global_quantization)
-        print("minimo: ", minimo,"\nmaximo: " ,maximo)
         #creamos el modelo
         modelq = QuantNet()
         modelq = create_backward_hooks(modelq)
@@ -186,7 +175,6 @@ def main():
         lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
     else:
         maximo = maximof(model, global_quantization)
-        print("\nmaximo: " ,maximo)
         minimo = 0
         #creamos el modelo
         modelq = QuantNet()
