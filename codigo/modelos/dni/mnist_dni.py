@@ -59,6 +59,7 @@ class Net(nn.Module):
         x = self.layer2(x)
         
         output = F.log_softmax(x, dim=1)
+        
         return output
 
 

@@ -22,6 +22,7 @@ import captum
 from captum.attr import IntegratedGradients, Occlusion, LayerGradCam, LayerAttribution
 from captum.attr import visualization as viz
 
+import dni
 import numpy as np
 
 import csv
@@ -60,10 +61,72 @@ class my_round_func(torch.autograd.Function):
     
 class QuantLayer(nn.Module):
     def __init__(self):
-        super().__init__()
+        super(QuantLayer,self).__init__()
     
-    def forward(self,x):
-        return my_round_func.apply(x)
+    def forward(self,input):
+        return my_round_func.apply(input)
+
+    
+def linearStack(input_width,output_width):
+    linear = nn.Linear(input_width,output_width)
+    relu = nn.ReLU()
+    return nn.Sequential(*[linear,relu])
+
+def quantLinearStack(input_width,output_width):
+    linear = nn.Linear(input_width,output_width)
+    relu = nn.ReLU()
+    quant = QuantLayer()
+    return nn.Sequential(*[linear,quant,relu,quant])
+
+
+
+class Net(nn.Module):
+    def __init__(self, n_layers, hidden_width, input_width, output_width):
+        super(Net, self).__init__()
+        
+        self.flatten = nn.Flatten()
+        self.input_layer = linearStack(input_width,hidden_width)
+        blocks = []
+        for i in range(n_layers):
+            blocks.append(linearStack(hidden_width,hidden_width))
+        self.hidden_layers = nn.Sequential(*blocks)
+        self.output_layer = nn.Linear(hidden_width,output_width)
+            
+        
+
+    def forward(self, x):
+        x = self.flatten(x)
+        x = self.input_layer(x)
+        x = self.hidden_layers(x)
+        x = self.output_layer(x)
+        x = F.log_softmax(x, dim=1)
+        x = my_round_func.apply(x)
+        return x
+    
+class QuantNet(nn.Module):
+    def __init__(self, n_layers, hidden_width, input_width, output_width):
+        super(QuantNet, self).__init__()
+        
+        self.flatten = nn.Flatten()
+        self.input_layer = quantLinearStack(input_width,hidden_width)
+        blocks = []
+        for i in range(n_layers):
+            blocks.append(quantLinearStack(hidden_width,hidden_width))
+        self.hidden_layers = nn.Sequential(*blocks)
+        self.output_layer = nn.Linear(hidden_width,output_width)
+        self.quant_output = QuantLayer()
+            
+        
+
+    def forward(self, x):
+        x = self.flatten(x)
+        x = self.input_layer(x)
+        x = self.hidden_layers(x)
+        x = self.output_layer(x)
+        x = self.quant_output(x)
+        x = F.log_softmax(x, dim=1)
+        x = my_round_func.apply(x)
+        return x
 
 def load_dataset(dataset, args, device, use_cuda):
     if dataset == "MNIST":
@@ -152,6 +215,29 @@ def train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion 
                 100. * batch_idx / len(train_loader), loss.item()))
             if args.dry_run:
                 break
+            
+            
+def train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True):
+    model.train()
+    output = 0
+    for batch_idx, (data, target) in enumerate(train_loader):
+        data, target = data.to(device), target.to(device)
+        #data = torch.round(input=data,decimals=3)
+        optimizer.zero_grad()
+        output = model(data)
+        #print(output)
+        loss = F.nll_loss(output, target)
+        loss.backward()
+        optimizer.step()
+        if cuantizacion:
+            actualizar_pesos_fa(model, args.n_bits, minimo, maximo, glob)
+        if batch_idx % args.log_interval == 0:
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                epoch, batch_idx * len(data), len(train_loader.dataset),
+                100. * batch_idx / len(train_loader), loss.item()))
+            if args.dry_run:
+                break
+    #print(output)
 
 
 def test(model, device, test_loader):
@@ -183,6 +269,22 @@ def train_loop(model, args, device, train_loader, test_loader, cuantizacion = Fa
     acc_list = []
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob)
+        loss, acc = test(model, device, test_loader)
+        loss_list.append(loss)
+        acc_list.append(acc)
+        scheduler.step()
+    
+    return loss_list, acc_list
+
+def train_loop_fa(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True):
+    
+    optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
+
+    scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
+    loss_list = []
+    acc_list = []
+    for epoch in range(1, args.epochs + 1):
+        train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob)
         loss, acc = test(model, device, test_loader)
         loss_list.append(loss)
         acc_list.append(acc)

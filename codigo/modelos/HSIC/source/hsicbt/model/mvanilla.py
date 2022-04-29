@@ -2,6 +2,7 @@ from .. import *
 import sys
 sys.path.insert(1, '/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo')
 from custom_funcs import QuantLayer
+
 class ModelVanilla(nn.Module):
 
     def __init__(self, hidden_width=64, last_hidden_width=None, **kwargs):
@@ -22,6 +23,7 @@ class QuantModelVanilla(nn.Module):
         last_dim = hidden_width
         if last_hidden_width:
         	last_dim = last_hidden_width
+
         self.output = nn.Linear(last_dim, 10)
         self.quant = QuantLayer()
 

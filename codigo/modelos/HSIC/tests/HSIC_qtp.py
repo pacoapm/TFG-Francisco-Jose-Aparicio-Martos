@@ -109,8 +109,21 @@ def main():
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
-    parser.add_argument('--save-model', action='store_true', default=False,
+    parser.add_argument('--save-model', action='store_true', default=True,
                         help='For Saving the current Model')
+    parser.add_argument('--global-quantization', type=int, default=1, metavar='G',
+                        help="indica si se realiza la cuantizacion a nivel global (1) o local (0)")
+    parser.add_argument('--n-bits', type=int, default=8, metavar='N',
+                        help="numero de bits usados para la cuantizacion")
+    parser.add_argument('--dataset', type=str, default='MNIST', metavar='d',
+                        help="indica la base de datos a usar: MNIST O FMNIST")
+    parser.add_argument('--modo', type=int, default=0, metavar='n',
+                        help="indica la cuantizacion a usar: ASYMM(0) o SYMM(1)")
+
+    parser.add_argument('--n-layers',type=int, default= 0, metavar = 'n', help = "indica la cantidad de capas ocultas de la red (sin contar la de salida)")
+    parser.add_argument('--hidden-width', type=int, default = 4, metavar = 'n', help = "numero de unidades de las capas ocultas ")
+    parser.add_argument('--input-width',type=int, default = 784, metavar = 'n', help = "numero de unidades de la capa de entrada")
+    parser.add_argument('--output-width',type=int, default = 10, metavar = 'n', help = "numero de unidades de la capa de salida")
     args = parser.parse_args()
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()
@@ -130,10 +143,10 @@ def main():
     train_loader, test_loader = get_dataset_from_code('fmnist', 128)
 
     # # # simple fully-connected model
-    model = ModelLinear(hidden_width=4,
-                        n_layers=0,
+    model = ModelLinear(hidden_width=args.hidden_width,
+                        n_layers=args.n_layers,
                         atype='relu',
-                        last_hidden_width=10,
+                        last_hidden_width=args.output_width,
                         model_type='simple-dense',
                         data_code='mnist')
 
@@ -144,10 +157,9 @@ def main():
                         model_type='simple-dense',
                         data_code='mnist')"""
 
-    final_layer = ModelVanilla(hidden_width=10)
+    final_layer = ModelVanilla(args.output_width)
     final_layer = final_layer.to(torch.device("cuda"))
-    print(model)
-    hol = input()
+    
 
 
     #UNFORMATED TRAINING: entrenamiento de la red con HSIC
@@ -178,9 +190,8 @@ def main():
         vacc.append(acc)
         vloss.append(loss)
 
-    
-
-    
+    if args.save_model:
+        torch.save(final_model.state_dict(),"/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/"+args.dataset+"_HSIC.pt")
 
     dibujar_loss_acc(vloss,vacc,epochs)
 

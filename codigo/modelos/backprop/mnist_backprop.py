@@ -14,9 +14,11 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
+import sys
+sys.path.insert(1, '../../')
+from custom_funcs import Net
 
-
-class Net(nn.Module):
+"""class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.flatten = nn.Flatten()
@@ -30,7 +32,11 @@ class Net(nn.Module):
         x = self.flatten(x)
         x = self.linear_relu_stack(x)
         output = F.log_softmax(x, dim=1)
-        return output
+        return output"""
+    
+
+    
+
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
@@ -92,6 +98,10 @@ def main():
                         help='how many batches to wait before logging training status')
     parser.add_argument('--save-model', action='store_true', default=True,
                         help='For Saving the current Model')
+    parser.add_argument('--n-layers',type=int, default= 0, metavar = 'n', help = "indica la cantidad de capas ocultas de la red (sin contar la de salida)")
+    parser.add_argument('--hidden-width', type=int, default = 4, metavar = 'n', help = "numero de unidades de las capas ocultas ")
+    parser.add_argument('--input-width',type=int, default = 784, metavar = 'n', help = "numero de unidades de la capa de entrada")
+    parser.add_argument('--output-width',type=int, default = 10, metavar = 'n', help = "numero de unidades de la capa de salida")
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
@@ -122,7 +132,7 @@ def main():
     train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
     test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
 
-    """model = Net().to(device)
+    model = Net(args.n_layers,args.hidden_width,args.input_width,args.output_width).to(device)
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
@@ -133,10 +143,10 @@ def main():
         scheduler.step()
 
     if args.save_model:
-        torch.save(model.state_dict(), "../../pesosModelos/mnist_backprop.pt")"""
+        torch.save(model.state_dict(), "../../pesosModelos/MNIST_backprop.pt")
     
-    model = Net().to(device)
-    model.load_state_dict(torch.load("../../pesosModelos/mnist_backprop.pt"))
+    model = Net(args.n_layers,args.hidden_width,args.input_width,args.output_width).to(device)
+    model.load_state_dict(torch.load("../../pesosModelos/MNIST_backprop.pt"))
     test(model,device,test_loader)
 
 

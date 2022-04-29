@@ -21,7 +21,7 @@ from mnist_dni import Net
 import sys
 sys.path.insert(1, '../../')
 from custom_funcs import my_round_func,train_DNI,test,create_backward_hooks, load_dataset, train_loop_dni, one_hot, actualizar_pesos,minmax
-from custom_funcs import generarNombre, dibujar_loss_acc, train_loop_dni, maximof, guardarDatos, generarInformacion
+from custom_funcs import generarNombre, dibujar_loss_acc, train_loop_dni, maximof, guardarDatos, generarInformacion, QuantLayer, linearStack
 import custom_funcs
 
 #copiado del propio dni para crear la version cuantizada
@@ -103,31 +103,69 @@ class BasicSynthesizerQ(torch.nn.Module):
             last = my_round_func.apply(layer(my_round_func.apply(F.relu(last))))
 
         return last
+    
+    
+def quantLinearStackDNI(input_width,output_width, args):
+    linear = nn.Linear(input_width,output_width)
+    relu = nn.ReLU()
+    quant = QuantLayer()
+    
+    if args.dni:
+        if args.context:
+            context_dim = 10
+        else:
+            context_dim = None
+        backward_interface = dni.BackwardInterface(
+            BasicSynthesizerQ(
+                output_dim=4, n_hidden=1, context_dim=context_dim
+            )
+        )
+        
+    if args.dni:
+        return nn.Sequential(*[linear,quant,relu,quant,backward_interface]) 
+    else:
+        return nn.Sequential(*[linear,quant,relu,quant]) 
+    
+def aplicarStack(modelo,args,stack, entrada, y):
+    cont = 0
+    x = entrada
+    for i in stack:
+        cont+=1
+        x = i(x)
+        if cont == 4:
+            if args.dni and modelo.training:
+                if args.context:
+                    context = one_hot(y, 10, args)
+                else:
+                    context = None
+                with dni.synthesizer_context(context):
+                    x = i(x)
+                    
+    return x
+            
 
 class QuantNet(nn.Module):
-    def __init__(self, args):
+    def __init__(self, args,n_layers, hidden_width, input_width, output_width):
         super(QuantNet, self).__init__()
         
         self.flatten = nn.Flatten()
-        self.layer1 = nn.Linear(28*28,4)
-        self.layer1_f = nn.ReLU()
-        self.layer2 = nn.Linear(4,10)
+        self.input_layer = quantLinearStackDNI(input_width,hidden_width, args)
+        
+        blocks = []
+        for i in range(n_layers):
+            blocks.append(quantLinearStackDNI(hidden_width, hidden_width, args))
+            
+        self.hidden_layers = nn.Sequential(*blocks)
+        
+        self.output_layer = nn.Linear(hidden_width,output_width)
+        
         self.args = args
-        if args.dni:
-            if args.context:
-                context_dim = 10
-            else:
-                context_dim = None
-            self.backward_interface = dni.BackwardInterface(
-                BasicSynthesizerQ(
-                    output_dim=4, n_hidden=1, context_dim=context_dim
-                )
-            )
+        
         
 
     def forward(self, x, y = None):
         x = x.view(x.size()[0], -1)
-        x = self.flatten(x)
+        """x = self.flatten(x)
         x = my_round_func.apply(x)
         x = self.layer1(x)
         x = my_round_func.apply(x)
@@ -142,8 +180,13 @@ class QuantNet(nn.Module):
                 x = self.backward_interface(x)
                 x = my_round_func.apply(x)
         x = self.layer2(x)
-        x = my_round_func.apply(x)
+        x = my_round_func.apply(x)"""
         
+        x = aplicarStack(self,self.args,self.input_layer,x,y)
+        for i in self.hidden_layers:
+            x = aplicarStack(self,self.args,i,x,y)
+            
+        x = self.output_layer(x)
         x = F.log_softmax(x, dim=1)
         x = my_round_func.apply(x)
         return x
@@ -186,6 +229,10 @@ def main():
                         help="indica la base de datos a usar: MNIST O FMNIST")
     parser.add_argument('--modo', type=int, default=0, metavar='n',
                         help="indica la cuantizacion a usar: ASYMM(0) o SYMM(1)")
+    parser.add_argument('--n-layers',type=int, default= 0, metavar = 'n', help = "indica la cantidad de capas ocultas de la red (sin contar la de salida)")
+    parser.add_argument('--hidden-width', type=int, default = 4, metavar = 'n', help = "numero de unidades de las capas ocultas ")
+    parser.add_argument('--input-width',type=int, default = 784, metavar = 'n', help = "numero de unidades de la capa de entrada")
+    parser.add_argument('--output-width',type=int, default = 10, metavar = 'n', help = "numero de unidades de la capa de salida")
 
 
     args = parser.parse_args()

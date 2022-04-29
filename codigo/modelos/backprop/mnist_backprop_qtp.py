@@ -17,9 +17,9 @@ from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 import sys
 sys.path.insert(1, '../../')
-from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas
-from custom_funcs import load_dataset, dibujar_loss_acc, maximof, generarInformacion, generarNombre, guardarDatos, QuantLayer
-from mnist_backprop_visualizacion import Net
+from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas, test
+from custom_funcs import load_dataset, dibujar_loss_acc, maximof, generarInformacion, generarNombre, guardarDatos, QuantLayer, QuantNet, Net
+#from mnist_backprop_visualizacion import Net
 import custom_funcs
 
 """import os 
@@ -62,7 +62,7 @@ class CustomNet(nn.Module):
         #print(x)
         return x
     
-class QuantNet(nn.Module):
+"""class QuantNet(nn.Module):
     def __init__(self):
         super(QuantNet, self).__init__()
         #self.round = my_round_func.apply
@@ -93,7 +93,7 @@ class QuantNet(nn.Module):
         #print(x)
         x = my_round_func.apply(x)
         #print(x)
-        return x
+        return x"""
 
 
 
@@ -128,6 +128,11 @@ def main():
                         help="indica la base de datos a usar: MNIST O FMNIST")
     parser.add_argument('--modo', type=int, default=0, metavar='n',
                         help="indica la cuantizacion a usar: ASYMM(0) o SYMM(1)")
+    parser.add_argument('--n-layers',type=int, default= 0, metavar = 'n', help = "indica la cantidad de capas ocultas de la red (sin contar la de salida)")
+    parser.add_argument('--hidden-width', type=int, default = 4, metavar = 'n', help = "numero de unidades de las capas ocultas ")
+    parser.add_argument('--input-width',type=int, default = 784, metavar = 'n', help = "numero de unidades de la capa de entrada")
+    parser.add_argument('--output-width',type=int, default = 10, metavar = 'n', help = "numero de unidades de la capa de salida")
+    
     
     
     
@@ -147,55 +152,49 @@ def main():
     torch.manual_seed(args.seed)
 
     device = torch.device("cuda" if use_cuda else "cpu")
-
+    #cargamos la base de datos
     train_loader,test_loader = load_dataset(args.dataset, args, device, use_cuda)
     
+    #guardamos una imagen del dataset para usarla en la visualizacion de características
     images, labels = next(iter(train_loader))
     imagen = images[0]
     
-    model = Net()
+    #cargamos el modelo preentrenado
+    model = Net(args.n_layers,args.hidden_width,args.input_width,args.output_width)
     model = model.to(device)
-    loss, acc = train_loop(model,args,device,train_loader,test_loader)
-
-    if args.save_model:
-        torch.save(model.state_dict(), "../pesosModelos/mnist_backprop.pt")
-        
+    model.load_state_dict(torch.load("../../pesosModelos/"+args.dataset+"_backprop.pt"))
+    loss,acc = test(model,device,test_loader)
+    
+    
     #version cuantizada
+    #creamos el modelo
+    modelq = QuantNet(args.n_layers,args.hidden_width,args.input_width,args.output_width)
+    modelq = create_backward_hooks(modelq)
+    modelq = modelq.to(device)
     
     #cogemos los valores minimos y maximos de la red anterior
     if custom_funcs.modo == 0:
         minimo, maximo = minmax(model, global_quantization)
-        #creamos el modelo
-        modelq = CustomNet()
-        modelq = create_backward_hooks(modelq)
-        modelq = modelq.to(device)
-        #cuantizamos los pesos
-        actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
-        #entrenamiento 
-        lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
     else:
         maximo = maximof(model, global_quantization)
         minimo = 0
-        #creamos el modelo
-        modelq = QuantNet()
-        modelq = create_backward_hooks(modelq)
-        modelq = modelq.to(device)
-        #cuantizamos los pesos
-        actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
-        #entrenamiento 
-        lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
+        
+    #cuantizamos los pesos
+    actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
+    #entrenamiento 
+    lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
         
     #visualizar_caracteristicas(model, imagen)
     #visualizar_caracteristicas(modelq, imagen)
 
-    nombre = generarNombre(args,False)
-    dibujar_loss_acc(loss,acc,args.epochs, nombre)
+    """nombre = generarNombre(args,False)
+    dibujar_loss_acc(loss,acc,args.epochs, nombre)"""
 
     nombreq = generarNombre(args,True)
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
     
         
-    guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc[-1],loss[-1],accq[-1],lossq[-1]))
+    guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
     
     
 
