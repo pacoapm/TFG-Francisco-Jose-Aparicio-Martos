@@ -122,7 +122,7 @@ def quantLinearStackDNI(input_width,output_width, args):
         )
         
     if args.dni:
-        return nn.Sequential(*[linear,quant,relu,quant,backward_interface]) 
+        return nn.Sequential(*[linear,quant,relu,quant,backward_interface, quant]) 
     else:
         return nn.Sequential(*[linear,quant,relu,quant]) 
     
@@ -132,7 +132,7 @@ def aplicarStack(modelo,args,stack, entrada, y):
     for i in stack:
         cont+=1
         x = i(x)
-        if cont == 4:
+        if cont == 5:
             if args.dni and modelo.training:
                 if args.context:
                     context = one_hot(y, 10, args)

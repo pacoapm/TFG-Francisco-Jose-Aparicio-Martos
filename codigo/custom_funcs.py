@@ -422,19 +422,26 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     layer.bias.bias = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
                     layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
                     
-                else:
+                elif modo == 1:
                     layer.bias.data = SYMMf(layer.bias.data,maximo,n_bits)
                     layer.weight.data = SYMMf(layer.weight.data,maximo,n_bits)
+                else:
+                    layer.bias.data = my_round_func.apply(layer.bias.data)
+                    layer.weight.data = my_round_func.apply(layer.weight.data)
+                    
                     
             else:
                 if modo == 0:
                     layer.bias.data = ASYMMf(layer.bias.data,minimo[i+1],maximo[i+1],n_bits)
                     layer.weight.data = ASYMMf(layer.weight.data,minimo[i],maximo[i],n_bits)
                     i+=2
-                else:
+                elif modo == 1:
                     layer.bias.data = SYMMf(layer.bias.data,maximo[i+1],n_bits)
                     layer.weight.data = SYMMf(layer.weight.data,maximo[i],n_bits)
                     i+= 2
+                else:
+                    layer.bias.data = my_round_func.apply(layer.bias.data)
+                    layer.weight.data = my_round_func.apply(layer.weight.data)
                     
 def actualizar_pesos_fa(modelo,n_bits,minimo=None,maximo=None, glob = True):
     i = 0
@@ -500,14 +507,14 @@ def dibujar_loss_acc(loss,acc,epochs,nombre):
     fig, ax = plt.subplots(1,2, figsize=(10,4))
     
     x = np.arange(0,epochs)
-    ax[0].plot(x,loss,'.-')
+    ax[0].plot(x,loss,'*-')
     ax[0].set_title("Test loss")
     ax[0].set_xlabel("epochs")
     ax[0].set_ylabel("Loss")
     ax[0].set_ylim(0,max(loss)+1)
     #ax[0].set_xlim(0,epochs-1)
 
-    ax[1].plot(x,acc,'.-')
+    ax[1].plot(x,acc,'*-')
     ax[1].set_title("Test acc")
     ax[1].set_xlabel("epochs")
     ax[1].set_ylabel("Accuracy")
@@ -515,8 +522,8 @@ def dibujar_loss_acc(loss,acc,epochs,nombre):
     #ax[1].set_xlim(0,epochs-1)
 
 
-    plt.savefig("images/"+nombre)
-    #plt.show()
+    #plt.savefig("images/"+nombre)
+    plt.show()
     
 def generarNombre(args, quantize):
     

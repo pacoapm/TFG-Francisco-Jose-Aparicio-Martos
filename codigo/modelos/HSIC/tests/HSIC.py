@@ -1,10 +1,10 @@
-from hsicbt.core.train_hsic import hsic_train, quant_hsic_train
-from hsicbt.core.train_standard import standard_train, quant_standard_train
+from hsicbt.core.train_hsic import hsic_train
+from hsicbt.core.train_standard import standard_train
 from hsicbt.model.mhlinear import ModelLinear
 from hsicbt.utils.dataset import get_dataset_from_code
 from hsicbt.utils.misc import get_accuracy_epoch
 from hsicbt.utils.misc import get_accuracy_hsic
-from hsicbt.model.mvanilla import ModelVanilla, QuantModelVanilla
+from hsicbt.model.mvanilla import ModelVanilla
 from hsicbt.model.mensemble import ModelEnsemble
 import torch
 import torch.nn.functional as F
@@ -13,11 +13,28 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 
-from source.hsicbt.model.mhlinear import ModelQuantLinear
-import sys
-sys.path.insert(1, '/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo')
-from custom_funcs import create_backward_hooks, minmax, maximof, actualizar_pesos, dibujar_loss_acc
-import custom_funcs
+
+
+
+def train(args, model, device, train_loader, optimizer, epoch):
+    model.train()
+    output = 0
+    cross_entropy_loss = torch.nn.CrossEntropyLoss()
+    for batch_idx, (data, target) in enumerate(train_loader):
+        data, target = data.to(device), target.to(device)
+        data = torch.round(input=data,decimals=3)
+        optimizer.zero_grad()
+        output, hidden = model(data)
+        loss = cross_entropy_loss(output,target)#F.nll_loss(output, target)
+        loss.backward()
+        optimizer.step()
+        if batch_idx % args.log_interval == 0:
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                epoch, batch_idx * len(data), len(train_loader.dataset),
+                100. * batch_idx / len(train_loader), loss.item()))
+            if args.dry_run:
+                break
+    print(output)
 
 
 def test(model, device, test_loader):
@@ -30,6 +47,11 @@ def test(model, device, test_loader):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output, hidden = model(data)
+            """print(type(output))
+            print("tamaño: ", len(output))
+            print("output[0]: ", output[0])
+            print("output[1]: ", output[1])
+            hola = input()"""
             test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()
@@ -45,6 +67,27 @@ def test(model, device, test_loader):
 
     return acc, loss
 
+def dibujar_loss_acc(loss,acc,epochs):
+    fig, ax = plt.subplots(1,2, figsize=(10,4))
+    
+    x = np.arange(0,epochs)
+    ax[0].plot(x,loss,'*-')
+    ax[0].set_title("Test loss")
+    ax[0].set_xlabel("epochs")
+    ax[0].set_ylabel("Loss")
+    ax[0].set_ylim(0,max(loss)+1)
+    #ax[0].set_xlim(0,epochs-1)
+
+    ax[1].plot(x,acc,'*-')
+    ax[1].set_title("Test acc")
+    ax[1].set_xlabel("epochs")
+    ax[1].set_ylabel("Accuracy")
+    ax[1].set_ylim(0,100)
+    #ax[1].set_xlim(0,epochs-1)
+
+
+    #plt.savefig("images/"+nombre)
+    plt.show()
 
 def main():
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -84,20 +127,7 @@ def main():
     args = parser.parse_args()
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()
-    device = torch.device("cuda" if use_cuda else "cpu")
-
     torch.manual_seed(args.seed)
-
-    if args.global_quantization == 1:
-        global_quantization = True
-    else:
-        global_quantization = False
-
-
-    custom_funcs.n_bits = args.n_bits
-    custom_funcs.modo = args.modo
-
-
     # # # configuration
     config_dict = {}
     config_dict['batch_size'] = 128
@@ -112,10 +142,7 @@ def main():
     # # # data prepreation
     train_loader, test_loader = get_dataset_from_code(args.dataset.lower(), 128)
 
-    #cargamos el modelo sin cuantizar
-
-
-    #creamos la arquitectura del modelo y cargamos los pesos del modelo sin cuantizar
+    # # # simple fully-connected model
     model = ModelLinear(hidden_width=args.hidden_width,
                         n_layers=args.n_layers,
                         atype='relu',
@@ -123,63 +150,50 @@ def main():
                         model_type='simple-dense',
                         data_code='mnist')
 
-    final_layer = ModelVanilla(args.output_width)
-    final_model = ModelEnsemble(model,final_layer)
-    final_model = final_model.to(device)
-
-    final_model.load_state_dict(torch.load('/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/'+args.dataset+"_HSIC.pt"))
-    loss,acc = test(final_model,device,test_loader)
-
-
-    #creamos el modelo cuantizado
-    modelq = ModelQuantLinear(hidden_width=args.hidden_width,
-                        n_layers=args.n_layers,
+    """model = ModelLinear(hidden_width=256,
+                        n_layers=5,
                         atype='relu',
-                        last_hidden_width=args.output_width,
+                        last_hidden_width=10,
                         model_type='simple-dense',
-                        data_code='mnist')
+                        data_code='mnist')"""
+
+    final_layer = ModelVanilla(args.output_width)
+    final_layer = final_layer.to(torch.device("cuda"))
     
-    #añadimos los hooks para la cuantización en la actualización de pesos
-    modelq = create_backward_hooks(modelq)
-    modelq = modelq.to(device)
 
-    #buscamos los máximos y mínimos del modelo entrenado sin cuantización
-    if custom_funcs.modo == 0:
-        minimo, maximo = minmax(final_model, global_quantization)
-    else:
-        maximo = maximof(final_model, global_quantization)
-        minimo = 0
 
-    #cuantizamos los pesos del modelo
-    actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
     #UNFORMATED TRAINING: entrenamiento de la red con HSIC
     epochs = 30
     for cepoch in range(epochs):
-        quant_hsic_train(cepoch, model, train_loader, config_dict, args, minimo, maximo, global_quantization)
+        hsic_train(cepoch, model, train_loader, config_dict)
+
+    
+
 
     #FORMATED TRAINING: entrenamiento de la ultima capa con sgd
-    final_layerq = QuantModelVanilla(args.output_width)
-    final_layerq = create_backward_hooks(final_layerq)
-    modelq.eval() 
-    final_modelq = ModelEnsemble(modelq,final_layerq)
+    model.eval()
+    final_model = ModelEnsemble(model,final_layer)
+    final_model = final_model.to(torch.device("cuda"))
 
-    optimizer = torch.optim.SGD( filter(lambda p: p.requires_grad, final_layerq.parameters()),
+    optimizer = torch.optim.SGD( filter(lambda p: p.requires_grad, final_layer.parameters()),
                 lr = config_dict['learning_rate'], weight_decay=0.001)
+
 
 
     epochs = 20
     vacc = []
     vloss = []
     for cepoch in range(epochs):
-        quant_standard_train(cepoch, final_modelq, train_loader, optimizer, config_dict, args, minimo, maximo, global_quantization)
-        acc, loss = test(final_modelq,device,test_loader)
+        #train(args, model, torch.device('cuda'), train_loader, optimizer, cepoch)
+        standard_train(cepoch, final_model, train_loader, optimizer, config_dict)
+        acc, loss = test(final_model,torch.device("cuda"),test_loader)
         vacc.append(acc)
         vloss.append(loss)
 
-    """if args.save_model:
-        torch.save(final_modelq.state_dict(),"/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/"+args.dataset+"_HSIC.pt")
-"""
-    dibujar_loss_acc(vloss,vacc,epochs,"prueba")
+    if args.save_model:
+        torch.save(final_model.state_dict(),"/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/"+args.dataset+"_HSIC.pt")
+
+    dibujar_loss_acc(vloss,vacc,epochs)
 
 if __name__ == '__main__':
     main()

@@ -51,11 +51,11 @@ class ModelLinear(nn.Module):
 
         return x, output_list
 
-class QuantLinear(nn.Module):
+class ModelQuantLinear(nn.Module):
     
     def __init__(self, hidden_width=64, n_layers=5, atype='relu', 
         last_hidden_width=None, model_type='simple-dense', data_code='mnist', **kwargs):
-        super(QuantLinear, self).__init__()
+        super(ModelQuantLinear, self).__init__()
     
         block_list = []
         is_conv = False
