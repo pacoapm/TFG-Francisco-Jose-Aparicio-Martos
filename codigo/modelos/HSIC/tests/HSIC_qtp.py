@@ -18,6 +18,7 @@ import sys
 sys.path.insert(1, '/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo')
 from custom_funcs import create_backward_hooks, create_backward_hooks_print, minmax, maximof, actualizar_pesos, dibujar_loss_acc
 import custom_funcs
+from torch.optim.lr_scheduler import StepLR
 
 
 def test(model, device, test_loader):
@@ -167,12 +168,14 @@ def main():
     optimizer = torch.optim.SGD( filter(lambda p: p.requires_grad, final_layerq.parameters()),
                 lr = config_dict['learning_rate'], weight_decay=0.001)
 
+    scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
+
 
     epochs = 5
     vacc = []
     vloss = []
     for cepoch in range(epochs):
-        quant_standard_train(cepoch, final_modelq, train_loader, optimizer, config_dict, args, minimo, maximo, global_quantization)
+        quant_standard_train(cepoch, final_modelq, train_loader, optimizer, scheduler,config_dict, args, minimo, maximo, global_quantization)
         acc, loss = test(final_modelq,device,test_loader)
         vacc.append(acc)
         vloss.append(loss)

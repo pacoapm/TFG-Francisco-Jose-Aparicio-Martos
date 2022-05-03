@@ -93,7 +93,7 @@ def standard_train(cepoch, model, data_loader, optimizer, config_dict):
 
     return batch_log
 
-def quant_standard_train(cepoch, model, data_loader, optimizer, config_dict, args, minimo = None, maximo = None, glob = True):
+def quant_standard_train(cepoch, model, data_loader, optimizer, scheduler,config_dict, args, minimo = None, maximo = None, glob = True):
     
     #cross_entropy_loss = F.nll_loss()#torch.nn.CrossEntropyLoss()
     prec1 = total_loss = hx_l = hy_l = -1
@@ -126,7 +126,7 @@ def quant_standard_train(cepoch, model, data_loader, optimizer, config_dict, arg
         h_data = data.view(-1, np.prod(data.size()[1:]))
 
         # # # if want to monitor hsic
-        """if config_dict['task'] == 'varied-activation' or config_dict['task'] == 'varied-depth':
+        if config_dict['task'] == 'varied-activation' or config_dict['task'] == 'varied-depth':
             hx_l, hy_l = hsic_objective(
                     hiddens[-1],
                     h_target=h_target.float(),
@@ -134,7 +134,7 @@ def quant_standard_train(cepoch, model, data_loader, optimizer, config_dict, arg
                     sigma=config_dict['sigma']
                 )
             hx_l = hx_l.cpu().detach().numpy()
-            hy_l = hy_l.cpu().detach().numpy()"""
+            hy_l = hy_l.cpu().detach().numpy()
 
         optimizer.zero_grad()
         loss = F.nll_loss(output,target)#cross_entropy_loss(output, target)
@@ -142,7 +142,7 @@ def quant_standard_train(cepoch, model, data_loader, optimizer, config_dict, arg
         optimizer.step()
         actualizar_pesos(model, args.n_bits, minimo, maximo, glob)
 
-        """loss = float(loss.detach().cpu().numpy())
+        loss = float(loss.detach().cpu().numpy())
         prec1, prec5 = misc.get_accuracy(output, target, topk=(1, 5)) 
         prec1 = float(prec1.cpu().numpy())
     
@@ -169,6 +169,6 @@ def quant_standard_train(cepoch, model, data_loader, optimizer, config_dict, arg
             batch_log['batch_hsic_hx'].append(batch_hischx.val)
             batch_log['batch_hsic_hy'].append(batch_hischy.val)
 
-        pbar.set_description(msg)"""
+        pbar.set_description(msg)
 
     return batch_log
