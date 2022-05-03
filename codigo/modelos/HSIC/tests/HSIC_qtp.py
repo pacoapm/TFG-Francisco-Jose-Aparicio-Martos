@@ -16,7 +16,7 @@ import numpy as np
 from source.hsicbt.model.mhlinear import ModelQuantLinear
 import sys
 sys.path.insert(1, '/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo')
-from custom_funcs import create_backward_hooks, minmax, maximof, actualizar_pesos, dibujar_loss_acc
+from custom_funcs import create_backward_hooks, create_backward_hooks_print, minmax, maximof, actualizar_pesos, dibujar_loss_acc
 import custom_funcs
 
 
@@ -137,7 +137,7 @@ def main():
                         atype='relu',
                         last_hidden_width=args.output_width,
                         model_type='simple-dense',
-                        data_code='mnist')
+                        data_code=args.dataset.lower())
     
     #añadimos los hooks para la cuantización en la actualización de pesos
     modelq = create_backward_hooks(modelq)
@@ -153,21 +153,22 @@ def main():
     #cuantizamos los pesos del modelo
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
     #UNFORMATED TRAINING: entrenamiento de la red con HSIC
-    epochs = 30
+    epochs = 5
     for cepoch in range(epochs):
-        quant_hsic_train(cepoch, model, train_loader, config_dict, args, minimo, maximo, global_quantization)
+        quant_hsic_train(cepoch, modelq, train_loader, config_dict, args, minimo, maximo, global_quantization)
 
     #FORMATED TRAINING: entrenamiento de la ultima capa con sgd
     final_layerq = QuantModelVanilla(args.output_width)
     final_layerq = create_backward_hooks(final_layerq)
     modelq.eval() 
     final_modelq = ModelEnsemble(modelq,final_layerq)
+    #final_modelq = create_backward_hooks(final_modelq)
 
     optimizer = torch.optim.SGD( filter(lambda p: p.requires_grad, final_layerq.parameters()),
                 lr = config_dict['learning_rate'], weight_decay=0.001)
 
 
-    epochs = 20
+    epochs = 5
     vacc = []
     vloss = []
     for cepoch in range(epochs):

@@ -51,7 +51,10 @@ class my_round_func(torch.autograd.Function):
         if modo == 0:
             return ASYMMf(input, minimo, maximo, n_bits)
         else:
-            return SYMMf(input,maximo,n_bits)
+            if maximo == 0:
+                return SYMMf(input,maximo,n_bits)
+            else:
+                return input
         #return int_quant(scale, zero_point, bit_width, input)
 
     @staticmethod
@@ -314,14 +317,27 @@ def train_loop_dni(model, args, device, train_loader, test_loader, cuantizacion 
             parameter.register_hook(lambda grad: torch.round(input=grad,decimals=decimals))
     return model"""
 def hook(grad):
-    
     if modo == 0:
         minimo = torch.min(grad)
         maximo = torch.max(grad)
         return ASYMMf(grad,minimo,maximo,n_bits)
-    else:
+    elif modo == 1:
         maximo = torch.max(torch.abs(grad))
         return SYMMf(grad,maximo,n_bits)
+    else:
+        return my_round_func.apply(grad)
+    
+def hook_print(grad):
+    if modo == 0:
+        minimo = torch.min(grad)
+        maximo = torch.max(grad)
+        return ASYMMf(grad,minimo,maximo,n_bits)
+    elif modo == 1:
+        maximo = torch.max(torch.abs(grad))
+        return SYMMf(grad,maximo,n_bits)
+    else:
+        print("ey")
+        return my_round_func.apply(grad)
         
 
 
@@ -329,6 +345,12 @@ def create_backward_hooks( model :nn.Module) -> nn.Module:
     for parameter in model.parameters():
             if parameter.requires_grad:
                 parameter.register_hook(hook)
+    return model
+
+def create_backward_hooks_print( model :nn.Module) -> nn.Module:
+    for parameter in model.parameters():
+            if parameter.requires_grad:
+                parameter.register_hook(hook_print)
     return model
 
 #funcion de cuantizacion flotante -> entero
