@@ -93,7 +93,7 @@ def standard_train(cepoch, model, data_loader, optimizer, config_dict):
 
     return batch_log
 
-def quant_standard_train(cepoch, model, data_loader, optimizer, scheduler,config_dict, args, minimo = None, maximo = None, glob = True):
+def quant_standard_train(cepoch, model, data_loader, optimizer, config_dict, args, minimo = None, maximo = None, glob = True):
     
     #cross_entropy_loss = F.nll_loss()#torch.nn.CrossEntropyLoss()
     prec1 = total_loss = hx_l = hy_l = -1
@@ -126,7 +126,7 @@ def quant_standard_train(cepoch, model, data_loader, optimizer, scheduler,config
         h_data = data.view(-1, np.prod(data.size()[1:]))
 
         # # # if want to monitor hsic
-        if config_dict['task'] == 'varied-activation' or config_dict['task'] == 'varied-depth':
+        """if config_dict['task'] == 'varied-activation' or config_dict['task'] == 'varied-depth':
             hx_l, hy_l = hsic_objective(
                     hiddens[-1],
                     h_target=h_target.float(),
@@ -134,7 +134,7 @@ def quant_standard_train(cepoch, model, data_loader, optimizer, scheduler,config
                     sigma=config_dict['sigma']
                 )
             hx_l = hx_l.cpu().detach().numpy()
-            hy_l = hy_l.cpu().detach().numpy()
+            hy_l = hy_l.cpu().detach().numpy()"""
 
         optimizer.zero_grad()
         loss = F.nll_loss(output,target)#cross_entropy_loss(output, target)
@@ -142,16 +142,16 @@ def quant_standard_train(cepoch, model, data_loader, optimizer, scheduler,config
         optimizer.step()
         actualizar_pesos(model, args.n_bits, minimo, maximo, glob)
 
-        loss = float(loss.detach().cpu().numpy())
+        """loss = float(loss.detach().cpu().numpy())
         prec1, prec5 = misc.get_accuracy(output, target, topk=(1, 5)) 
         prec1 = float(prec1.cpu().numpy())
     
         batch_acc.update(prec1)   
         batch_loss.update(loss)  
         batch_hischx.update(hx_l)
-        batch_hischy.update(hy_l)
+        batch_hischy.update(hy_l)"""
 
-        msg = 'Train Epoch: {cepoch} [ {cidx:5d}/{tolidx:5d} ({perc:2d}%)] Loss:{loss:.4f} Acc:{acc:.4f} hsic_xz:{hsic_zx:.4f} hsic_yz:{hsic_zy:.4f}'.format(
+        """msg = 'Train Epoch: {cepoch} [ {cidx:5d}/{tolidx:5d} ({perc:2d}%)] Loss:{loss:.4f} Acc:{acc:.4f} hsic_xz:{hsic_zx:.4f} hsic_yz:{hsic_zy:.4f}'.format(
                         cepoch = cepoch,  
                         cidx = (batch_idx+1)*config_dict['batch_size'], 
                         tolidx = n_data,
@@ -169,6 +169,6 @@ def quant_standard_train(cepoch, model, data_loader, optimizer, scheduler,config
             batch_log['batch_hsic_hx'].append(batch_hischx.val)
             batch_log['batch_hsic_hy'].append(batch_hischy.val)
 
-        pbar.set_description(msg)
+        pbar.set_description(msg)"""
 
     return batch_log

@@ -128,36 +128,37 @@ def quantLinearStackDNI(input_width,output_width, args):
     
 def aplicarStack(modelo,args,stack, entrada, y):
     cont = 0
-    x = entrada
-    for i in stack:
+    x = torch.clone(entrada)
+    for layer in stack:
         cont+=1
-        x = i(x)
-        if cont == 5:
-            if args.dni and modelo.training:
-                if args.context:
-                    context = one_hot(y, 10, args)
-                else:
-                    context = None
-                with dni.synthesizer_context(context):
-                    x = i(x)
+        
+        if cont == 5 and args.dni and modelo.training:
+            if args.context:
+                context = one_hot(y, 10, args)
+            else:
+                context = None
+            with dni.synthesizer_context(context):
+                x = layer(x)
+        else:
+            x = layer(x)
                     
     return x
             
 
 class QuantNet(nn.Module):
-    def __init__(self, args,n_layers, hidden_width, input_width, output_width):
+    def __init__(self, args):
         super(QuantNet, self).__init__()
         
         self.flatten = nn.Flatten()
-        self.input_layer = quantLinearStackDNI(input_width,hidden_width, args)
+        self.input_layer = quantLinearStackDNI(args.input_width,args.hidden_width, args)
         
         blocks = []
-        for i in range(n_layers):
-            blocks.append(quantLinearStackDNI(hidden_width, hidden_width, args))
+        for i in range(args.n_layers):
+            blocks.append(quantLinearStackDNI(args.hidden_width, args.hidden_width, args))
             
         self.hidden_layers = nn.Sequential(*blocks)
         
-        self.output_layer = nn.Linear(hidden_width,output_width)
+        self.output_layer = nn.Linear(args.hidden_width,args.output_width)
         
         self.args = args
         
@@ -258,29 +259,21 @@ def main():
     model.load_state_dict(torch.load("../../pesosModelos/"+args.dataset+"_dni.pt"))
     
     loss, acc = test(model,device, test_loader)
-    
+    modelq = QuantNet(args)
+    modelq = create_backward_hooks(modelq)
+    modelq = modelq.to(device)
     #cogemos los valores minimos y maximos de la red anterior
     if custom_funcs.modo == 0:
         minimo, maximo = minmax(model, global_quantization)
-        #creamos el modelo
-        modelq = QuantNet(args)
-        modelq = create_backward_hooks(modelq)
-        modelq = modelq.to(device)
-        #cuantizamos los pesos
-        actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
-        #entrenamiento 
-        lossq, accq = train_loop_dni(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
     else:
         maximo = maximof(model, global_quantization)
         minimo = 0
-        #creamos el modelo
-        modelq = QuantNet(args)
-        modelq = create_backward_hooks(modelq)
-        modelq = modelq.to(device)
-        #cuantizamos los pesos
-        actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
-        #entrenamiento 
-        lossq, accq = train_loop_dni(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
+        
+        
+    #cuantizamos los pesos
+    actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
+    #entrenamiento 
+    lossq, accq = train_loop_dni(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
     
     
     """nombre = generarNombre(args,False)

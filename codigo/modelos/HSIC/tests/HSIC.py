@@ -13,6 +13,8 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 
+from torch.optim.lr_scheduler import StepLR
+
 
 
 
@@ -131,7 +133,7 @@ def main():
     # # # configuration
     config_dict = {}
     config_dict['batch_size'] = 128
-    config_dict['learning_rate'] = 0.001
+    config_dict['learning_rate'] = args.lr#0.001
     config_dict['lambda_y'] = 500#100
     config_dict['sigma'] = 5#2
     config_dict['task'] = 'hsic-train'
@@ -175,10 +177,10 @@ def main():
     final_model = ModelEnsemble(model,final_layer)
     final_model = final_model.to(torch.device("cuda"))
 
-    optimizer = torch.optim.SGD( filter(lambda p: p.requires_grad, final_layer.parameters()),
-                lr = config_dict['learning_rate'], weight_decay=0.001)
+    optimizer = torch.optim.Adadelta(filter(lambda p: p.requires_grad, final_layer.parameters()),
+                lr = config_dict['learning_rate'])
 
-
+    scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
 
     epochs = 20
     vacc = []
@@ -189,6 +191,7 @@ def main():
         acc, loss = test(final_model,torch.device("cuda"),test_loader)
         vacc.append(acc)
         vloss.append(loss)
+        scheduler.step()
 
     if args.save_model:
         torch.save(final_model.state_dict(),"/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/"+args.dataset+"_HSIC.pt")
