@@ -117,7 +117,7 @@ def main():
                         help="indica si se realiza la cuantizacion a nivel global (1) o local (0)")
     parser.add_argument('--n-bits', type=int, default=8, metavar='N',
                         help="numero de bits usados para la cuantizacion")
-    parser.add_argument('--dataset', type=str, default='MNIST', metavar='d',
+    parser.add_argument('--dataset', type=str, default='FMNIST', metavar='d',
                         help="indica la base de datos a usar: MNIST O FMNIST")
     parser.add_argument('--modo', type=int, default=0, metavar='n',
                         help="indica la cuantizacion a usar: ASYMM(0) o SYMM(1)")
@@ -150,7 +150,7 @@ def main():
                         atype='relu',
                         last_hidden_width=args.output_width,
                         model_type='simple-dense',
-                        data_code='mnist')
+                        data_code=args.dataset.lower())
 
     """model = ModelLinear(hidden_width=256,
                         n_layers=5,

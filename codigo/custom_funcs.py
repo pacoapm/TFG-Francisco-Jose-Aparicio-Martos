@@ -544,8 +544,8 @@ def dibujar_loss_acc(loss,acc,epochs,nombre):
     #ax[1].set_xlim(0,epochs-1)
 
 
-    #plt.savefig("images/"+nombre)
-    plt.show()
+    plt.savefig("images/"+nombre)
+    #plt.show()
     
 def generarNombre(args, quantize):
     

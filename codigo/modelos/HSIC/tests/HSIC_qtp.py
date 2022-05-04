@@ -16,7 +16,7 @@ import numpy as np
 from source.hsicbt.model.mhlinear import ModelQuantLinear
 import sys
 sys.path.insert(1, '/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo')
-from custom_funcs import create_backward_hooks, create_backward_hooks_print, minmax, maximof, actualizar_pesos, dibujar_loss_acc
+from custom_funcs import create_backward_hooks, create_backward_hooks_print, minmax, maximof, actualizar_pesos, dibujar_loss_acc, generarNombre, guardarDatos, generarInformacion
 import custom_funcs
 from torch.optim.lr_scheduler import StepLR
 
@@ -122,14 +122,14 @@ def main():
                         atype='relu',
                         last_hidden_width=args.output_width,
                         model_type='simple-dense',
-                        data_code='mnist')
+                        data_code=args.dataset.lower())
 
     final_layer = ModelVanilla(args.output_width)
     final_model = ModelEnsemble(model,final_layer)
     final_model = final_model.to(device)
 
     final_model.load_state_dict(torch.load('/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/'+args.dataset+"_HSIC.pt"))
-    loss,acc = test(final_model,device,test_loader)
+    acc,loss = test(final_model,device,test_loader)
 
 
     #creamos el modelo cuantizado
@@ -178,15 +178,19 @@ def main():
     vloss = []
     for cepoch in range(epochs):
         quant_standard_train(cepoch, final_modelq, train_loader, optimizer,config_dict, args, minimo, maximo, global_quantization)
-        acc, loss = test(final_modelq,device,test_loader)
-        vacc.append(acc)
-        vloss.append(loss)
+        accq, lossq = test(final_modelq,device,test_loader)
+        vacc.append(accq)
+        vloss.append(lossq)
         scheduler.step()
 
     """if args.save_model:
         torch.save(final_modelq.state_dict(),"/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/"+args.dataset+"_HSIC.pt")
 """
-    dibujar_loss_acc(vloss,vacc,epochs,"prueba")
+    nombreq = generarNombre(args,True)
+    dibujar_loss_acc(vloss,vacc,20,nombreq)
+    
+        
+    guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,vacc[-1],vloss[-1]))
 
 if __name__ == '__main__':
     main()
