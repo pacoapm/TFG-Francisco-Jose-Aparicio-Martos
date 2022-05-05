@@ -365,9 +365,11 @@ def dASYMM(t,mini,maxi,n):
     return t/((2**(n)-1)/(maxi-mini))+mini
 #funcion de cuantizacion flotante -> flotante
 def ASYMMf(t,mini,maxi,n):
+    t_mod = torch.clamp(t,min=mini,max=maxi)
+    
     if maxi == mini:
-        return t
-    res = ASYMM(t,mini,maxi,n)
+        return t_mod
+    res = ASYMM(t_mod,mini,maxi,n)
     return dASYMM(res,mini,maxi,n)
 
 def SYMM(t,maxi,n):
@@ -382,6 +384,8 @@ def SYMMf(t,maxi,n):
         print("maxi ", maxi)
         hol = input()"""
         return t
+    if maxi < torch.max(torch.abs(t)):
+        print("problema")
     res = SYMM(t,maxi,n)
     return dSYMM(res,maxi,n)
 
@@ -544,8 +548,8 @@ def dibujar_loss_acc(loss,acc,epochs,nombre):
     #ax[1].set_xlim(0,epochs-1)
 
 
-    plt.savefig("images/"+nombre)
-    #plt.show()
+    #plt.savefig("images/"+nombre)
+    plt.show()
     
 def generarNombre(args, quantize):
     

@@ -96,17 +96,20 @@ def main():
 
     #version cuantizada
     #creamos el modelo
-    modelq = QuantNet(args.n_layers,args.hidden_width,args.input_width,args.output_width)
+    modelq = Net(args.n_layers,args.hidden_width,args.input_width,args.output_width)
     
     modelq = BioModule(modelq,mode="fa")
-    modelq = create_backward_hooks(modelq)
+    #modelq = create_backward_hooks(modelq)
     
     modelq = modelq.to(device)
     #cogemos los valores minimos y maximos de la red preentrenado
     if custom_funcs.modo == 0:
         minimo, maximo = minmax(model, global_quantization)
+        minimo = -1
+        maximo = 1
     else:
         maximo = maximof(model, global_quantization)
+        maximo = 1
         minimo = 0
         
         

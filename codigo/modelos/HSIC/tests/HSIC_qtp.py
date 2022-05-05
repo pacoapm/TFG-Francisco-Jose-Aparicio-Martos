@@ -133,7 +133,7 @@ def main():
 
 
     #creamos el modelo cuantizado
-    modelq = ModelQuantLinear(hidden_width=args.hidden_width,
+    modelq = ModelLinear(hidden_width=args.hidden_width,
                         n_layers=args.n_layers,
                         atype='relu',
                         last_hidden_width=args.output_width,
@@ -141,7 +141,7 @@ def main():
                         data_code=args.dataset.lower())
     
     #añadimos los hooks para la cuantización en la actualización de pesos
-    modelq = create_backward_hooks(modelq)
+    #modelq = create_backward_hooks(modelq)
     modelq = modelq.to(device)
 
     #buscamos los máximos y mínimos del modelo entrenado sin cuantización
@@ -159,7 +159,7 @@ def main():
         quant_hsic_train(cepoch, modelq, train_loader, config_dict, args, minimo, maximo, global_quantization)
 
     #FORMATED TRAINING: entrenamiento de la ultima capa con sgd
-    final_layerq = QuantModelVanilla(args.output_width)
+    final_layerq = ModelVanilla(args.output_width)#QuantModelVanilla(args.output_width)
     final_layerq = create_backward_hooks(final_layerq)
     modelq.eval() 
     final_modelq = ModelEnsemble(modelq,final_layerq)

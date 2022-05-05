@@ -23,6 +23,7 @@ sys.path.insert(1, '../../')
 from custom_funcs import my_round_func,train_DNI,test,create_backward_hooks, load_dataset, train_loop_dni, one_hot, actualizar_pesos,minmax
 from custom_funcs import generarNombre, dibujar_loss_acc, train_loop_dni, maximof, guardarDatos, generarInformacion, QuantLayer, linearStack
 import custom_funcs
+from mnist_dni import Net
 
 #copiado del propio dni para crear la version cuantizada
 
@@ -166,22 +167,6 @@ class QuantNet(nn.Module):
 
     def forward(self, x, y = None):
         x = x.view(x.size()[0], -1)
-        """x = self.flatten(x)
-        x = my_round_func.apply(x)
-        x = self.layer1(x)
-        x = my_round_func.apply(x)
-        x = self.layer1_f(x)
-        x = my_round_func.apply(x)
-        if self.args.dni and self.training:
-            if self.args.context:
-                context = one_hot(y, 10, self.args)
-            else:
-                context = None
-            with dni.synthesizer_context(context):
-                x = self.backward_interface(x)
-                x = my_round_func.apply(x)
-        x = self.layer2(x)
-        x = my_round_func.apply(x)"""
         
         x = aplicarStack(self,self.args,self.input_layer,x,y)
         for i in self.hidden_layers:
@@ -259,14 +244,17 @@ def main():
     model.load_state_dict(torch.load("../../pesosModelos/"+args.dataset+"_dni.pt"))
     
     loss, acc = test(model,device, test_loader)
-    modelq = QuantNet(args)
-    modelq = create_backward_hooks(modelq)
+    modelq = Net(args)
+    #modelq = create_backward_hooks(modelq)
     modelq = modelq.to(device)
     #cogemos los valores minimos y maximos de la red anterior
     if custom_funcs.modo == 0:
         minimo, maximo = minmax(model, global_quantization)
+        minimo = -1
+        maximo = 1
     else:
         maximo = maximof(model, global_quantization)
+        maximo = 1
         minimo = 0
         
         

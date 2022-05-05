@@ -23,44 +23,75 @@ import custom_funcs
 
 
 
+def linearStackDNI(input_width,output_width, args):
+    linear = nn.Linear(input_width,output_width)
+    relu = nn.ReLU()
+    
+    if args.dni:
+        if args.context:
+            context_dim = 10
+        else:
+            context_dim = None
+        backward_interface = dni.BackwardInterface(
+            dni.BasicSynthesizer(
+                output_dim=4, n_hidden=1, context_dim=context_dim
+            )
+        )
+        
+    if args.dni:
+        return nn.Sequential(*[linear,relu,backward_interface]) 
+    else:
+        return nn.Sequential(*[linear,relu]) 
+    
+def aplicarStack(modelo,args,stack, entrada, y):
+    cont = 0
+    x = torch.clone(entrada)
+    for layer in stack:
+        cont+=1
+        
+        if cont == 3 and args.dni and modelo.training:
+            if args.context:
+                context = one_hot(y, 10, args)
+            else:
+                context = None
+            with dni.synthesizer_context(context):
+                x = layer(x)
+        else:
+            x = layer(x)
+                    
+    return x
+            
+
 class Net(nn.Module):
     def __init__(self, args):
         super(Net, self).__init__()
         
         self.flatten = nn.Flatten()
-        self.layer1 = nn.Linear(28*28,4)
-        self.layer1_f = nn.ReLU()
-        self.layer2 = nn.Linear(4,10)
+        self.input_layer = linearStackDNI(args.input_width,args.hidden_width, args)
+        
+        blocks = []
+        for i in range(args.n_layers):
+            blocks.append(linearStackDNI(args.hidden_width, args.hidden_width, args))
+            
+        self.hidden_layers = nn.Sequential(*blocks)
+        
+        self.output_layer = nn.Linear(args.hidden_width,args.output_width)
+        
         self.args = args
-        if self.args.dni:
-            if self.args.context:
-                context_dim = 10
-            else:
-                context_dim = None
-            self.backward_interface = dni.BackwardInterface(
-                dni.BasicSynthesizer(
-                    output_dim=4, n_hidden=1, context_dim=context_dim
-                )
-            )
+        
         
 
     def forward(self, x, y = None):
         x = x.view(x.size()[0], -1)
-        x = self.flatten(x)
-        x = self.layer1(x)
-        x = self.layer1_f(x)
-        if self.args.dni and self.training:
-            if self.args.context:
-                context = one_hot(y, 10, self.args)
-            else:
-                context = None
-            with dni.synthesizer_context(context):
-                x = self.backward_interface(x)
-        x = self.layer2(x)
         
-        output = F.log_softmax(x, dim=1)
-        
-        return output
+        x = aplicarStack(self,self.args,self.input_layer,x,y)
+        for i in self.hidden_layers:
+            x = aplicarStack(self,self.args,i,x,y)
+            
+        x = self.output_layer(x)
+        x = F.log_softmax(x, dim=1)
+        x = my_round_func.apply(x)
+        return x
 
 
 
@@ -94,6 +125,10 @@ def main():
                         help='enable context (label conditioning) in DNI')
     parser.add_argument('--dataset', type=str, default='MNIST', metavar='d',
                         help="indica la base de datos a usar: MNIST O FMNIST")
+    parser.add_argument('--n-layers',type=int, default= 0, metavar = 'n', help = "indica la cantidad de capas ocultas de la red (sin contar la de salida)")
+    parser.add_argument('--hidden-width', type=int, default = 4, metavar = 'n', help = "numero de unidades de las capas ocultas ")
+    parser.add_argument('--input-width',type=int, default = 784, metavar = 'n', help = "numero de unidades de la capa de entrada")
+    parser.add_argument('--output-width',type=int, default = 10, metavar = 'n', help = "numero de unidades de la capa de salida")
 
 
 

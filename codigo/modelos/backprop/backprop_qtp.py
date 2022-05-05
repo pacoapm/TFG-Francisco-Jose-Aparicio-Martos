@@ -104,7 +104,7 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=1, metavar='N',
+    parser.add_argument('--epochs', type=int, default=10, metavar='N',
                         help='number of epochs to train (default: 14)')
     parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
                         help='learning rate (default: 1.0)')
@@ -169,15 +169,18 @@ def main():
     #version cuantizada
     #creamos el modelo
     modelq = QuantNet(args.n_layers,args.hidden_width,args.input_width,args.output_width)
-    modelq = create_backward_hooks(modelq)
+    #modelq = create_backward_hooks(modelq)
     modelq = modelq.to(device)
     
     #cogemos los valores minimos y maximos de la red anterior
     if custom_funcs.modo == 0:
         minimo, maximo = minmax(model, global_quantization)
+        minimo = -1
+        maximo = 1
     else:
         maximo = maximof(model, global_quantization)
         minimo = 0
+        maximo = 1
         
     #cuantizamos los pesos
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
@@ -194,7 +197,7 @@ def main():
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
     
         
-    guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
+    #guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
     
     
 
