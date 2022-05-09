@@ -1,8 +1,8 @@
 funciones=(0 1)
-bits=(8 6 4)
-global=(0 1)
+bits=(3 2 1)
+global=(1)
 database=(MNIST FMNIST)
-programa=backprop.py
+programa=mnist_dni_qtp.py
 
 for k in "${database[@]}"
 do
@@ -12,7 +12,7 @@ do
 		do
 			for z in "${global[@]}"
 			do
-				echo "python" $programa "--database" $k "--modo" $i "--n-bits" $j "--global-quantization" $z
+				python $programa --dataset $k --modo $i --n-bits $j --global-quantization $z --epochs 30
 			done
 		done
 	done

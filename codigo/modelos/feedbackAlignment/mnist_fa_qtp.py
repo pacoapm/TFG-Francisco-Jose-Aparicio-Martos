@@ -23,7 +23,7 @@ from mnist_fa import Net
 import sys
 sys.path.insert(1, '../../')
 from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, generarNombre, generarInformacion
-from custom_funcs import  visualizar_caracteristicas, load_dataset, dibujar_loss_acc, maximof, actualizar_pesos_fa, guardarDatos, QuantNet, test, train_loop_fa
+from custom_funcs import  visualizar_caracteristicas, load_dataset, dibujar_loss_acc, maximof, actualizar_pesos_fa, guardarDatos, QuantNet, test, train_loop_fa, guardarHistorial
 import custom_funcs
 
 
@@ -51,7 +51,7 @@ def main():
                         help='how many batches to wait before logging training status')
     parser.add_argument('--save-model', action='store_true', default=False,
                         help='For Saving the current Model')
-    parser.add_argument('--global-quantization', type=int, default=0, metavar='G',
+    parser.add_argument('--global-quantization', type=int, default=1, metavar='G',
                         help="indica si se realiza la cuantizacion a nivel global (1) o local (0)")
     parser.add_argument('--n-bits', type=int, default=8, metavar='N',
                         help="numero de bits usados para la cuantizacion")
@@ -104,11 +104,13 @@ def main():
     modelq = modelq.to(device)
     #cogemos los valores minimos y maximos de la red preentrenado
     if custom_funcs.modo == 0:
-        minimo, maximo = minmax(model, global_quantization)
+        """minimo, maximo = minmax(model, global_quantization)
+        print(minimo,maximo)
+        hol =input()"""
         minimo = -1
         maximo = 1
     else:
-        maximo = maximof(model, global_quantization)
+        #maximo = maximof(model, global_quantization)
         maximo = 1
         minimo = 0
         
@@ -128,7 +130,7 @@ def main():
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
     
     guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
-
+    guardarHistorial("historial/"+generarNombre(args,True),lossq,accq)
     """if args.save_model:
         torch.save(model.state_dict(), "../pesosModelos/mnist_backprop.pt")"""
 

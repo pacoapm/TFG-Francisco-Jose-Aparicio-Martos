@@ -1,9 +1,13 @@
 #!/bin/bash
 cd backprop
-./script.sh
+./pruebas.sh
 cd ..
 cd dni
-./script.sh
+./pruebas.sh
 cd ..
 cd feedbackAlignment
-./script.sh
+./pruebas.sh
+cd ..
+cd HSIC
+source env.sh
+./pruebas.sh

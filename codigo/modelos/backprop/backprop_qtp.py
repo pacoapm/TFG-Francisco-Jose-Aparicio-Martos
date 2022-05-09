@@ -18,7 +18,7 @@ from torch.optim.lr_scheduler import StepLR
 import sys
 sys.path.insert(1, '../../')
 from custom_funcs import my_round_func,create_backward_hooks, train_loop, minmax, actualizar_pesos, visualizar_caracteristicas, test
-from custom_funcs import load_dataset, dibujar_loss_acc, maximof, generarInformacion, generarNombre, guardarDatos, QuantLayer, QuantNet, Net
+from custom_funcs import load_dataset, dibujar_loss_acc, maximof, generarInformacion, generarNombre, guardarDatos, QuantLayer, QuantNet, Net, guardarHistorial
 #from mnist_backprop_visualizacion import Net
 import custom_funcs
 
@@ -174,7 +174,9 @@ def main():
     
     #cogemos los valores minimos y maximos de la red anterior
     if custom_funcs.modo == 0:
-        minimo, maximo = minmax(model, global_quantization)
+        """minimo, maximo = minmax(model, global_quantization)
+        print(minimo,maximo)
+        hol =input()"""
         minimo = -1
         maximo = 1
     else:
@@ -197,7 +199,8 @@ def main():
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
     
         
-    #guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
+    guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
+    guardarHistorial("historial/"+generarNombre(args,True),lossq,accq)
     
     
 

@@ -16,7 +16,7 @@ import numpy as np
 from source.hsicbt.model.mhlinear import ModelQuantLinear
 import sys
 sys.path.insert(1, '/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo')
-from custom_funcs import create_backward_hooks, create_backward_hooks_print, minmax, maximof, actualizar_pesos, dibujar_loss_acc, generarNombre, guardarDatos, generarInformacion
+from custom_funcs import create_backward_hooks, create_backward_hooks_print, minmax, maximof, actualizar_pesos, dibujar_loss_acc, generarNombre, guardarDatos, generarInformacion, guardarHistorial
 import custom_funcs
 from torch.optim.lr_scheduler import StepLR
 
@@ -147,6 +147,8 @@ def main():
     #buscamos los máximos y mínimos del modelo entrenado sin cuantización
     if custom_funcs.modo == 0:
         minimo, maximo = minmax(final_model, global_quantization)
+        print(minimo,maximo)
+        hol =input()
     else:
         maximo = maximof(final_model, global_quantization)
         minimo = 0
@@ -191,7 +193,7 @@ def main():
     
         
     guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,vacc[-1],vloss[-1]))
-
+    guardarHistorial("historial/"+generarNombre(args,True),lossq,accq)
 if __name__ == '__main__':
     main()
 

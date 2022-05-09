@@ -103,7 +103,7 @@ class Net(nn.Module):
         x = self.hidden_layers(x)
         x = self.output_layer(x)
         x = F.log_softmax(x, dim=1)
-        x = my_round_func.apply(x)
+        #x = my_round_func.apply(x)
         return x
     
 class QuantNet(nn.Module):
@@ -155,7 +155,8 @@ def load_dataset(dataset, args, device, use_cuda):
         
         train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
         test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
-    else:
+        return train_loader,test_loader
+    if dataset=="FMNIST":
         train_kwargs = {'batch_size': args.batch_size}
         test_kwargs = {'batch_size': args.test_batch_size}
         if use_cuda:
@@ -175,7 +176,7 @@ def load_dataset(dataset, args, device, use_cuda):
         train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
         test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
         
-    return train_loader,test_loader
+        return train_loader,test_loader
     
 def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True):
     model.train()
@@ -558,7 +559,7 @@ def generarNombre(args, quantize):
     else:
         nombre =  "q_"
     
-    return nombre + args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)+"_modo"+str(args.modo)
+    return nombre + args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)+"_modo"+str(args.modo)+"_n_layers"+str(args.n_layers)+"_hidden_width"+str(args.hidden_width)
 
 def generarInformacion(args, acc, loss, accq, lossq):
     if args.modo == 0:
@@ -578,5 +579,10 @@ def guardarDatos(archivo, informacion):
     with open(archivo,'a') as f:
         f.write(informacion)
         #writer.writerow(informacion)
+        
+def guardarHistorial(archivo,loss,acc):
+    with open(archivo,'w') as f:
+        for i,j in zip(loss,acc):
+            f.write(str(loss)+" "+str(acc)+"\n")
     
 

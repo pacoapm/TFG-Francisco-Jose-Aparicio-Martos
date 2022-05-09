@@ -44,7 +44,7 @@ def main():
                         help='how many batches to wait before logging training status')
     parser.add_argument('--save-model', action='store_true', default=False,
                         help='For Saving the current Model')
-    parser.add_argument('--dataset', type=str, default='FMNIST', metavar='d',
+    parser.add_argument('--dataset', type=str, default='MNIST', metavar='d',
                         help="indica la base de datos a usar: MNIST O FMNIST", choices={"MNIST","FMNIST"})
     parser.add_argument('--n-layers',type=int, default= 0, metavar = 'n', help = "indica la cantidad de capas ocultas de la red (sin contar la de salida)")
     parser.add_argument('--hidden-width', type=int, default = 4, metavar = 'n', help = "numero de unidades de las capas ocultas ")

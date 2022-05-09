@@ -21,7 +21,7 @@ from mnist_dni import Net
 import sys
 sys.path.insert(1, '../../')
 from custom_funcs import my_round_func,train_DNI,test,create_backward_hooks, load_dataset, train_loop_dni, one_hot, actualizar_pesos,minmax
-from custom_funcs import generarNombre, dibujar_loss_acc, train_loop_dni, maximof, guardarDatos, generarInformacion, QuantLayer, linearStack
+from custom_funcs import generarNombre, dibujar_loss_acc, train_loop_dni, maximof, guardarDatos, generarInformacion, QuantLayer, linearStack, guardarHistorial
 import custom_funcs
 from mnist_dni import Net
 
@@ -249,7 +249,9 @@ def main():
     modelq = modelq.to(device)
     #cogemos los valores minimos y maximos de la red anterior
     if custom_funcs.modo == 0:
-        minimo, maximo = minmax(model, global_quantization)
+        """minimo, maximo = minmax(model, global_quantization)
+        print(minimo,maximo)
+        hol =input()"""
         minimo = -1
         maximo = 1
     else:
@@ -272,6 +274,7 @@ def main():
     
         
     guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
+    guardarHistorial("historial/"+generarNombre(args,True),lossq,accq)
 
 if __name__ == '__main__':
     main()
