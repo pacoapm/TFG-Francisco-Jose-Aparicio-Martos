@@ -1,1 +1,6 @@
 numero bits+ADs-cuantizacion global/local+ADs-tipo cuantizacion+ADs-accuracy+ADs-loss+ADs-quantize accuraccy+ADs- quantize loss +ADs-accuracy difference
+3;global;ASYMM;87.07;0.45349761657714843;10.88;2.46647958984375;-76.19
+2;global;ASYMM;87.07;0.45349761657714843;6.88;4.807176013183594;-80.19
+1;global;ASYMM;87.07;0.45349761657714843;6.86;303.206025;-80.21
+3;global;SYMM;87.07;0.45349761657714843;9.8;2.342500390625;-77.27
+2;global;SYMM;87.07;0.45349761657714843;9.8;2.3025849609375;-77.27

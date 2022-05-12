@@ -160,15 +160,15 @@ def main():
     imagen = images[0]
     
     #cargamos el modelo preentrenado
-    model = Net(args.n_layers,args.hidden_width,args.input_width,args.output_width)
+    """model = Net(args.n_layers,args.hidden_width,args.input_width,args.output_width)
     model = model.to(device)
     model.load_state_dict(torch.load("../../pesosModelos/"+args.dataset+"_backprop.pt"))
-    loss,acc = test(model,device,test_loader)
+    loss,acc = test(model,device,test_loader)"""
     
     
     #version cuantizada
     #creamos el modelo
-    modelq = QuantNet(args.n_layers,args.hidden_width,args.input_width,args.output_width)
+    modelq = Net(args.n_layers,args.hidden_width,args.input_width,args.output_width)
     #modelq = create_backward_hooks(modelq)
     modelq = modelq.to(device)
     
@@ -180,14 +180,14 @@ def main():
         minimo = -1
         maximo = 1
     else:
-        maximo = maximof(model, global_quantization)
+        #maximo = maximof(model, global_quantization)
         minimo = 0
         maximo = 1
         
     #cuantizamos los pesos
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
     #entrenamiento 
-    lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
+    lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization, "datosMaxMin")
         
     #visualizar_caracteristicas(model, imagen)
     #visualizar_caracteristicas(modelq, imagen)
@@ -199,8 +199,8 @@ def main():
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
     
         
-    guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
-    guardarHistorial("historial/"+generarNombre(args,True),lossq,accq)
+    #guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
+    #guardarHistorial("historial/"+generarNombre(args,True),lossq,accq)
     
     
 

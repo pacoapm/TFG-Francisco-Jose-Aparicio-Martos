@@ -178,9 +178,10 @@ def load_dataset(dataset, args, device, use_cuda):
         
         return train_loader,test_loader
     
-def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True):
+def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True, archivo = None):
     model.train()
     output = 0
+    info = []
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         #data = torch.round(input=data,decimals=3)
@@ -191,7 +192,8 @@ def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = Fa
         loss.backward()
         optimizer.step()
         if cuantizacion:
-            actualizar_pesos(model, args.n_bits, minimo, maximo, glob)
+            info.append(actualizar_pesos(model, args.n_bits, minimo, maximo, glob))
+            
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
@@ -199,10 +201,12 @@ def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = Fa
             if args.dry_run:
                 break
     #print(output)
-    
-def train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True):
+    if archivo != None:
+        guardarMaxMin(archivo, info)
+def train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True, archivo = None):
     model.train()
     output = 0
+    info = []
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         #data = torch.round(input=data,decimals=3)
@@ -212,7 +216,8 @@ def train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion 
         loss.backward()
         optimizer.step()
         if cuantizacion:
-            actualizar_pesos(model,args.n_bits,minimo,maximo,glob)
+            info.append(actualizar_pesos(model,args.n_bits,minimo,maximo,glob))
+            
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
@@ -220,10 +225,14 @@ def train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion 
             if args.dry_run:
                 break
             
+    if archivo != None:
+        guardarMaxMin(archivo, info)
             
-def train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True):
+            
+def train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True, archivo = None):
     model.train()
     output = 0
+    info = []
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         #data = torch.round(input=data,decimals=3)
@@ -234,7 +243,8 @@ def train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion =
         loss.backward()
         optimizer.step()
         if cuantizacion:
-            actualizar_pesos_fa(model, args.n_bits, minimo, maximo, glob)
+            info.append(actualizar_pesos_fa(model, args.n_bits, minimo, maximo, glob))
+            
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
@@ -242,7 +252,8 @@ def train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion =
             if args.dry_run:
                 break
     #print(output)
-
+    if archivo != None:
+        guardarMaxMin(archivo, info)
 
 def test(model, device, test_loader):
     model.eval()
@@ -264,7 +275,7 @@ def test(model, device, test_loader):
 
     return test_loss, 100. * correct / len(test_loader.dataset)
     
-def train_loop(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True):
+def train_loop(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True, archivo = None):
     
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
@@ -272,7 +283,7 @@ def train_loop(model, args, device, train_loader, test_loader, cuantizacion = Fa
     loss_list = []
     acc_list = []
     for epoch in range(1, args.epochs + 1):
-        train(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob)
+        train(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob, archivo)
         loss, acc = test(model, device, test_loader)
         loss_list.append(loss)
         acc_list.append(acc)
@@ -280,7 +291,7 @@ def train_loop(model, args, device, train_loader, test_loader, cuantizacion = Fa
     
     return loss_list, acc_list
 
-def train_loop_fa(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True):
+def train_loop_fa(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True, archivo = None):
     
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
@@ -288,7 +299,7 @@ def train_loop_fa(model, args, device, train_loader, test_loader, cuantizacion =
     loss_list = []
     acc_list = []
     for epoch in range(1, args.epochs + 1):
-        train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob)
+        train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob, archivo)
         loss, acc = test(model, device, test_loader)
         loss_list.append(loss)
         acc_list.append(acc)
@@ -296,7 +307,7 @@ def train_loop_fa(model, args, device, train_loader, test_loader, cuantizacion =
     
     return loss_list, acc_list
 
-def train_loop_dni(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True):
+def train_loop_dni(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True, archivo = None):
     
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
@@ -304,7 +315,7 @@ def train_loop_dni(model, args, device, train_loader, test_loader, cuantizacion 
     loss_list = []
     acc_list = []
     for epoch in range(1, args.epochs + 1):
-        train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob)
+        train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob, archivo)
         loss, acc = test(model, device, test_loader)
         loss_list.append(loss)
         acc_list.append(acc)
@@ -437,13 +448,13 @@ def maximof(modelo,glob = True):
         return maximos
 
 def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
-    i = 0
+    
+    max_bias = []
+    min_bias = []
+    max_weight = []
+    min_weight = []
     for layer in modelo.modules():
-        """print(layer)
-        hol = input()"""
         if type(layer) == nn.Linear or isinstance(layer,Linear): 
-            """print("cuantizado")
-            hol = input()"""
             if glob:
                 if modo == 0:
                     layer.bias.bias = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
@@ -459,25 +470,38 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     
             else:
                 if modo == 0:
-                    layer.bias.data = ASYMMf(layer.bias.data,minimo[i+1],maximo[i+1],n_bits)
-                    layer.weight.data = ASYMMf(layer.weight.data,minimo[i],maximo[i],n_bits)
-                    i+=2
+                    max_bias.append(torch.max(layer.bias.data))
+                    min_bias.append(torch.min(layer.bias.data))
+                    max_weight.append(torch.max(layer.weight.data))
+                    min_weight.append(torch.min(layer.weight.data))
+                    layer.bias.data = ASYMMf(layer.bias.data,min_bias[-1],max_bias[-1],n_bits)
+                    layer.weight.data = ASYMMf(layer.weight.data,min_weight[-1],max_weight[-1],n_bits)
+                    
                 elif modo == 1:
-                    layer.bias.data = SYMMf(layer.bias.data,maximo[i+1],n_bits)
-                    layer.weight.data = SYMMf(layer.weight.data,maximo[i],n_bits)
-                    i+= 2
+                    max_bias.append(torch.max(layer.bias.data))
+                    min_bias.append(torch.min(layer.bias.data))
+                    max_weight.append(torch.max(layer.weight.data))
+                    min_weight.append(torch.min(layer.weight.data))
+                    layer.bias.data = SYMMf(layer.bias.data,min_bias[-1],max_bias[-1],n_bits)
+                    layer.weight.data = SYMMf(layer.weight.data,min_weight[-1],max_weight[-1],n_bits)
+                    
                 else:
                     layer.bias.data = my_round_func.apply(layer.bias.data)
                     layer.weight.data = my_round_func.apply(layer.weight.data)
                     
+    return max_bias, min_bias, max_weight, min_weight
+                    
 def actualizar_pesos_fa(modelo,n_bits,minimo=None,maximo=None, glob = True):
-    i = 0
+    max_bias = []
+    min_bias = []
+    max_weight = []
+    min_weight = []
+    max_bias_back = []
+    min_bias_back = []
+    min_weight_back = []
+    max_weight_back = []
     for layer in modelo.modules():
-        """print(layer)
-        hol = input()"""
         if type(layer) == nn.Linear or isinstance(layer,Linear): 
-            """print("cuantizado")
-            hol = input()"""
             if glob:
                 if modo == 0:
                     layer.bias.bias = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
@@ -491,17 +515,37 @@ def actualizar_pesos_fa(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     layer.bias_backward.data = SYMMf(layer.bias_backward.data,maximo,n_bits)
             else:
                 if modo == 0:
-                    layer.bias.data = ASYMMf(layer.bias.data,minimo[i+1],maximo[i+1],n_bits)
-                    layer.weight.data = ASYMMf(layer.weight.data,minimo[i],maximo[i],n_bits)
-                    layer.weight_backward.data = ASYMMf(layer.weight_backward.data,minimo[i+2],maximo[i+2],n_bits)
-                    layer.bias_backward.data = ASYMMf(layer.bias_backward.data,minimo[i+3],maximo[i+3],n_bits)
-                    i+=4
+                    max_bias.append(torch.max(layer.bias.data))
+                    min_bias.append(torch.min(layer.bias.data))
+                    max_weight.append(torch.max(layer.weight.data))
+                    min_weight.append(torch.min(layer.weight.data))
+                    max_bias_back.append(torch.max(layer.bias_backward.data))
+                    min_bias_back.append(torch.min(layer.bias_backward.data))
+                    max_weight_back.append(torch.max(layer.weight_backward.data))
+                    min_weight_back.append(torch.min(layer.weight_backward.data))
+                    
+                    layer.bias.data = ASYMMf(layer.bias.data,min_bias[-1],max_bias[-1],n_bits)
+                    layer.weight.data = ASYMMf(layer.weight.data,min_weight[-1],max_weight[-1],n_bits)
+                    layer.bias_backward.data = ASYMMf(layer.bias_backward.data,min_bias_back[-1],max_bias_back[-1],n_bits)
+                    layer.weight_backward.data = ASYMMf(layer.weight_backward.data,min_weight_back[-1],max_weight_back[-1],n_bits)
+                    
                 else:
-                    layer.bias.data = SYMMf(layer.bias.data,maximo[i+1],n_bits)
-                    layer.weight.data = SYMMf(layer.weight.data,maximo[i],n_bits)
-                    layer.weight_backward.data = SYMMf(layer.weight_backward.data,maximo[i+2],n_bits)
-                    layer.bias_backward.data = SYMMf(layer.bias_backward.data,maximo[i+3],n_bits)
-                    i+= 4
+                    max_bias.append(torch.max(layer.bias.data))
+                    min_bias.append(torch.min(layer.bias.data))
+                    max_weight.append(torch.max(layer.weight.data))
+                    min_weight.append(torch.min(layer.weight.data))
+                    max_bias_back.append(torch.max(layer.bias_backward.data))
+                    min_bias_back.append(torch.min(layer.bias_backward.data))
+                    max_weight_back.append(torch.max(layer.weight_backward.data))
+                    min_weight_back.append(torch.min(layer.weight_backward.data))
+                    
+                    layer.bias.data = SYMMf(layer.bias.data,min_bias[-1],max_bias[-1],n_bits)
+                    layer.weight.data = SYMMf(layer.weight.data,min_weight[-1],max_weight[-1],n_bits)
+                    layer.bias_backward.data = SYMMf(layer.bias_backward.data,min_bias_back[-1],max_bias_back[-1],n_bits)
+                    layer.weight_backward.data = SYMMf(layer.weight_backward.data,min_weight_back[-1],max_weight_back[-1],n_bits)
+                    
+    return max_bias, min_bias, max_weight, min_weight, max_bias_back, min_bias_back, max_weight_back, min_weight_back        
+        
 
 def visualizar_caracteristicas(model, imagen):
     model.to(torch.device("cpu"))
@@ -549,8 +593,8 @@ def dibujar_loss_acc(loss,acc,epochs,nombre):
     #ax[1].set_xlim(0,epochs-1)
 
 
-    #plt.savefig("images/"+nombre)
-    plt.show()
+    plt.savefig("images/"+nombre)
+    #plt.show()
     
 def generarNombre(args, quantize):
     
@@ -583,6 +627,39 @@ def guardarDatos(archivo, informacion):
 def guardarHistorial(archivo,loss,acc):
     with open(archivo,'w') as f:
         for i,j in zip(loss,acc):
-            f.write(str(loss)+" "+str(acc)+"\n")
+            f.write(str(i)+" "+str(j)+"\n")
+            
+def guardarMaxMin(archivo,informacion):
+    with open(archivo,"w") as f:
+        for info in informacion:
+            for i in range(0,len(info[0])):
+                for j in range(0,len(info)):
+                    f.write(str(info[j][i].item()) + " ")
+                f.write("\n")
+                
+def extraerInfo(archivo):
+    f = open(archivo,"r")
+    Lines = f.readlines()
+    datos = []
+    
+    pos1 = archivo.find("n_layers")
+    pos2 = archivo.find(".")
+    
+    n_layers = int(archivo[pos1+len("n_layers"):pos2])
+    print("n_layers = ", n_layers)
+    for line in Lines:
+        datos.append(list(map(float,line.split(" ")[:-1])))
+        
+        
+    datos = np.array(datos)
+    n = len(datos)/n_layers
+    
+    for i in range(n_layers):
+        print(np.mean(datos[i::n_layers,:],axis=0))  
+        
+    for i in range(n_layers):
+        print(np.var(datos[i::n_layers,:],axis=0))
+    
+    
     
 

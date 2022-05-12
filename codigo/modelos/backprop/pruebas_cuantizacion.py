@@ -22,15 +22,16 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 
 
-
+import sys
 import numpy as np
-
+sys.path.insert(1, '../../')
+from custom_funcs import extraerInfo
 
 """import sys
 sys.path.insert(1, '../../')
 from custom_funcs import my_round_func,train,test,create_backward_hooks,ASYMM,dASYMM,ASYMMf,minmax"""
 
-from sklearn.cluster import KMeans, MeanShift
+"""from sklearn.cluster import KMeans, MeanShift
 
 def clustering(tensor, n_bits):
     if 2**n_bits <= torch.numel(tensor):
@@ -46,7 +47,7 @@ def clustering2(tensor, n_bits):
     else:
         return clustering(tensor,n_bits)
 
-tensor = torch.Tensor([0.3,0.6,0.9,1,0,0.4,0.7,0.2])
+tensor = torch.Tensor([0.3,0.6,0.9,1,0,0.4,0.7,0.2])"""
 
 """res1 = ASYMM(tensor, 0, 1, 2)
 print(tensor)
@@ -57,4 +58,17 @@ print("Diferencia: ", torch.mean(torch.abs(tensor-res)))"""
 """tensor = torch.Tensor([1,1,1])
 print(tensor - 1)"""
 
-print(clustering2(tensor,2))
+"""print(clustering2(tensor,2))
+"""
+def f():
+    return [1,2],[3,4],[5,6]
+
+def y(variable):
+    print(len(variable))
+
+variable = f()
+y(variable)
+for i in range(len(variable)):
+    print(variable[i][0])
+    
+extraerInfo("datosMaxMin_n_layers3.dat")

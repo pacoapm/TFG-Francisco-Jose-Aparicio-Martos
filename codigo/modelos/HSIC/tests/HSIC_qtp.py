@@ -147,11 +147,12 @@ def main():
     #buscamos los máximos y mínimos del modelo entrenado sin cuantización
     if custom_funcs.modo == 0:
         minimo, maximo = minmax(final_model, global_quantization)
-        print(minimo,maximo)
-        hol =input()
+        maximo = 1
+        minimo = -1
     else:
         maximo = maximof(final_model, global_quantization)
         minimo = 0
+        maximo = 1
 
     #cuantizamos los pesos del modelo
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
@@ -193,7 +194,7 @@ def main():
     
         
     guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,vacc[-1],vloss[-1]))
-    guardarHistorial("historial/"+generarNombre(args,True),lossq,accq)
+    guardarHistorial("historial/"+generarNombre(args,True),vloss,vacc)
 if __name__ == '__main__':
     main()
 

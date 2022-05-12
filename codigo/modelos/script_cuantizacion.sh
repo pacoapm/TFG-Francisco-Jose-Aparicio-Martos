@@ -5,9 +5,10 @@ cd ..
 cd dni
 ./pruebas.sh
 cd ..
+
 cd feedbackAlignment
-./pruebas.sh
+#./pruebas.sh
 cd ..
 cd HSIC
-source env.sh
-./pruebas.sh
+#source env.sh
+#./pruebas.sh

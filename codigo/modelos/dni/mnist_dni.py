@@ -90,7 +90,7 @@ class Net(nn.Module):
             
         x = self.output_layer(x)
         x = F.log_softmax(x, dim=1)
-        x = my_round_func.apply(x)
+        #x = my_round_func.apply(x)
         return x
 
 
