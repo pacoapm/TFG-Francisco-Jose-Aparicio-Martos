@@ -187,7 +187,7 @@ def main():
     #cuantizamos los pesos
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
     #entrenamiento 
-    lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization, "datosMaxMin")
+    lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization, "infoPesos/"+generarNombre(args,True))
         
     #visualizar_caracteristicas(model, imagen)
     #visualizar_caracteristicas(modelq, imagen)

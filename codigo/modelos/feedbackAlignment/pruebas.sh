@@ -1,6 +1,6 @@
 funciones=(0 1)
-bits=(3 2 1)
-global=(1)
+bits=(3 2)
+global=(1 0)
 database=(MNIST FMNIST)
 programa=mnist_fa_qtp.py
 

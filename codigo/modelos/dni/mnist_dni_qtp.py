@@ -263,7 +263,7 @@ def main():
     #cuantizamos los pesos
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
     #entrenamiento 
-    lossq, accq = train_loop_dni(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization)
+    lossq, accq = train_loop_dni(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization, "infoPesos/"+generarNombre(args,True))
     
     
     """nombre = generarNombre(args,False)

@@ -392,12 +392,8 @@ def dSYMM(t,maxi,n):
 
 def SYMMf(t,maxi,n):
     if maxi == 0:
-        """print("t ",t)
-        print("maxi ", maxi)
-        hol = input()"""
         return t
-    if maxi < torch.max(torch.abs(t)):
-        print("problema")
+    t = torch.clamp(t,min=-maxi,max=maxi)
     res = SYMM(t,maxi,n)
     return dSYMM(res,maxi,n)
 
@@ -472,18 +468,22 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
                 if modo == 0:
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
+                    
                     max_weight.append(torch.max(layer.weight.data))
                     min_weight.append(torch.min(layer.weight.data))
+                    
                     layer.bias.data = ASYMMf(layer.bias.data,min_bias[-1],max_bias[-1],n_bits)
                     layer.weight.data = ASYMMf(layer.weight.data,min_weight[-1],max_weight[-1],n_bits)
                     
                 elif modo == 1:
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
+                    max_bias_abs = torch.max(torch.abs(layer.bias.data))
                     max_weight.append(torch.max(layer.weight.data))
                     min_weight.append(torch.min(layer.weight.data))
-                    layer.bias.data = SYMMf(layer.bias.data,min_bias[-1],max_bias[-1],n_bits)
-                    layer.weight.data = SYMMf(layer.weight.data,min_weight[-1],max_weight[-1],n_bits)
+                    max_weight_abs = torch.max(torch.abs(layer.weight.data))
+                    layer.bias.data = SYMMf(layer.bias.data,max_bias_abs,n_bits)
+                    layer.weight.data = SYMMf(layer.weight.data,max_weight_abs,n_bits)
                     
                 else:
                     layer.bias.data = my_round_func.apply(layer.bias.data)
@@ -532,17 +532,21 @@ def actualizar_pesos_fa(modelo,n_bits,minimo=None,maximo=None, glob = True):
                 else:
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
+                    max_bias_abs = torch.max(torch.abs(layer.bias.data))
                     max_weight.append(torch.max(layer.weight.data))
                     min_weight.append(torch.min(layer.weight.data))
+                    max_weight_abs = torch.max(torch.abs(layer.weight.data))
                     max_bias_back.append(torch.max(layer.bias_backward.data))
                     min_bias_back.append(torch.min(layer.bias_backward.data))
+                    max_bias_back_abs = torch.max(torch.abs(layer.bias_backward.data))
                     max_weight_back.append(torch.max(layer.weight_backward.data))
                     min_weight_back.append(torch.min(layer.weight_backward.data))
+                    max_weight_back_abs = torch.max(torch.abs(layer.weight_backward.data))
                     
-                    layer.bias.data = SYMMf(layer.bias.data,min_bias[-1],max_bias[-1],n_bits)
-                    layer.weight.data = SYMMf(layer.weight.data,min_weight[-1],max_weight[-1],n_bits)
-                    layer.bias_backward.data = SYMMf(layer.bias_backward.data,min_bias_back[-1],max_bias_back[-1],n_bits)
-                    layer.weight_backward.data = SYMMf(layer.weight_backward.data,min_weight_back[-1],max_weight_back[-1],n_bits)
+                    layer.bias.data = SYMMf(layer.bias.data,max_bias_abs,n_bits)
+                    layer.weight.data = SYMMf(layer.weight.data,max_weight_abs,n_bits)
+                    layer.bias_backward.data = SYMMf(layer.bias_backward.data,max_bias_back_abs,n_bits)
+                    layer.weight_backward.data = SYMMf(layer.weight_backward.data,max_weight_back_abs,n_bits)
                     
     return max_bias, min_bias, max_weight, min_weight, max_bias_back, min_bias_back, max_weight_back, min_weight_back        
         
@@ -652,7 +656,6 @@ def extraerInfo(archivo):
         
         
     datos = np.array(datos)
-    n = len(datos)/n_layers
     
     for i in range(n_layers):
         print(np.mean(datos[i::n_layers,:],axis=0))  
