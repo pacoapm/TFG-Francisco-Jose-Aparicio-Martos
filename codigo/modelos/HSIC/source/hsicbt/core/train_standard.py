@@ -4,7 +4,7 @@ from .train_misc     import *
 from ..utils.const   import *
 import sys 
 sys.path.insert(1, '/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo')
-from custom_funcs import actualizar_pesos
+from custom_funcs import actualizar_pesos, guardarMaxMin
 
 batch_acc    = meter.AverageMeter()
 batch_loss   = meter.AverageMeter()
@@ -93,7 +93,7 @@ def standard_train(cepoch, model, data_loader, optimizer, config_dict):
 
     return batch_log
 
-def quant_standard_train(cepoch, model, data_loader, optimizer, config_dict, args, minimo = None, maximo = None, glob = True):
+def quant_standard_train(cepoch, model, data_loader, optimizer, config_dict, args, minimo = None, maximo = None, glob = True, archivo = None):
     
     #cross_entropy_loss = F.nll_loss()#torch.nn.CrossEntropyLoss()
     prec1 = total_loss = hx_l = hy_l = -1
@@ -107,7 +107,7 @@ def quant_standard_train(cepoch, model, data_loader, optimizer, config_dict, arg
     model = model.to(config_dict['device'])
 
     n_data = config_dict['batch_size'] * len(data_loader)
-    
+    info = []
     pbar = tqdm(enumerate(data_loader), total=n_data/config_dict['batch_size'], ncols=150)
     # for batch_idx, (data, target) in enumerate(data_loader):
     for batch_idx, (data, target) in pbar:
@@ -140,7 +140,7 @@ def quant_standard_train(cepoch, model, data_loader, optimizer, config_dict, arg
         loss = F.nll_loss(output,target)#cross_entropy_loss(output, target)
         loss.backward()
         optimizer.step()
-        actualizar_pesos(model, args.n_bits, minimo, maximo, glob)
+        info.append(actualizar_pesos(model, args.n_bits, minimo, maximo, glob))
 
         """loss = float(loss.detach().cpu().numpy())
         prec1, prec5 = misc.get_accuracy(output, target, topk=(1, 5)) 
@@ -170,5 +170,8 @@ def quant_standard_train(cepoch, model, data_loader, optimizer, config_dict, arg
             batch_log['batch_hsic_hy'].append(batch_hischy.val)
 
         pbar.set_description(msg)"""
+
+    if archivo != None:
+        guardarMaxMin(archivo,info)
 
     return batch_log

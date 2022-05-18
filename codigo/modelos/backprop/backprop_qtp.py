@@ -160,10 +160,10 @@ def main():
     imagen = images[0]
     
     #cargamos el modelo preentrenado
-    """model = Net(args.n_layers,args.hidden_width,args.input_width,args.output_width)
+    model = Net(args.n_layers,args.hidden_width,args.input_width,args.output_width)
     model = model.to(device)
     model.load_state_dict(torch.load("../../pesosModelos/"+args.dataset+"_backprop.pt"))
-    loss,acc = test(model,device,test_loader)"""
+    loss,acc = test(model,device,test_loader)
     
     
     #version cuantizada
@@ -199,8 +199,8 @@ def main():
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
     
         
-    #guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
-    #guardarHistorial("historial/"+generarNombre(args,True),lossq,accq)
+    guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
+    guardarHistorial("historial/"+generarNombre(args,True),lossq,accq)
     
     
 

@@ -4,7 +4,7 @@ from .train_misc     import *
 from ..utils.const   import *
 import sys
 sys.path.insert(1, '/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo')
-from custom_funcs import actualizar_pesos
+from custom_funcs import actualizar_pesos, guardarMaxMin
 
 def hsic_train(cepoch, model, data_loader, config_dict):
 
@@ -115,7 +115,7 @@ def hsic_train(cepoch, model, data_loader, config_dict):
 
     return batch_log
 
-def quant_hsic_train(cepoch, model, data_loader, config_dict, args, minimo = None, maximo = None, glob = True):
+def quant_hsic_train(cepoch, model, data_loader, config_dict, args, minimo = None, maximo = None, glob = True, archivo = "None"):
     
     cross_entropy_loss = torch.nn.CrossEntropyLoss()
     prec1 = total_loss = hx_l = hy_l = -1
@@ -139,6 +139,7 @@ def quant_hsic_train(cepoch, model, data_loader, config_dict, args, minimo = Non
 
     # for batch_idx, (data, target) in enumerate(data_loader):
     pbar = tqdm(enumerate(data_loader), total=n_data/config_dict['batch_size'], ncols=120)
+    info = []
     for batch_idx, (data, target) in pbar:
 
         if os.environ.get('HSICBT_DEBUG')=='4':
@@ -188,7 +189,7 @@ def quant_hsic_train(cepoch, model, data_loader, config_dict, args, minimo = Non
             loss = hx_l - config_dict['lambda_y']*hy_l
             loss.backward()
             optimizer.step()
-            actualizar_pesos(model, args.n_bits, minimo, maximo, glob)
+            info.append(actualizar_pesos(model, args.n_bits, minimo, maximo, glob))
             # sigma_optimizer.step()
         # if config_dict['hsic_solve']:
         #     prec1, reorder_list = misc.get_accuracy_hsic(model, data_loader)
@@ -222,5 +223,9 @@ def quant_hsic_train(cepoch, model, data_loader, config_dict, args, minimo = Non
         #     _code_name = [config_dict['task'], TTYPE_HSICTRAIN, config_dict['data_code']+"_batch", batch_idx]
         #     filepath = get_act_path(*_code_name)
         #     save_logs(data, filepath)
+
+    if archivo != None:
+        guardarMaxMin(archivo,info)
+
 
     return batch_log

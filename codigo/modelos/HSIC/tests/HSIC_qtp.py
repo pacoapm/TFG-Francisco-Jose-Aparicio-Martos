@@ -159,7 +159,7 @@ def main():
     #UNFORMATED TRAINING: entrenamiento de la red con HSIC
     epochs = 30
     for cepoch in range(epochs):
-        quant_hsic_train(cepoch, modelq, train_loader, config_dict, args, minimo, maximo, global_quantization)
+        quant_hsic_train(cepoch, modelq, train_loader, config_dict, args, minimo, maximo, global_quantization, "infoPesos/"+generarNombre(args,True))
 
     #FORMATED TRAINING: entrenamiento de la ultima capa con sgd
     final_layerq = ModelVanilla(args.output_width)#QuantModelVanilla(args.output_width)
@@ -180,7 +180,7 @@ def main():
     vacc = []
     vloss = []
     for cepoch in range(epochs):
-        quant_standard_train(cepoch, final_modelq, train_loader, optimizer,config_dict, args, minimo, maximo, global_quantization)
+        quant_standard_train(cepoch, final_modelq, train_loader, optimizer,config_dict, args, minimo, maximo, global_quantization, "infoPesos/"+generarNombre(args,True))
         accq, lossq = test(final_modelq,device,test_loader)
         vacc.append(accq)
         vloss.append(lossq)
