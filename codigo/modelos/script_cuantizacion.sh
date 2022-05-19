@@ -1,10 +1,10 @@
 #!/bin/bash
-cd backprop
-./pruebas.sh
-cd ..
-cd dni
-./pruebas.sh
-cd ..
+#cd backprop
+#./pruebas.sh
+#cd ..
+#cd dni
+#./pruebas.sh
+#cd ..
 
 cd feedbackAlignment
 ./pruebas.sh

@@ -75,6 +75,19 @@ def main():
     custom_funcs.modo = args.modo
 
     torch.manual_seed(args.seed)
+    
+    with open("datos/"+args.dataset+".csv",'r') as f:
+        dicc = {'ASYMM':0,'SYMM':1}
+        info = generarInformacion(args,0,0,0,0)
+        info = info.split(';')
+        lines = f.readlines()
+        
+        for line in lines:
+            linea = line.split(';')
+            if linea[0:3] == info[0:3]:
+                print("ya existe")
+                return 0
+        
 
     #device = torch.device("cuda" if use_cuda else "cpu")
     device = torch.device("cpu")
