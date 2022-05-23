@@ -382,7 +382,12 @@ def ASYMMf(t,mini,maxi,n):
     if maxi == mini:
         return t_mod
     res = ASYMM(t_mod,mini,maxi,n)
+    
+        
     return dASYMM(res,mini,maxi,n)
+
+def correcto(tensor):
+    return torch.any(torch.abs(tensor)>1).numpy()
 
 def SYMM(t,maxi,n):
     return torch.round(t*((2**(n-1)-1)/maxi))
@@ -456,14 +461,29 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
                     
+                    
                     max_weight.append(torch.max(layer.weight.data))
                     min_weight.append(torch.min(layer.weight.data))
                     
-                    layer.bias.bias = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
+                    if max_bias[-1] > 1.1 or max_weight[-1] > 1.1 or min_bias[-1] < -1.1 or min_weight[-1] < -1.1:
+                        print("error")
+                        print(max_bias[-1] ,max_weight[-1] , min_bias[-1] , min_weight[-1])
+                        print(correcto(layer.bias.data))
+                        print(correcto(layer.weight.data))
+                        hol = input()
+                    
+                    if (correcto(ASYMMf(layer.bias.data,minimo,maximo,n_bits))):
+                        print("mal calculo")
+                    if (correcto(ASYMMf(layer.bias.data,minimo,maximo,n_bits))):
+                        print("mal calculo")
+                    
+                        
+                    
+                    layer.bias.data = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
                     layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
                     
                 elif modo == 1:
-                    
+                    print("la cago")
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
                     
@@ -472,13 +492,12 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     
                     layer.bias.data = SYMMf(layer.bias.data,maximo,n_bits)
                     layer.weight.data = SYMMf(layer.weight.data,maximo,n_bits)
-                else:
-                    layer.bias.data = my_round_func.apply(layer.bias.data)
-                    layer.weight.data = my_round_func.apply(layer.weight.data)
+                
                     
                     
             else:
                 if modo == 0:
+                    print("la cago")
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
                     
@@ -489,6 +508,7 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     layer.weight.data = ASYMMf(layer.weight.data,min_weight[-1],max_weight[-1],n_bits)
                     
                 elif modo == 1:
+                    print("la cago")
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
                     max_bias_abs = torch.max(torch.abs(layer.bias.data))
@@ -499,9 +519,7 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     layer.bias.data = SYMMf(layer.bias.data,max_bias_abs,n_bits)
                     layer.weight.data = SYMMf(layer.weight.data,max_weight_abs,n_bits)
                     
-                else:
-                    layer.bias.data = my_round_func.apply(layer.bias.data)
-                    layer.weight.data = my_round_func.apply(layer.weight.data)
+              
                     
     return max_bias, min_bias, max_weight, min_weight
                     
@@ -678,7 +696,6 @@ def guardarMaxMin(archivo,informacion):
                 f.write("\n")
                 
 def extraerInfo(archivo):
-    print("hola")
     f = open(archivo,"r")
     Lines = f.readlines()
     datos = []
@@ -687,13 +704,12 @@ def extraerInfo(archivo):
     pos2 = archivo.find("_hidden")
     
     n_layers = int(archivo[pos1+len("n_layers"):pos2])+3
-    print("n_layers = ", n_layers)
     for line in Lines:
+        #creo una lista numerica apartir del archivo de entrada
         datos.append(list(map(float,line.split(" ")[:-1])))
         
-        
+    #transformo la información a numpy array
     datos = np.array(datos)
-    print(datos.shape[0])
     for i in range(n_layers):
         print(np.mean(datos[i::n_layers,:],axis=0)) 
         plt.plot(list(range(len(datos[i::n_layers,3]))),datos[i::n_layers,3], label = "capa "+str(i+1))
@@ -702,6 +718,10 @@ def extraerInfo(archivo):
         
     for i in range(n_layers):
         print(np.var(datos[i::n_layers,:],axis=0))
+        
+    f.close()
+        
+    
     
     
     

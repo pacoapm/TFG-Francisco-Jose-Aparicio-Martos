@@ -152,6 +152,7 @@ def main():
     torch.manual_seed(args.seed)
 
     device = torch.device("cuda" if use_cuda else "cpu")
+    device = torch.device("cpu")
     #cargamos la base de datos
     train_loader,test_loader = load_dataset(args.dataset, args, device, use_cuda)
     
@@ -199,7 +200,7 @@ def main():
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
     
         
-    guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
+    #guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
     guardarHistorial("historial/"+generarNombre(args,True),lossq,accq)
     
     
