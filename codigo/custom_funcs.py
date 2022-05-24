@@ -200,7 +200,7 @@ def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = Fa
                 100. * batch_idx / len(train_loader), loss.item()))
             if args.dry_run:
                 break
-    #print(output)
+    
     if archivo != None:
         guardarMaxMin(archivo, info)
 def train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True, archivo = None):
@@ -367,9 +367,6 @@ def create_backward_hooks_print( model :nn.Module) -> nn.Module:
 
 #funcion de cuantizacion flotante -> entero
 def ASYMM(t, mini, maxi, n):
-    if mini == maxi:
-        print("son iguales AAHHHHHH")
-        hol = input()
     return torch.round((t-mini)*((2**(n)-1)/(maxi-mini)))
 
 #funcion de decuantizacion entero -> flotante
@@ -382,8 +379,7 @@ def ASYMMf(t,mini,maxi,n):
     if maxi == mini:
         return t_mod
     res = ASYMM(t_mod,mini,maxi,n)
-    
-        
+           
     return dASYMM(res,mini,maxi,n)
 
 def correcto(tensor):
@@ -465,25 +461,10 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     max_weight.append(torch.max(layer.weight.data))
                     min_weight.append(torch.min(layer.weight.data))
                     
-                    if max_bias[-1] > 1.1 or max_weight[-1] > 1.1 or min_bias[-1] < -1.1 or min_weight[-1] < -1.1:
-                        print("error")
-                        print(max_bias[-1] ,max_weight[-1] , min_bias[-1] , min_weight[-1])
-                        print(correcto(layer.bias.data))
-                        print(correcto(layer.weight.data))
-                        hol = input()
-                    
-                    if (correcto(ASYMMf(layer.bias.data,minimo,maximo,n_bits))):
-                        print("mal calculo")
-                    if (correcto(ASYMMf(layer.bias.data,minimo,maximo,n_bits))):
-                        print("mal calculo")
-                    
-                        
-                    
                     layer.bias.data = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
                     layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
                     
                 elif modo == 1:
-                    print("la cago")
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
                     
@@ -497,7 +478,6 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     
             else:
                 if modo == 0:
-                    print("la cago")
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
                     
@@ -508,7 +488,6 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     layer.weight.data = ASYMMf(layer.weight.data,min_weight[-1],max_weight[-1],n_bits)
                     
                 elif modo == 1:
-                    print("la cago")
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
                     max_bias_abs = torch.max(torch.abs(layer.bias.data))
@@ -545,7 +524,7 @@ def actualizar_pesos_fa(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     max_weight_back.append(torch.max(layer.weight_backward.data))
                     min_weight_back.append(torch.min(layer.weight_backward.data))
                     
-                    layer.bias.bias = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
+                    layer.bias.data = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
                     layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
                     layer.weight_backward.data = ASYMMf(layer.weight_backward.data,minimo,maximo,n_bits)
                     layer.bias_backward.data = ASYMMf(layer.bias_backward.data,minimo,maximo,n_bits)

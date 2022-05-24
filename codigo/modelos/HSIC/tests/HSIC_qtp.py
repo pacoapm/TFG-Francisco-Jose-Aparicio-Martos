@@ -49,7 +49,7 @@ def test(model, device, test_loader):
 
 def main():
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--batch-size', type=int, default=128, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
@@ -101,7 +101,7 @@ def main():
 
     # # # configuration
     config_dict = {}
-    config_dict['batch_size'] = 128
+    config_dict['batch_size'] = 64
     config_dict['learning_rate'] = args.lr#0.001
     config_dict['lambda_y'] = 500#100
     config_dict['sigma'] = 5#2
@@ -111,7 +111,7 @@ def main():
     config_dict['epochs'] = 5
 
     # # # data prepreation
-    train_loader, test_loader = get_dataset_from_code(args.dataset.lower(), 128)
+    train_loader, test_loader = get_dataset_from_code(args.dataset.lower(), 64)
 
     #cargamos el modelo sin cuantizar
 
