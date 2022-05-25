@@ -383,7 +383,7 @@ def ASYMMf(t,mini,maxi,n):
     return dASYMM(res,mini,maxi,n)
 
 def correcto(tensor):
-    return torch.any(torch.abs(tensor)>1).numpy()
+    return torch.all(torch.abs(tensor)<=1).numpy()
 
 def SYMM(t,maxi,n):
     return torch.round(t*((2**(n-1)-1)/maxi))
@@ -452,54 +452,76 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
     min_weight = []
     for layer in modelo.modules():
         if type(layer) == nn.Linear or isinstance(layer,Linear): 
+            
             if glob:
                 if modo == 0:
-                    max_bias.append(torch.max(layer.bias.data))
-                    min_bias.append(torch.min(layer.bias.data))
+                    
+                    """if correcto(layer.bias.data) == False or correcto(layer.weight.data) == False:
+                        
+                        print("Maximo ", maximo)
+                        print("Minimo ", minimo)
+                        print("\n\n",correcto(layer.bias.data),correcto(layer.weight.data))
+                        print("Maximo bias", torch.max(layer.bias.data))
+                        print("Maximo capa", torch.max(layer.weight.data))
+                        hol = input()"""
                     
                     
-                    max_weight.append(torch.max(layer.weight.data))
-                    min_weight.append(torch.min(layer.weight.data))
+                    
+                    
                     
                     layer.bias.data = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
                     layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
                     
+                    max_bias.append(torch.max(layer.bias.data))
+                    min_bias.append(torch.min(layer.bias.data))
+                    
+                    
+                    max_weight.append(torch.max(layer.weight.data))
+                    min_weight.append(torch.min(layer.weight.data))
+                    
+                    
                 elif modo == 1:
+                    
+                    
+                    layer.bias.data = SYMMf(layer.bias.data,maximo,n_bits)
+                    layer.weight.data = SYMMf(layer.weight.data,maximo,n_bits)
+                    
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
                     
                     max_weight.append(torch.max(layer.weight.data))
                     min_weight.append(torch.min(layer.weight.data))
-                    
-                    layer.bias.data = SYMMf(layer.bias.data,maximo,n_bits)
-                    layer.weight.data = SYMMf(layer.weight.data,maximo,n_bits)
                 
                     
                     
             else:
                 if modo == 0:
+                    
+                    
+                    layer.bias.data = ASYMMf(layer.bias.data,torch.min(layer.bias.data),torch.max(layer.bias.data),n_bits)
+                    layer.weight.data = ASYMMf(layer.weight.data,torch.min(layer.weight.data),torch.max(layer.weight.data),n_bits)
+                    
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
                     
                     max_weight.append(torch.max(layer.weight.data))
                     min_weight.append(torch.min(layer.weight.data))
-                    
-                    layer.bias.data = ASYMMf(layer.bias.data,min_bias[-1],max_bias[-1],n_bits)
-                    layer.weight.data = ASYMMf(layer.weight.data,min_weight[-1],max_weight[-1],n_bits)
                     
                 elif modo == 1:
-                    max_bias.append(torch.max(layer.bias.data))
-                    min_bias.append(torch.min(layer.bias.data))
+                    
                     max_bias_abs = torch.max(torch.abs(layer.bias.data))
-                    max_weight.append(torch.max(layer.weight.data))
-                    min_weight.append(torch.min(layer.weight.data))
+                    
                     max_weight_abs = torch.max(torch.abs(layer.weight.data))
                     
                     layer.bias.data = SYMMf(layer.bias.data,max_bias_abs,n_bits)
                     layer.weight.data = SYMMf(layer.weight.data,max_weight_abs,n_bits)
                     
+                    max_bias.append(torch.max(layer.bias.data))
+                    min_bias.append(torch.min(layer.bias.data))
+                    max_weight.append(torch.max(layer.weight.data))
+                    min_weight.append(torch.min(layer.weight.data))
               
-                    
+    
     return max_bias, min_bias, max_weight, min_weight
                     
 def actualizar_pesos_fa(modelo,n_bits,minimo=None,maximo=None, glob = True):
@@ -515,39 +537,50 @@ def actualizar_pesos_fa(modelo,n_bits,minimo=None,maximo=None, glob = True):
         if type(layer) == nn.Linear or isinstance(layer,Linear): 
             if glob:
                 if modo == 0:
-                    max_bias.append(torch.max(layer.bias.data))
-                    min_bias.append(torch.min(layer.bias.data))
-                    max_weight.append(torch.max(layer.weight.data))
-                    min_weight.append(torch.min(layer.weight.data))
-                    max_bias_back.append(torch.max(layer.bias_backward.data))
-                    min_bias_back.append(torch.min(layer.bias_backward.data))
-                    max_weight_back.append(torch.max(layer.weight_backward.data))
-                    min_weight_back.append(torch.min(layer.weight_backward.data))
+                    
                     
                     layer.bias.data = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
                     layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)
                     layer.weight_backward.data = ASYMMf(layer.weight_backward.data,minimo,maximo,n_bits)
                     layer.bias_backward.data = ASYMMf(layer.bias_backward.data,minimo,maximo,n_bits)
-                else:
+                    
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
-                    max_bias_abs = torch.max(torch.abs(layer.bias.data))
                     max_weight.append(torch.max(layer.weight.data))
                     min_weight.append(torch.min(layer.weight.data))
-                    max_weight_abs = torch.max(torch.abs(layer.weight.data))
                     max_bias_back.append(torch.max(layer.bias_backward.data))
                     min_bias_back.append(torch.min(layer.bias_backward.data))
-                    max_bias_back_abs = torch.max(torch.abs(layer.bias_backward.data))
                     max_weight_back.append(torch.max(layer.weight_backward.data))
                     min_weight_back.append(torch.min(layer.weight_backward.data))
-                    max_weight_back_abs = torch.max(torch.abs(layer.weight_backward.data))
+                else:
+                    
                     
                     layer.bias.data = SYMMf(layer.bias.data,maximo,n_bits)
                     layer.weight.data = SYMMf(layer.weight.data,maximo,n_bits)
                     layer.weight_backward.data = SYMMf(layer.weight_backward.data,maximo,n_bits)
                     layer.bias_backward.data = SYMMf(layer.bias_backward.data,maximo,n_bits)
+                    
+                    max_bias.append(torch.max(layer.bias.data))
+                    min_bias.append(torch.min(layer.bias.data))
+                    
+                    max_weight.append(torch.max(layer.weight.data))
+                    min_weight.append(torch.min(layer.weight.data))
+                    
+                    max_bias_back.append(torch.max(layer.bias_backward.data))
+                    min_bias_back.append(torch.min(layer.bias_backward.data))
+                    
+                    max_weight_back.append(torch.max(layer.weight_backward.data))
+                    min_weight_back.append(torch.min(layer.weight_backward.data))
+                    
             else:
                 if modo == 0:
+                    
+                    
+                    layer.bias.data = ASYMMf(layer.bias.data,torch.min(layer.bias.data),torch.max(layer.bias.data),n_bits)
+                    layer.weight.data = ASYMMf(layer.weight.data,torch.min(layer.weight.data),torch.max(layer.weight.data),n_bits)
+                    layer.bias_backward.data = ASYMMf(layer.bias_backward.data,torch.min(layer.bias_backward.data),torch.max(layer.bias_backward.data),n_bits)
+                    layer.weight_backward.data = ASYMMf(layer.weight_backward.data,torch.min(layer.weight_backward.data),torch.max(layer.weight_backward.data),n_bits)
+                    
                     max_bias.append(torch.max(layer.bias.data))
                     min_bias.append(torch.min(layer.bias.data))
                     max_weight.append(torch.max(layer.weight.data))
@@ -556,30 +589,30 @@ def actualizar_pesos_fa(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     min_bias_back.append(torch.min(layer.bias_backward.data))
                     max_weight_back.append(torch.max(layer.weight_backward.data))
                     min_weight_back.append(torch.min(layer.weight_backward.data))
-                    
-                    layer.bias.data = ASYMMf(layer.bias.data,min_bias[-1],max_bias[-1],n_bits)
-                    layer.weight.data = ASYMMf(layer.weight.data,min_weight[-1],max_weight[-1],n_bits)
-                    layer.bias_backward.data = ASYMMf(layer.bias_backward.data,min_bias_back[-1],max_bias_back[-1],n_bits)
-                    layer.weight_backward.data = ASYMMf(layer.weight_backward.data,min_weight_back[-1],max_weight_back[-1],n_bits)
                     
                 else:
-                    max_bias.append(torch.max(layer.bias.data))
-                    min_bias.append(torch.min(layer.bias.data))
+                    
                     max_bias_abs = torch.max(torch.abs(layer.bias.data))
-                    max_weight.append(torch.max(layer.weight.data))
-                    min_weight.append(torch.min(layer.weight.data))
+                    
                     max_weight_abs = torch.max(torch.abs(layer.weight.data))
-                    max_bias_back.append(torch.max(layer.bias_backward.data))
-                    min_bias_back.append(torch.min(layer.bias_backward.data))
+                    
                     max_bias_back_abs = torch.max(torch.abs(layer.bias_backward.data))
-                    max_weight_back.append(torch.max(layer.weight_backward.data))
-                    min_weight_back.append(torch.min(layer.weight_backward.data))
+                    
                     max_weight_back_abs = torch.max(torch.abs(layer.weight_backward.data))
                     
                     layer.bias.data = SYMMf(layer.bias.data,max_bias_abs,n_bits)
                     layer.weight.data = SYMMf(layer.weight.data,max_weight_abs,n_bits)
                     layer.bias_backward.data = SYMMf(layer.bias_backward.data,max_bias_back_abs,n_bits)
                     layer.weight_backward.data = SYMMf(layer.weight_backward.data,max_weight_back_abs,n_bits)
+                    
+                    max_weight.append(torch.max(layer.weight.data))
+                    min_weight.append(torch.min(layer.weight.data))
+                    max_bias.append(torch.max(layer.bias.data))
+                    min_bias.append(torch.min(layer.bias.data))
+                    max_bias_back.append(torch.max(layer.bias_backward.data))
+                    min_bias_back.append(torch.min(layer.bias_backward.data))
+                    max_weight_back.append(torch.max(layer.weight_backward.data))
+                    min_weight_back.append(torch.min(layer.weight_backward.data))
                     
     return max_bias, min_bias, max_weight, min_weight, max_bias_back, min_bias_back, max_weight_back, min_weight_back        
         

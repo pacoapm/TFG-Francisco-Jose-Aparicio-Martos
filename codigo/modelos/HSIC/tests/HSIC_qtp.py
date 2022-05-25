@@ -110,7 +110,7 @@ def main():
     config_dict['log_batch_interval'] = 10
     config_dict['epochs'] = 5
 
-    with open("datos/"+args.dataset+".csv",'r') as f:
+    """with open("datos/"+args.dataset+".csv",'r') as f:
         dicc = {'ASYMM':0,'SYMM':1}
         info = generarInformacion(args,0,0,0,0)
         info = info.split(';')
@@ -120,7 +120,7 @@ def main():
             linea = line.split(';')
             if linea[0:3] == info[0:3]:
                 print("ya existe")
-                return 0
+                return 0"""
 
     # # # data prepreation
     train_loader, test_loader = get_dataset_from_code(args.dataset.lower(), args.batch_size)

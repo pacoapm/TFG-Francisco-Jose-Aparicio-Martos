@@ -189,7 +189,8 @@ def quant_hsic_train(cepoch, model, data_loader, config_dict, args, minimo = Non
             loss = hx_l - config_dict['lambda_y']*hy_l
             loss.backward()
             optimizer.step()
-            info.append(actualizar_pesos(model, args.n_bits, minimo, maximo, glob))
+            
+        info.append(actualizar_pesos(model, args.n_bits, minimo, maximo, glob))
             # sigma_optimizer.step()
         # if config_dict['hsic_solve']:
         #     prec1, reorder_list = misc.get_accuracy_hsic(model, data_loader)
