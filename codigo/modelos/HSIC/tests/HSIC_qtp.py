@@ -16,7 +16,7 @@ import numpy as np
 from source.hsicbt.model.mhlinear import ModelQuantLinear
 import sys
 sys.path.insert(1, '/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo')
-from custom_funcs import create_backward_hooks, create_backward_hooks_print, minmax, maximof, actualizar_pesos, dibujar_loss_acc, generarNombre, guardarDatos, generarInformacion, guardarHistorial
+from custom_funcs import load_dataset,create_backward_hooks, create_backward_hooks_print, minmax, maximof, actualizar_pesos, dibujar_loss_acc, generarNombre, guardarDatos, generarInformacion, guardarHistorial
 import custom_funcs
 from torch.optim.lr_scheduler import StepLR
 
@@ -101,7 +101,7 @@ def main():
 
     # # # configuration
     config_dict = {}
-    config_dict['batch_size'] = 64
+    config_dict['batch_size'] = args.batch_size
     config_dict['learning_rate'] = args.lr#0.001
     config_dict['lambda_y'] = 500#100
     config_dict['sigma'] = 5#2
@@ -110,8 +110,20 @@ def main():
     config_dict['log_batch_interval'] = 10
     config_dict['epochs'] = 5
 
+    with open("datos/"+args.dataset+".csv",'r') as f:
+        dicc = {'ASYMM':0,'SYMM':1}
+        info = generarInformacion(args,0,0,0,0)
+        info = info.split(';')
+        lines = f.readlines()
+        
+        for line in lines:
+            linea = line.split(';')
+            if linea[0:3] == info[0:3]:
+                print("ya existe")
+                return 0
+
     # # # data prepreation
-    train_loader, test_loader = get_dataset_from_code(args.dataset.lower(), 64)
+    train_loader, test_loader = get_dataset_from_code(args.dataset.lower(), args.batch_size)
 
     #cargamos el modelo sin cuantizar
 

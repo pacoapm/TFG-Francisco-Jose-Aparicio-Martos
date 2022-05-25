@@ -109,25 +109,38 @@ def graficarEvaluacion(ruta,var):
     plt.show()
     
 def graficarACC(ruta,var):
-    fig = plt.figure(figsize=(6,4))
+    fig = plt.figure(figsize=(8,6))
     x = np.arange(0,var["epochs"][0])
-    
+    dicc = {0:"global",1:"local"}
+    colores = ["r","b","g","y","c","m","y"]
+    iterador = 0
     for dataset in var["dataset"]:
         for bits in var["n_bits"]:
             for func in var["func"]:
                 for glbl in var["globl"]:
                     loss, acc = extraerLossAcc(ruta+"/sinq_"+dataset+"_nbits"+str(bits)+"_epochs"+str(var["epochs"][0])+"_global"+str(glbl)+"_modo"+str(func)+"_n_layers0_hidden_width4")
                     #plt.plot(x,loss,'*-',label="n_bits"+str(bits))
-                    plt.plot(x,acc,'*-', label="n_bits"+str(bits))
+                    if len(var["n_bits"]) > 1:
+                        plt.plot(x,acc,'*-', label="n_bits"+str(bits))
+                    if len(var["globl"]) > 1:
+                        plt.plot(x,acc,'*-', label=dicc[glbl])
+                        
+                    """if glbl == 0:
+                        plt.plot(x,acc,colores[iterador]+'*--', label="n_bits"+str(bits))
+                        iterador += 1
+                    else:
+                        plt.plot(x,acc,colores[iterador]+'*-', label="n_bits"+str(bits))
+                        iterador += 1"""
+                    
     
     
     
     plt.legend(bbox_to_anchor=(1.04,1))
-    plt.set_title("Test acc")
-    plt.set_xlabel("epochs")
-    plt.set_ylabel("Accuracy")
-    plt.set_ylim(0,100)
-
+    plt.title("Test acc")
+    plt.xlabel("epochs")
+    plt.ylabel("Accuracy")
+    plt.ylim(0,100)
+    fig.tight_layout()
 
     #plt.savefig("images/"+nombre)
     plt.show()
@@ -147,7 +160,8 @@ def main():
         print(i)
         comprobarPesos(i)"""
         #hol = input()
-    graficarEvaluacion("modelos/feedbackAlignment/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[1],"globl":[0]})
+    #graficarACC("modelos/feedbackAlignment/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[1],"globl":[0]})
+    graficarACC("modelos/feedbackAlignment/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[5,6,7,8],"func":[1],"globl":[0]})
     
     
 if __name__=="__main__":

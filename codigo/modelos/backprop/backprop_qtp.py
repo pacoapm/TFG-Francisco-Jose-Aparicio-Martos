@@ -152,6 +152,7 @@ def main():
     torch.manual_seed(args.seed)
 
     device = torch.device("cuda" if use_cuda else "cpu")
+    
     with open("datos/"+args.dataset+".csv",'r') as f:
         dicc = {'ASYMM':0,'SYMM':1}
         info = generarInformacion(args,0,0,0,0)
