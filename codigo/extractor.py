@@ -25,6 +25,23 @@ from custom_funcs import load_dataset
 def substring(string, ini, fin):
     return string[string.find(ini)+len(ini):string.find(fin)]
 
+def comprobarPesos(archivo):
+    f = open(archivo,"r")
+    Lines = f.readlines()
+    datos = []
+    
+    for line in Lines:
+        datos.append(list(map(float,line.split(" ")[:-1])))
+        
+    datos = np.array(datos)
+    datos = np.array([np.max(datos[:,[0,2]],axis=1),np.min(datos[:,[1,3]],axis=1)]).T
+    
+    
+   
+    #print("Los pesos son correctos: ", np.all(abs(datos) <= 1))
+    f.close()
+    return np.all(abs(datos) <= 1)
+
 def graficarPesos(archivo):
     f = open(archivo,"r")
     Lines = f.readlines()
@@ -39,8 +56,36 @@ def graficarPesos(archivo):
     datos = np.array(datos)
     datos = np.array([np.max(datos[:,[0,2]],axis=1),np.min(datos[:,[1,3]],axis=1)]).T
     
-    """dataset = substring(archivo,"sinq_","_nbits")  
-    epocas = substring(archivo,"epochs","_global")"""
+    
+    batch_size = 64
+    dataset_len = 60000
+    
+    iteraciones = int(dataset_len/batch_size)
+    for i in range(n_layers):
+        
+        plt.plot(list(range(len(datos[iteraciones*n_layers-n_layers-i::iteraciones*n_layers,0]))),datos[iteraciones*n_layers-n_layers-i::iteraciones*n_layers,0], label = "capa "+str(i+1))
+    
+    plt.legend()
+    plt.show()
+    #print("Los pesos son correctos: ", np.all(abs(datos) <= 1.1))
+    f.close()
+    
+    
+def graficarPesosDNI(archivo):
+    f = open(archivo,"r")
+    Lines = f.readlines()
+    datos = []
+    pos1 = archivo.find("n_layers")
+    pos2 = archivo.find("_hidden")
+    
+    n_layers = int(archivo[pos1+len("n_layers"):pos2])*4+5
+    for line in Lines:
+        datos.append(list(map(float,line.split(" ")[:-1])))
+        
+    datos = np.array(datos)
+    datos = np.array([np.max(datos[:,[0,2]],axis=1),np.min(datos[:,[1,3]],axis=1)]).T
+    
+    
     batch_size = 64
     dataset_len = 60000
     
@@ -88,6 +133,80 @@ def datosPesos(archivo):
     
     #print("Los pesos son correctos: ", np.all(abs(datos) <= 1.1))
     f.close()
+    
+    
+def datosPesosFA(archivo):
+    f = open(archivo,"r")
+    Lines = f.readlines()
+    datos = []
+    pos1 = archivo.find("n_layers")
+    pos2 = archivo.find("_hidden")
+    
+    n_layers = int(archivo[pos1+len("n_layers"):pos2])+2
+    for line in Lines:
+        datos.append(list(map(float,line.split(" ")[:-1])))
+        
+    datos = np.array(datos)
+    datos = np.array([np.max(datos[:,[0,2]],axis=1),np.min(datos[:,[1,3]],axis=1),np.max(datos[:,[4,6]],axis=1),np.min(datos[:,[5,7]],axis=1)]).T
+    
+    dataset = substring(archivo,"sinq_","_nbits")  
+    epocas = substring(archivo,"epochs","_global")
+    batch_size = 64
+    dataset_len = 60000
+    
+    iteraciones = int(dataset_len/batch_size)
+    for i in range(n_layers):
+        
+        #plt.plot(list(range(len(datos[iteraciones*n_layers-n_layers-i::iteraciones*n_layers,0]))),datos[iteraciones*n_layers-n_layers-i::iteraciones*n_layers,0], label = "capa "+str(i+1))
+        info = datos[iteraciones*n_layers-n_layers-i::iteraciones*n_layers,:]
+        
+        print("Capa: ", i)
+        print("Peso maximo: %.4f Peso minimo: %.4f Peso back maximo %.4f Peso back minimo %.4f" % (np.max(info[:,0]), np.min(info[:,1]), np.max(info[:,2]), np.min(info[:,2])))
+        print("Peso maximo medio: %.4f Peso minimo medio: %.4f Peso back maximo medio %.4f Peso back minimo medio %.4f" % (np.mean(info[:,0]), np.mean(info[:,1]),np.mean(info[:,2]), np.mean(info[:,2])))
+        print("Peso maximo varianza: %.4f Peso minimo varianza: %.4f Peso back maximo varianza %.4f Peso back minimo varianza %.4f" % (np.var(info[:,0]),np.var(info[:,1]),np.var(info[:,2]), np.var(info[:,2])))
+        
+    
+    #print("Los pesos son correctos: ", np.all(abs(datos) <= 1.1))
+    f.close()
+    
+    
+def datosPesosDNI(archivo):
+    f = open(archivo,"r")
+    Lines = f.readlines()
+    datos = []
+    pos1 = archivo.find("n_layers")
+    pos2 = archivo.find("_hidden")
+    
+    n_layers = int(archivo[pos1+len("n_layers"):pos2])*4+5
+    
+    for line in Lines:
+        datos.append(list(map(float,line.split(" ")[:-1])))
+        
+    datos = np.array(datos)
+    datos = np.array([np.max(datos[:,[0,2]],axis=1),np.min(datos[:,[1,3]],axis=1)]).T
+    
+    dataset = substring(archivo,"sinq_","_nbits")  
+    epocas = substring(archivo,"epochs","_global")
+    batch_size = 64
+    dataset_len = 60000
+    
+    iteraciones = int(dataset_len/batch_size)
+    for i in range(n_layers):
+        
+        #plt.plot(list(range(len(datos[iteraciones*n_layers-n_layers-i::iteraciones*n_layers,0]))),datos[iteraciones*n_layers-n_layers-i::iteraciones*n_layers,0], label = "capa "+str(i+1))
+        info = datos[iteraciones*n_layers-n_layers-i::iteraciones*n_layers,:]
+        
+        print("Capa: ", i)
+        print("Peso maximo: %.4f Peso minimo: %.4f" % (np.max(info[:,0]), np.min(info[:,1])))
+        print("Peso maximo medio: %.4f Peso minimo medio: %.4f" % (np.mean(info[:,0]), np.mean(info[:,1])))
+        print("Peso maximo varianza: %.4f Peso minimo varianza: %.4f" % (np.var(info[:,0]),np.var(info[:,1])))
+        
+    
+    #print("Los pesos son correctos: ", np.all(abs(datos) <= 1.1))
+    f.close()
+    
+    
+    
     
 def mostrarInfoPesos(ruta,var):
     dicc = {0:"ASYMM",1:"SYMM"}
@@ -192,15 +311,16 @@ def main():
     parser.add_argument('--ruta',type=str, default=None, metavar="archivo")
     args = parser.parse_args()
     
-    """for i in glob(args.ruta+"/*_global1*"):
-        print(i)
-        comprobarPesos(i)"""
+    for i in glob(args.ruta+"/*_global1*"):
+        #print(i)
+        if comprobarPesos(i) == False:
+            print("NO es correcto")
         #hol = input()
     #graficarACC("modelos/feedbackAlignment/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[1],"globl":[0]})
-    graficarEvaluacion("modelos/backprop/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[1],"globl":[0]})
+    """graficarEvaluacion("modelos/backprop/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[1],"globl":[0]})
     graficarEvaluacion("modelos/backprop/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[0],"globl":[0]})
     mostrarInfoPesos("modelos/backprop/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[6,7,8],"func":[0],"globl":[1]})
-    
+    """
     
 if __name__=="__main__":
     """tensor = torch.Tensor([[0,-1.1],[0,1]])
