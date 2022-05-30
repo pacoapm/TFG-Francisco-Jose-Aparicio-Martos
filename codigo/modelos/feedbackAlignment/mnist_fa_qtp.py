@@ -76,7 +76,7 @@ def main():
 
     torch.manual_seed(args.seed)
     
-    with open("datos/"+args.dataset+".csv",'r') as f:
+    """with open("datos/"+args.dataset+".csv",'r') as f:
         dicc = {'ASYMM':0,'SYMM':1}
         info = generarInformacion(args,0,0,0,0)
         info = info.split(';')
@@ -86,10 +86,9 @@ def main():
             linea = line.split(';')
             if linea[0:3] == info[0:3]:
                 print("ya existe")
-                return 0
+                return 0"""
         
 
-    #device = torch.device("cuda" if use_cuda else "cpu")
     device = torch.device("cpu")
 
     train_loader,test_loader = load_dataset(args.dataset, args, device, use_cuda)
@@ -112,20 +111,12 @@ def main():
     modelq = Net(args.n_layers,args.hidden_width,args.input_width,args.output_width)
     
     modelq = BioModule(modelq,mode="fa")
-    #modelq = create_backward_hooks(modelq)
     
     modelq = modelq.to(device)
-    #cogemos los valores minimos y maximos de la red preentrenado
-    if custom_funcs.modo == 0:
-        """minimo, maximo = minmax(model, global_quantization)
-        print(minimo,maximo)
-        hol =input()"""
-        minimo = -1
-        maximo = 1
-    else:
-        #maximo = maximof(model, global_quantization)
-        maximo = 1
-        minimo = 0
+    
+        
+    minimo = -1
+    maximo = 1
         
         
     #cuantizamos los pesos
@@ -136,16 +127,12 @@ def main():
     #visualizar_caracteristicas(model, imagen)
     #visualizar_caracteristicas(modelq, imagen)
 
-    """nombre = generarNombre(args,False)
-    dibujar_loss_acc(loss,acc,args.epochs, nombre)"""
 
     nombreq = generarNombre(args,True)
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)
     
     guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
     guardarHistorial("historial/"+generarNombre(args,True),lossq,accq)
-    """if args.save_model:
-        torch.save(model.state_dict(), "../pesosModelos/mnist_backprop.pt")"""
 
 
 if __name__ == '__main__':

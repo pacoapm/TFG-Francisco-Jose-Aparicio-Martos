@@ -25,160 +25,6 @@ from custom_funcs import generarNombre, dibujar_loss_acc, train_loop_dni, maximo
 import custom_funcs
 from mnist_dni import Net
 
-#copiado del propio dni para crear la version cuantizada
-
-class BasicSynthesizerQ(torch.nn.Module):
-    """Basic `Synthesizer` based on an MLP with ReLU activation.
-
-    Args:
-        output_dim: Dimensionality of the synthesized `messages`.
-        n_hidden (optional): Number of hidden layers. Defaults to 0.
-        hidden_dim (optional): Dimensionality of the hidden layers. Defaults to
-            `output_dim`.
-        trigger_dim (optional): Dimensionality of the trigger. Defaults to
-            `output_dim`.
-        context_dim (optional): Dimensionality of the context. If `None`, do
-            not use context. Defaults to `None`.
-    """
-
-    def __init__(self, output_dim, n_hidden=0, hidden_dim=None,
-                 trigger_dim=None, context_dim=None):
-        super().__init__()
-        if hidden_dim is None:
-            hidden_dim = output_dim
-        if trigger_dim is None:
-            trigger_dim = output_dim
-
-        top_layer_dim = output_dim if n_hidden == 0 else hidden_dim
-
-        self.input_trigger = torch.nn.Linear(
-            in_features=trigger_dim, out_features=top_layer_dim
-        )
-
-        if context_dim is not None:
-            self.input_context = torch.nn.Linear(
-                in_features=context_dim, out_features=top_layer_dim
-            )
-        else:
-            self.input_context = None
-
-        self.layers = torch.nn.ModuleList([
-            torch.nn.Linear(
-                in_features=hidden_dim,
-                out_features=(
-                    hidden_dim if layer_index < n_hidden - 1 else output_dim
-                )
-            )
-            for layer_index in range(n_hidden)
-        ])
-
-        # zero-initialize the last layer, as in the paper
-        if n_hidden > 0:
-            nn.init.constant(self.layers[-1].weight, 0)
-        else:
-            nn.init.constant(self.input_trigger.weight, 0)
-            if context_dim is not None:
-                nn.init.constant(self.input_context.weight, 0)
-
-    def forward(self, trigger, context):
-        """Synthesizes a `message` based on `trigger` and `context`.
-
-        Args:
-            trigger: `trigger` to synthesize the `message` based on. Size:
-                (`batch_size`, `trigger_dim`).
-            context: `context` to condition the synthesizer. Ignored if
-                `context_dim` has not been specified in the constructor. Size:
-                (`batch_size`, `context_dim`).
-
-        Returns:
-            The synthesized `message`.
-        """
-        last = my_round_func.apply(self.input_trigger(trigger))
-
-        if self.input_context is not None:
-            last += my_round_func.apply(self.input_context(context))
-            
-        last = my_round_func.apply(last)
-
-        for layer in self.layers:
-            last = my_round_func.apply(layer(my_round_func.apply(F.relu(last))))
-
-        return last
-    
-    
-def quantLinearStackDNI(input_width,output_width, args):
-    linear = nn.Linear(input_width,output_width)
-    relu = nn.ReLU()
-    quant = QuantLayer()
-    
-    if args.dni:
-        if args.context:
-            context_dim = 10
-        else:
-            context_dim = None
-        backward_interface = dni.BackwardInterface(
-            BasicSynthesizerQ(
-                output_dim=4, n_hidden=1, context_dim=context_dim
-            )
-        )
-        
-    if args.dni:
-        return nn.Sequential(*[linear,quant,relu,quant,backward_interface, quant]) 
-    else:
-        return nn.Sequential(*[linear,quant,relu,quant]) 
-    
-def aplicarStack(modelo,args,stack, entrada, y):
-    cont = 0
-    x = torch.clone(entrada)
-    for layer in stack:
-        cont+=1
-        
-        if cont == 5 and args.dni and modelo.training:
-            if args.context:
-                context = one_hot(y, 10, args)
-            else:
-                context = None
-            with dni.synthesizer_context(context):
-                x = layer(x)
-        else:
-            x = layer(x)
-                    
-    return x
-            
-
-class QuantNet(nn.Module):
-    def __init__(self, args):
-        super(QuantNet, self).__init__()
-        
-        self.flatten = nn.Flatten()
-        self.input_layer = quantLinearStackDNI(args.input_width,args.hidden_width, args)
-        
-        blocks = []
-        for i in range(args.n_layers):
-            blocks.append(quantLinearStackDNI(args.hidden_width, args.hidden_width, args))
-            
-        self.hidden_layers = nn.Sequential(*blocks)
-        
-        self.output_layer = nn.Linear(args.hidden_width,args.output_width)
-        
-        self.args = args
-        
-        
-
-    def forward(self, x, y = None):
-        x = x.view(x.size()[0], -1)
-        
-        x = aplicarStack(self,self.args,self.input_layer,x,y)
-        for i in self.hidden_layers:
-            x = aplicarStack(self,self.args,i,x,y)
-            
-        x = self.output_layer(x)
-        x = F.log_softmax(x, dim=1)
-        x = my_round_func.apply(x)
-        return x
-
-
-
 def main():
     
     # Training settings
@@ -245,19 +91,11 @@ def main():
     
     loss, acc = test(model,device, test_loader)
     modelq = Net(args)
-    #modelq = create_backward_hooks(modelq)
     modelq = modelq.to(device)
-    #cogemos los valores minimos y maximos de la red anterior
-    if custom_funcs.modo == 0:
-        """minimo, maximo = minmax(model, global_quantization)
-        print(minimo,maximo)
-        hol =input()"""
-        minimo = -1
-        maximo = 1
-    else:
-        maximo = maximof(model, global_quantization)
-        maximo = 1
-        minimo = 0
+    
+        
+    minimo = -1
+    maximo = 1
         
         
     #cuantizamos los pesos
@@ -265,9 +103,7 @@ def main():
     #entrenamiento 
     lossq, accq = train_loop_dni(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization, "infoPesos/"+generarNombre(args,True))
     
-    
-    """nombre = generarNombre(args,False)
-    dibujar_loss_acc(loss,acc,args.epochs, nombre)"""
+
 
     nombreq = generarNombre(args,True)
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)

@@ -103,7 +103,6 @@ class Net(nn.Module):
         x = self.hidden_layers(x)
         x = self.output_layer(x)
         x = F.log_softmax(x, dim=1)
-        #x = my_round_func.apply(x)
         return x
     
 class QuantNet(nn.Module):
@@ -184,10 +183,8 @@ def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = Fa
     info = []
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
-        #data = torch.round(input=data,decimals=3)
         optimizer.zero_grad()
         output = model(data)
-        #print(output)
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
@@ -209,7 +206,6 @@ def train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion 
     info = []
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
-        #data = torch.round(input=data,decimals=3)
         optimizer.zero_grad()
         output = model(data,target)
         loss = F.nll_loss(output, target)
@@ -235,10 +231,8 @@ def train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion =
     info = []
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
-        #data = torch.round(input=data,decimals=3)
         optimizer.zero_grad()
         output = model(data)
-        #print(output)
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
@@ -251,7 +245,6 @@ def train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion =
                 100. * batch_idx / len(train_loader), loss.item()))
             if args.dry_run:
                 break
-    #print(output)
     if archivo != None:
         guardarMaxMin(archivo, info)
 
@@ -324,10 +317,6 @@ def train_loop_dni(model, args, device, train_loader, test_loader, cuantizacion 
     return loss_list, acc_list
 
 
-"""def create_backward_hooks( model :nn.Module, decimals: int) -> nn.Module:
-    for parameter in model.parameters():
-            parameter.register_hook(lambda grad: torch.round(input=grad,decimals=decimals))
-    return model"""
 def hook(grad):
     if modo == 0:
         minimo = torch.min(grad)
@@ -405,9 +394,6 @@ def minmax(modelo,glob = True):
     maximos = []
     contador = 0       
     for i in modelo.parameters():
-        """contador += 1
-        print(i)
-        hol = input()"""
         min_capa = torch.min(i)
         max_capa = torch.max(i)
         
@@ -418,7 +404,6 @@ def minmax(modelo,glob = True):
         if max_capa > maximo:
             maximo = max_capa
             
-    #print("en total hay ", contador, " parametros")
     if glob:
         return minimo,maximo
     else:
@@ -455,19 +440,6 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
             
             if glob:
                 if modo == 0:
-                    
-                    """if correcto(layer.bias.data) == False or correcto(layer.weight.data) == False:
-                        
-                        print("Maximo ", maximo)
-                        print("Minimo ", minimo)
-                        print("\n\n",correcto(layer.bias.data),correcto(layer.weight.data))
-                        print("Maximo bias", torch.max(layer.bias.data))
-                        print("Maximo capa", torch.max(layer.weight.data))
-                        hol = input()"""
-                    
-                    
-                    
-                    
                     
                     layer.bias.data = ASYMMf(layer.bias.data,minimo,maximo,n_bits)
                     layer.weight.data = ASYMMf(layer.weight.data,minimo,maximo,n_bits)

@@ -175,13 +175,10 @@ def main():
 
     #FORMATED TRAINING: entrenamiento de la ultima capa con sgd
     final_layerq = ModelVanilla(args.output_width)#QuantModelVanilla(args.output_width)
-    final_layerq = create_backward_hooks(final_layerq)
+
     modelq.eval() 
     final_modelq = ModelEnsemble(modelq,final_layerq)
-    #final_modelq = create_backward_hooks(final_modelq)
 
-    """optimizer = torch.optim.SGD( filter(lambda p: p.requires_grad, final_layerq.parameters()),
-                lr = config_dict['learning_rate'], weight_decay=0.001)"""
     optimizer = torch.optim.Adadelta(filter(lambda p: p.requires_grad, final_layerq.parameters()),
                 lr = config_dict['learning_rate'])
 
@@ -198,9 +195,7 @@ def main():
         vloss.append(lossq)
         scheduler.step()
 
-    """if args.save_model:
-        torch.save(final_modelq.state_dict(),"/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/"+args.dataset+"_HSIC.pt")
-"""
+    
     nombreq = generarNombre(args,True)
     dibujar_loss_acc(vloss,vacc,20,nombreq)
     

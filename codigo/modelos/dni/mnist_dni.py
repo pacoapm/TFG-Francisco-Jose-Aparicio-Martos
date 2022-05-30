@@ -34,7 +34,7 @@ def linearStackDNI(input_width,output_width, args):
             context_dim = None
         backward_interface = dni.BackwardInterface(
             dni.BasicSynthesizer(
-                output_dim=4, n_hidden=1, context_dim=context_dim
+                output_dim=args.hidden_width, n_hidden=1, context_dim=context_dim
             )
         )
         

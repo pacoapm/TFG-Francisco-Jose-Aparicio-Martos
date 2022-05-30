@@ -1,4 +1,4 @@
-funciones=(0 1)
+funciones=(0)
 bits=(2 3 4 5 6 7 8)
 global=(1 0)
 database=(MNIST FMNIST)
@@ -12,7 +12,7 @@ do
 		do
 			for z in "${global[@]}"
 			do
-				python $programa --dataset $k --modo $i --n-bits $j --global-quantization $z --epochs 30
+				python $programa --dataset $k --modo $i --n-bits $j --global-quantization $z --epochs 30 --n-layers 5 --hidden-width 20
 			done
 		done
 	done

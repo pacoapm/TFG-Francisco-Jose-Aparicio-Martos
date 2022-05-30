@@ -22,81 +22,6 @@ from custom_funcs import load_dataset, dibujar_loss_acc, maximof, generarInforma
 #from mnist_backprop_visualizacion import Net
 import custom_funcs
 
-"""import os 
-ruta = os.getcwd()
-pos = ruta.find("codigo")
-print("ruta del codigo ", ruta[:pos+6])
-print(type(ruta))
-print(os.getcwd())
-hol = input()"""
-
-class CustomNet(nn.Module):
-    def __init__(self):
-        super(CustomNet, self).__init__()
-        #self.round = my_round_func.apply
-        self.flatten = nn.Flatten()
-        self.l1 = nn.Linear(28*28,4)
-        self.relu = nn.ReLU()
-        self.l2 = nn.Linear(4,10)
-        self.softmax = nn.LogSoftmax(dim=1)
-        self.quant = QuantLayer()
-        
-        
-
-    def forward(self,x):
-        x = self.flatten(x)
-        #print(x)
-        x = self.quant(x)#my_round_func.apply(x)
-        #print(x)
-        x = self.l1(x)
-        #print(x)
-        x = self.quant(x)#my_round_func.apply(x)
-        #print(x)
-        x = self.l2(self.relu(x))
-        #print(x)
-        x = self.quant(x)#my_round_func.apply(x)
-        #print(x)
-        x = self.softmax(x)
-        #print(x)
-        x = self.quant(x)#my_round_func.apply(x)
-        #print(x)
-        return x
-    
-"""class QuantNet(nn.Module):
-    def __init__(self):
-        super(QuantNet, self).__init__()
-        #self.round = my_round_func.apply
-        self.flatten = nn.Flatten()
-        self.l1 = nn.Linear(28*28,4)
-        self.relu = nn.ReLU()
-        self.l2 = nn.Linear(4,10)
-        self.softmax = nn.LogSoftmax(dim=1)
-       
-        
-        
-
-    def forward(self,x):
-        #print(x)
-        x = self.flatten(x)
-        #print(x)
-        x = my_round_func.apply(x)
-        #print(x)
-        x = self.l1(x)
-        #print(x)
-        x = my_round_func.apply(x)
-        #print(x)
-        x = self.l2(self.relu(x))
-        #print(x)
-        x = my_round_func.apply(x)
-        #print(x)
-        x = self.softmax(x)
-        #print(x)
-        x = my_round_func.apply(x)
-        #print(x)
-        return x"""
-
-
-
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -153,7 +78,7 @@ def main():
 
     device = torch.device("cuda" if use_cuda else "cpu")
     
-    with open("datos/"+args.dataset+".csv",'r') as f:
+    """with open("datos/"+args.dataset+".csv",'r') as f:
         dicc = {'ASYMM':0,'SYMM':1}
         info = generarInformacion(args,0,0,0,0)
         info = info.split(';')
@@ -163,7 +88,7 @@ def main():
             linea = line.split(';')
             if linea[0:3] == info[0:3]:
                 print("ya existe")
-                return 0
+                return 0"""
     #cargamos la base de datos
     train_loader,test_loader = load_dataset(args.dataset, args, device, use_cuda)
     
@@ -186,13 +111,9 @@ def main():
     
     #cogemos los valores minimos y maximos de la red anterior
     if custom_funcs.modo == 0:
-        """minimo, maximo = minmax(model, global_quantization)
-        print(minimo,maximo)
-        hol =input()"""
         minimo = -1
         maximo = 1
     else:
-        #maximo = maximof(model, global_quantization)
         minimo = 0
         maximo = 1
         
@@ -203,9 +124,6 @@ def main():
         
     #visualizar_caracteristicas(model, imagen)
     #visualizar_caracteristicas(modelq, imagen)
-
-    """nombre = generarNombre(args,False)
-    dibujar_loss_acc(loss,acc,args.epochs, nombre)"""
 
     nombreq = generarNombre(args,True)
     dibujar_loss_acc(lossq,accq,args.epochs,nombreq)

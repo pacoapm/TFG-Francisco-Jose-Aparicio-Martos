@@ -93,7 +93,7 @@ def dibujar_loss_acc(loss,acc,epochs):
 
 def main():
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--batch-size', type=int, default=128, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
@@ -132,7 +132,7 @@ def main():
     torch.manual_seed(args.seed)
     # # # configuration
     config_dict = {}
-    config_dict['batch_size'] = 128
+    config_dict['batch_size'] = 64
     config_dict['learning_rate'] = args.lr#0.001
     config_dict['lambda_y'] = 500#100
     config_dict['sigma'] = 5#2
@@ -196,7 +196,7 @@ def main():
     if args.save_model:
         torch.save(final_model.state_dict(),"/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/"+args.dataset+"_HSIC.pt")
 
-    dibujar_loss_acc(vloss,vacc,epochs)
+    #dibujar_loss_acc(vloss,vacc,epochs)
 
 if __name__ == '__main__':
     main()
