@@ -72,3 +72,35 @@
 	url={https://www.sciencedirect.com/science/article/pii/S0364021387800253},
 	doi={10.1016/S0364-0213(87)80025-3}
 }
+
+@inproceedings{RefWorks:RefID:12-rafati2018improving,
+	author={Jacob Rafati and Roummel F. Marcia},
+	year={December 2018},
+	title={Improving L-BFGS Initialization for Trust-Region Methods in Deep Learning},
+	pages={501-508},
+	abstract={Deep learning algorithms often require solving a highly non-linear and nonconvex unconstrained optimization problem. Generally, methods for solving the optimization problems in machine learning and in deep learning specifically are restricted to the class of first-order algorithms, like stochastic gradient descent (SGD). The major drawback of the SGD methods is that they have the undesirable effect of not escaping saddle-points. Furthermore, these methods require exhaustive trial-and-error to fine-tune many learning parameters. Using the second-order curvature information to find the search direction can help with more robust convergence for the non-convex optimization problem. However, computing the Hessian matrix for the large-scale problems is not computationally practical. Alternatively, quasi-Newton methods construct an approximate of Hessian matrix to build a quadratic model of the objective function. Quasi-Newton methods, like SGD, require only first-order gradient information, but they can result in superlinear convergence, which makes them attractive alternatives. The limited-memory Broyden-Fletcher-Goldfarb-Shanno (L-BFGS) approach is one of the most popular quasi-Newton methods that construct positive-definite Hessian approximations. Since the true Hessian matrix is not necessarily positive definite, an extra initialization condition is required to be introduced when constructing the L-BFGS matrices to avoid false negative curvature information. In this paper, we propose various choices for initialization methods of the L-BFGS matrices within a trust-region framework. We provide empirical results on the classification task of the MNIST digits dataset to compare the performance of the trust-region algorithm with different L-BFGS initialization methods.},
+	doi={10.1109/ICMLA.2018.00081}
+}
+
+@article{RefWorks:RefID:13-johansson1991backpropagation,
+	author={E. m. Johansson and F. u. Dowla and D. m. Goodman},
+	year={1991},
+	month={January 1,},
+	title={Backpropagation learning for multilayer feed-forward neural networks using the conjugate gradient method},
+	journal={International Journal of Neural Systems},
+	volume={02},
+	number={04},
+	pages={291-301},
+	abstract={In many applications, the number of interconnects or weights in a neural network is so large that the learning time for the conventional backpropagation algorithm can become excessively long. Numerical optimization theory offers a rich and robust set of techniques which can be applied to neural networks to improve learning rates. In particular, the conjugate gradient method is easily adapted to the backpropagation learning problem. This paper describes the conjugate gradient method, its application to the backpropagation learning problem and presents results of numerical tests which compare conventional backpropagation, steepest descent and the conjugate gradient methods. For the parity problem, we find that the conjugate gradient method is an order of magnitude faster than conventional backpropagation with momentum.},
+	isbn={0129-0657},
+	url={https://www.worldscientific.com/doi/abs/10.1142/S0129065791000261},
+	doi={10.1142/S0129065791000261}
+}
+
+@article{RefWorks:RefID:14-bisong2017benchmarking,
+	author={Ekaba Bisong},
+	year={2017},
+	month={December 22,},
+	title={Benchmarking Decoupled Neural Interfaces with Synthetic Gradients},
+	abstract={Artifical Neural Network are a particular class of learning system modeled after biological neural functions with an interesting penchant for Hebbian learning, that is "neurons that wire together, fire together". However, unlike their natural counterparts, artificial neural networks have a close and stringent coupling between the modules of neurons in the network. This coupling or locking imposes upon the network a strict and inflexible structure that prevent layers in the network from updating their weights until a full feed-forward and backward pass has occurred. Such a constraint though may have sufficed for a while, is now no longer feasible in the era of very-large-scale machine learning, coupled with the increased desire for parallelization of the learning process across multiple computing infrastructures. To solve this problem, synthetic gradients (SG) with decoupled neural interfaces (DNI) are introduced as a viable alternative to the backpropagation algorithm. This paper performs a speed benchmark to compare the speed and accuracy capabilities of SG-DNI as over to a standard neural interface using multilayer perceptron MLP. SG-DNI shows good promise, in that it not only captures the learning problem, it is also over 3-fold faster due to it asynchronous learning capabilities.}
+}

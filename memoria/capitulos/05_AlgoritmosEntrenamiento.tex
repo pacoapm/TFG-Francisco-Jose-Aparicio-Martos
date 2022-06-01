@@ -4,15 +4,82 @@ En el campo del machine learning los algoritmos más usados son las redes neuron
 
 Los métodos que se usan para enseñar a la redes neuronales se conocen como algoritmos de entrenamiento. Un buen algoritmo de entrenamiento tiene que ser capaz de poder mejorar el desempeño de la red neuronal en la base de datos de entrenamiento.
 
-Actualmente el algoritmo más usado es el backpropagation \cite{RefWorks:RefID:6-rumelhart1986learning} debido a su capacidad de encontrar buenos resultados y a su eficiencia. Desde que se inventó este algoritmo ha sido el más estudiado creandose numerosas variantes cuyo objetivo era el de mejorar los puntos débiles de este algoritmo. Terminar de introducir el estado del arte...
+Actualmente el algoritmo más usado es el backpropagation \cite{RefWorks:RefID:6-rumelhart1986learning} debido a su capacidad de encontrar buenos resultados y a su eficiencia. Desde que se inventó este algoritmo ha sido el más estudiado creándose numerosas variantes cuyo objetivo era el de mejorar los puntos débiles de este algoritmo, como son su inviabilidad biológica, el problema del transporte de pesos \cite{RefWorks:RefID:10-grossberg1987competitive} y el desvanecimiento de gradientes.
 
-A continuación voy a realizar una presentación de cada uno de los algoritmos presentados anteriormente explicando su funcionamiento y mostrando su pseudocódigo.
-\newpage
-\section{Backpropagation} \label{tab:Backprop}
+Haciendo una revisión en la literatura actual nos podemos encontrar con algunos de los algoritmos más populares como son el grupo de los métodos quasi-newton, el método del gradiente conjugado y el algoritmo de levenberg marquardt.
+
+Los métodos quasi-newton son aproximaciones al método de newton. La motivación de estos algoritmos es conseguir aplicar de manera práctica el método de newton a problemas de deep learning. El gran problema que tiene el método de newton es su alto coste computacional debido a que hace uso de la derivada de segundo orden para la optimización de funciones, es decir, necesita realizar el cálculo de la matriz Hessiana. En problemas con un número de variables grande hace que sea imposible aplicar este algoritmo. Es por este motivo por lo que surgen los métodos quasi-newton los cuales abordan el problema del cálculo de la matriz Hessiana mediante aproximaciones. Dentro del conjunto de estos algoritmos uno de los más conocidos es el L-BFGS \cite{RefWorks:RefID:12-rafati2018improving} (Limited-Broyden–Fletcher–Goldfarb–Shanno), el cual aproxima la matriz Hessiana de manera iterativa creando un proceso mucho más eficiente. 
+
+El gradiente conjugado \cite{RefWorks:RefID:13-johansson1991backpropagation} se trata de un algoritmo que se encuentra entre el gradiente descendente y el método de newton. La motivación de este algoritmo es solucionar la convergencia lenta del gradiente descendente y evitar los requerimientos del cálculo de la matriz Hessiana como invertir la matriz, evaluarla y almacenarla. 
+
+Por su parte el método del levenberg-marquardt esta diseñado para trabajar con la función de pérdida. No necesita calcular la matriz Hessiana, sino que calcula el vector gradiente y la matriz Jacobiana.
+
+Además de los métodos ya mencionados, existen alternativas que se centran en mejorar el propio backpropagation como puede ser el algoritmo Adadelta, el cual modifica el comportamiento del learning rate para mejorar la convergencia y los resultados que obtiene. 
+
+
+
+
+Hablar sobre la actualidad de la computacion neuromórfica
+
+
+
+Terminar de introducir el estado del arte...
+
+
+\section{Preliminar}
+
+Este apartado esta destinado a explicar los métodos, algoritmos o herramientas que se van a utilizar en los algoritmos a estudiar con el objetivo de no tener que repetir su significado o funcionamiento.
+
+
+\subsection{Propagación hacia delante}
+
+La propagación forward o hacia delante es el proceso que se realiza para calcular la hipótesis de la red neuronal. Consiste en ir pasando la información de capa a capa, empezando por la inicial y llegando hasta la de salida. El proceso que se lleva a cabo es multiplicar la entrada por la matriz de pesos de la primera capa, a este resultado se le aplica la función de activación que se esté usando en la red. Este proceso se repite hasta llegar a la capa final, en la que la función de activación dependiendo del problema puede ser la identidad, softmax, entropía cruzada, etc.
+
+\begin{algorithm}[H]
+   \caption{Propagación hacia delante}
+   \KwData{x: dato de entrada, $w = \{W^{1}, ..., W^{L}\}$: matrices de pesos, \\$\theta$: función de activación}
+   \KwResult{h(x): hipótesis }
+   
+   $x^{(0)} \gets x$ \\
+   \For{l = 1 to L }{
+        $s^{(l)} \gets (W^{(l)})^{T}x^{(l-1)}$ \\
+        $x^{(l)} \gets $ 
+        $
+        \begin{bmatrix}
+        1 \\
+        \theta(s^{(l)})
+        \end{bmatrix}
+        $
+   } 
+   $h(x) = x^{(L)}$
+   \label{tab:Feedforward}
+\end{algorithm}
+
+\subsection{Gradiente descendente}
+
+El gradiente descendente es una técnica básica de optimización de funciones en los algoritmos de machine learning. Consiste en calcular el mínimo de una función de forma iterativa haciendo uso de la derivada de la función a estudiar. 
+
+La ejecución del algoritmo se inicia desde un punto aleatorio de la función. Para dirigirse hacia el mínimo más cercano el algoritmo calcula la derivada de la función en dicho punto y se desplaza en sentido contrario a esta. 
+
+\begin{algorithm}[H]
+   \caption{Gradiente descendente}
+   \KwData{$w_{0}$: punto de partida; $\theta$: función a optimizar; $max\_iter$: numero máximo de iteraciones; $\eta$ learning rate}
+   \KwResult{un mínimo de la función}
+   $w \gets x_{0}$\\
+   \For{i = 1 hasta $max\_iter$ }{
+        $w = w - \eta f'(w)$
+   } 
+\end{algorithm}
+\newpage 
+\section{Algoritmos}
+
+A continuación presento los algoritmos de entrenamiento que se van a estudiar para este proyecto.
+
+\subsection{Backpropagation} \label{tab:Backprop}
 
 El algoritmo Backpropagation, abreviatura de ``backward propagation error", es un algoritmo de aprendizaje supervisado para redes neuronales que hace uso del gradiente descendente. Se trata de una generalización de la regla delta del perceptron para las redes neuronales multicapa. Su funcionamiento se basa en calcular el gradiente de la función de error con respecto a los pesos de la red. Para calcular los gradientes de cada capa primero se calculan los vectores de sensibilidad los cuales cuantifican cuanto cambia el error con respecto a $s^{(l)}$ siendo $s^{(l)} = (W^{(L)})x^{(l-1)}$ el resultado de multiplicar los pesos de la capa $l$, $W^{(L)}$, con el resultado de la capa $l-1$, $x^{(l-1)}$. Calculadas las sensibilidades el siguiente paso es calcular los gradientes, para ello se multiplicara cada vector de sensibilidad, $\delta^{(l)}$, por los resultados de cada capa, $x^{(l)}$. Finalmente para actualizar la red se usará la regla del gradiente descendente.
 
-\begin{algorithm}
+\begin{algorithm}[H]
    \caption{Backpropagation para calcular la sensibilidad}
    \KwData{Un punto de la muestra $(x,y)$; las matrices de pesos, $w = \{W^{1},...,W^{L}\}$; la función de activación $\theta$}
    \KwResult{La sensibilidad  $\delta^{(l)}$ para $l = \{L,...,1\}$}
@@ -27,7 +94,7 @@ El algoritmo Backpropagation, abreviatura de ``backward propagation error", es u
    \label{tab:Backprop_alg}
 \end{algorithm}
 
-\begin{algorithm}
+\begin{algorithm}[H]
    \caption{Proceso del calculo de gradientes $g = \nabla E_{in}(w)$ y la función de error $E_{in}(w)$}
    \KwData{$w = \{W^{1},...,W^{L}\}$; $D = (x_{1},y_{1}) ... (x_{N},y_{N})$}
    \KwResult{el error $E_{in}(w)$ y los gradientes $g = \{G^{1},...,G^{L}\}$}
@@ -45,11 +112,11 @@ El algoritmo Backpropagation, abreviatura de ``backward propagation error", es u
 
 La actualización de los pesos se hará con el uso del gradiente descendente el cual dependiendo de la estrategia usada se hará tras calcular los gradientes con un solo punto de la muestra, con un subconjunto o con todos los datos.
 
-\subsection{Eficiencia}
+\subsubsection{Eficiencia}
 
 A continuación, en este subapartado voy a realizar el análisis de la complejidad computacional del algoritmo. Para poder realizar el análisis lo primero que tendremos que saber es cual es la complejidad computacional de la multiplicación de matrices, ya que es una operación que se usa en todas las fases del algoritmo.
 
-\begin{algorithm}
+\begin{algorithm}[H]
    \caption{Multiplicación de matrices}
    \KwData{$A_{nxn}$ y $B_{nxn}$, matrices a multiplicar}
    \KwResult{$C_{nxn}$, matriz producto}
@@ -71,13 +138,13 @@ Realizado el feedforward se realiza el calculo del gradiente de la salida, cuya 
 
 Los 3 pasos anteriores se realizaran n veces por lo tanto, $O(n(n^4+n^4+n^4))$, es decir, que el algoritmo de backpropagation tiene una complejidad computacional de $O(n^5)$.
 
-\section{HSIC Bottleneck}
+\subsection{HSIC Bottleneck}
 
 El algoritmo HSIC Bottleneck se introduce en el año 2019 como alternativa a backpropagation para el entrenamiento de redes neuronales. La propuesta se basa en la teoría de la información, más específicamente en los principios de la desigualdad de Fano y la información mutua. En el contexto de las redes neuronales la desigualdad de Fano indica que la probabilidad de clasificar erróneamente depende de la entropía condicional $H(Y|X)$, siendo Y la etiqueta y X la entrada. Además la información mutua puede ser escrita de la siguiente forma: $I(X,Y) = H(Y) - H(Y|X)$. Debido a que la entropía de las etiquetas es constante con respecto a los pesos de la red, cuando la probabilidad de fallar en la clasificación es baja, $H(Y|X)$ es también bajo mientras que la información mutua es alta. 
 
 El algoritmo no usa directamente la información mutua debido a que se produciría overfitting, es por ello que se emplea una aproximación del infromation bottleneck llamado criterio de independencia HSIC para caracterizar la dependencia entre las distintas capas. El objetivo es que por cada capa de la red maximizar el HSIC entre la activación de la capa y la salida deseada y minimizar el HSIC entre la activación de la capa y la entrada.
 
-\begin{algorithm}
+\begin{algorithm}[H]
    \caption{Entrenamiento HSIC sin formato}
    \KwData{$X_{j} \epsilon R^{mxd_{x}}$: data batch $j$, $Y_{j} \epsilon R^{mxd_{y}}$: label batch j,  
    capa $T_{i}$ parametrizado por $\{\theta|W_{i}b_{i}\}$, $i \epsilon \{1,...,L\}:$ iterador de capas, $m:$ tamaño del batch, $n:$ numero de muestras, $\alpha:$ learning rate}
@@ -93,21 +160,21 @@ El algoritmo no usa directamente la información mutua debido a que se producir�
    
 \end{algorithm}
 
-\subsection{Eficiencia}
+\subsubsection{Eficiencia}
 
 
-El algoritmo se compone de dos bucles, uno que recorre los minibatches y otro que recorre las capas, por lo tanto tenemos bucles de $n/m$ iteraciones y $L$ iteraciones, siendo $n$ el número de muestras, $m$ el tamaño de los minibatches y $L$ el número de capas. Dentro de los bucles anidados encontramos una multiplicación de matrices cuya eficiencia es $O(n^3)$. La siguiente operacion es el calculo de HSIC que como se indica en el paper su complejidad computacional depende del número de datos que le pasemos $m$, siendo $O(m^2)$, como $m < n$, lo podemos escribir como $O(n^2)$. Finalmente el último paso se trata de una actualización de los pesos de los pesos de la capa mediante gradiente descendente, por lo tanto tiene una eficiencia de $O(n^2)$. 
+El algoritmo se compone de dos bucles, uno que recorre los minibatches y otro que recorre las capas, por lo tanto tenemos bucles de $n/m$ iteraciones y $L$ iteraciones, siendo $n$ el número de muestras, $m$ el tamaño de los minibatches y $L$ el número de capas. Dentro de los bucles anidados encontramos una multiplicación de matrices cuya eficiencia es $O(n^3)$. La siguiente operacion es el calculo de HSIC que como se indica en el paper su complejidad computacional depende del número de datos que le pasemos $m$, siendo $O(m^2)$, como $m < n$, lo podemos escribir como $O(n^2)$. Finalmente el último paso se trata de una actualización de los pesos de la capa mediante gradiente descendente, por lo tanto tiene una eficiencia de $O(n^2)$. 
 
-Como ya sabemos las eficiencias de las operaciones que se realizan dentro de los bucles solo nos falta multiplicarlas por los bucles para hallar la complejidad del algoritmo. Se trata de dos bucles anidades por lo tanto $O(n^{2}(n^{3}+n^{2}+n^{2})) = O(n^{5}+n^{4}+n^{4}) = O(n^{5})$.
+Como ya sabemos las eficiencias de las operaciones que se realizan dentro de los bucles, solo nos falta multiplicarlas por los bucles para hallar la complejidad del algoritmo. Se trata de dos bucles anidados por lo tanto $O(n^{2}(n^{3}+n^{2}+n^{2})) = O(n^{5}+n^{4}+n^{4}) = O(n^{5})$.
 
 
-\section{Synthetic gradient}
+\subsection{Synthetic gradient}
 
-Synthetic Gradient es un algoritmo propuesto por la empresa DeepMind. La característica principal de este algoritmo es que entrena la red mediante gradiente descendente haciendo uso de gradientes sintéticos, es decir, gradientes resultantes de la predicción de una red neuronal auxiliar. El problema que intenta resolver este algoritmo es el del bloqueo que se produce en el backpropagation. Cuando una capa envía información hacia delante, tiene que esperar a que esta información llegue hasta la capa de salida de la red, se calcule el error, se calculo el gradiente y que se propague capa por capa. Para eliminar esta espera se introducen entre las capas unos módulos llamados módulos de comunicación que se encargarán de calcular los gradientes sintéticos. 
+Synthetic Gradient es un algoritmo propuesto por la empresa DeepMind. La característica principal de este algoritmo es que entrena la red mediante gradiente descendente haciendo uso de gradientes sintéticos, es decir, gradientes resultantes de la predicción de una red neuronal auxiliar. El problema que intenta resolver este algoritmo es el del bloqueo que se produce en el backpropagation. Cuando una capa envía información hacia delante, tiene que esperar a que esta información llegue hasta la capa de salida de la red, se calcule el error, se calcule el gradiente y que se propague capa por capa. Para eliminar esta espera se introducen entre las capas unos módulos llamados módulos de comunicación que se encargarán de calcular los gradientes sintéticos. 
 
-El funcionamiento que siguen estas redes es el siguiente: la red recibe la entrada y comienza con el proceso de feedforward. Suponiendo que introducimos un modulo de comunicación entre cada pareja de capas contiguas, en cada paso del feedforward la información se transmite a la capa i+1 y al modulo de comunicación i+1. Este modulo de comunicación (un perceptron multicapa MLP) procesará el mensaje y realizará una predicción del gradiente correspondiente. El gradiente se envía a la capa i y esta se actualizara por gradiente descendente. Cuando se alcanza la última capa se calcula el error y se calcula el gradiente real que se irá propagando hacia atrás en varias iteraciones. El gradiente real se usará para actualizar los módulos de comunicación para que estos consigan hacer predicciones cada vez más precisas.
+El funcionamiento que siguen estas redes es el siguiente: la red recibe la entrada y comienza con el proceso de feedforward. Suponiendo que introducimos un modulo de comunicación entre cada pareja de capas contiguas, en cada paso del feedforward la información se transmite a la capa i+1 y al modulo de comunicación i+1. Este modulo de comunicación (un perceptron multicapa MLP) procesará el mensaje y realizará una predicción del gradiente correspondiente. El gradiente se envía a la capa i y esta se actualizara por gradiente descendente. Cuando se alcanza la última capa se calcula el error y se calcula el gradiente real que se irá propagando hacia atrás. El gradiente real se usará para actualizar los módulos de comunicación.
 
-\begin{algorithm}
+\begin{algorithm}[H]
    \caption{Synthetic gradient (supongo un modulo por pareja de capas)}
    \KwData{$w = \{W^{1},...,W^{L}\}$; $D = (x_{1},y_{1}) ... (x_{N},y_{N})$}
    \KwResult{Red entrenada por synthetic gradient}
@@ -117,7 +184,7 @@ El funcionamiento que siguen estas redes es el siguiente: la red recibe la entra
             Calculo de synthetic gradient (Feedforward red modulo) \\
             Actualizar capa $i$
         }
-        
+        Calcular gradiente ultima capa \\
         \For{$i = L-1$ to $1$}{
             Calcular gradiente con Backprop \\
             Actualizar modulo i
@@ -126,16 +193,27 @@ El funcionamiento que siguen estas redes es el siguiente: la red recibe la entra
    }
 \end{algorithm}
 
-\subsection{Eficiencia}
+\subsubsection{Eficiencia}
+Con respecto a la eficiencia, estamos ante el algoritmo menos eficiente teóricamente, ya que además de realizar el backpropagation tiene que entrenar y ejecutar los módulos adicionales para el cálculo de gradientes sintéticos. 
+
+El primer paso de este algoritmo es el feedforward, (primer bucle interno). En este bucle se transmite la información hacia delante y se actualizará cada capa con el gradiente sintético calculado por los módulos correspondientes. Por cada capa se realiza una multiplicación de matrices para propagar la información, $O(n^{3})$, el calculo del gradiente por el modulo de comunicación, como se trata de un perceptron multicapa muy sencillo (1-3 capas) podemos asumir que la complejidad de este proceso es de $O(n^{3})$, y por último se actualiza la capa gradiente descendente, $O(n)$. Esta primera fase del algoritmo tiene por tanto una eficiencia de $O(n(n^{3}+n^{3}+n))=O(n^{4})$.
+
+El siguiente bucle del algoritmo se encarga de realizar el calculo del gradiente real y propagarlo hacia atrás para actualizar los módulos de actualización. El calculo del gradiente de cada capa se realiza en $O(n^3)$ y actualizar cada modulo tendrá un coste de $O(n^{4})$, ya que consiste en actualizar mediante backpropagation un MLP. Este bucle se ejecuta otras n veces por lo que tendrá una eficiencia de $O(n(n^3+n^4) = O(n^5)$.
+
+Juntando ambos bucles, los cuales se ejecutarán n veces en función del número de muestras, obtenemos que la eficiencia final del algoritmo es de $O(n(n^4+n^5)) = O(n^6)$. 
+
+Como apunte final cabe mencionar que se trata del algoritmo más costoso computacionalmente si este ejecuta de manera secuencial sin hacer uso de multithreading. La potencia de este algoritmo reside en que el entrenamiento de cada una de las capas se puede realizar de manera independiente haciendo uso de múltiples hilos lo que provocaría una gran disminución de los tiempos de ejecución. Para este trabajo no se va a realizar dicha paralelización ya que nuestro objetivo no es el de encontrar el algoritmo más eficiente. Para obtener más información sobre la comparación de rendimiento real entre backpropagation y synthetic gradients consultar el siguiente paper \cite{RefWorks:RefID:14-bisong2017benchmarking}.
 
 
-\section{Feedback alignment}
 
-El algoritmo de feedback alignment \cite{RefWorks:RefID:9-lillicrap2016random} se trata de una alternativa a backpropagation que propone como mejora el uso de matrices aleatorias fijadas de antemano para la retropropagación de valores en vez de usar la matriz traspuesta de los pesos de la red. Esta idea surge debido a que el algoritmo de backpropagation no es posible biológicamente ya que el cerebro debería de tener las mismas conexiones para las fases hacia delante y hacia atrás, cosa que no ocurre. El hecho de usar las mismas matrices de pesos en ambas fases acarrea el problema del transporte de pesos \cite{RefWorks:RefID:10-grossberg1987competitive}, cuyo nombre se debe a que para poder actualizar los pesos correctamente los pesos se ``transportan" hacia detrás al propagar el error. 
+
+\subsection{Feedback alignment}
+
+El algoritmo de feedback alignment \cite{RefWorks:RefID:9-lillicrap2016random} se trata de una alternativa a backpropagation que propone como mejora el uso de matrices aleatorias fijadas de antemano para la retropropagación de valores, en vez de usar la matriz traspuesta de los pesos de la red. Esta idea surge debido a que el algoritmo de backpropagation no es posible biológicamente ya que el cerebro debería de tener las mismas conexiones para las fases hacia delante y hacia atrás, cosa que no ocurre. El hecho de usar las mismas matrices de pesos en ambas fases acarrea el problema del transporte de pesos \cite{RefWorks:RefID:10-grossberg1987competitive}, cuyo nombre se debe a que para poder actualizar los pesos correctamente los pesos se ``transportan" hacia detrás al propagar el error. 
 
 El algoritmo a pesar de usar pesos aleatorios fijados consigue encontrar las soluciones debido a la siguiente propiedad: cualquier matriz $B$ de pesos aleatorias es válida para el aprendizaje si cumple $e^{T}WBe>0$, es decir, que la señal de enseñanza de la matiz $Be$ no difiera en más de 90º a la usada por el backpropagation $W^{T}e$, por lo tanto B empuja a la red prácticamente en la misma dirección en la que lo haría $W$. Para acelerar el aprendizaje se tendría que estrechar la diferencia entre las direcciones de ambas matrices, pero esto no es necesario ya que se realiza automáticamente por el alineamiento. Este fenómeno se produce debido a que $B$ influye en $W$ en el proceso de aprendizaje pues este se actualiza en base a $B$ lo que produce dicho alineamiento.
 
-\begin{algorithm}
+\begin{algorithm}[H]
    \caption{Backpropagation para calcular la sensibilidad}
    \KwData{Un punto de la muestra $(x,y)$; las matrices de pesos, $w = \{W^{1},...,W^{L}\}$; la matriz de pesos aleatorios $b = \{B^{1},...,B^{L}\}$; la función de activación $\theta$}
    \KwResult{La sensibilidad  $\delta^{(l)}$ para $l = \{L,...,1\}$}
@@ -149,8 +227,8 @@ El algoritmo a pesar de usar pesos aleatorios fijados consigue encontrar las sol
    
 \end{algorithm}
 
-El resto de procesos se realiza de manera idéntica al algoritmo de backpropagation \ref{tab:Backprop}.
+El resto de procesos se realiza de manera idéntica al algoritmo de backpropagation. \ref{tab:Backprop}.
 
-\subsection{Eficiencia}
+\subsubsection{Eficiencia}
 
 Al realizar las mismas operaciones que el algoritmo de Backpropagation tiene la misma eficiencia, es decir, $O(n^{5})$
