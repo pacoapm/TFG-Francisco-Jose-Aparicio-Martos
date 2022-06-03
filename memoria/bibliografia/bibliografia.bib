@@ -104,3 +104,287 @@
 	title={Benchmarking Decoupled Neural Interfaces with Synthetic Gradients},
 	abstract={Artifical Neural Network are a particular class of learning system modeled after biological neural functions with an interesting penchant for Hebbian learning, that is "neurons that wire together, fire together". However, unlike their natural counterparts, artificial neural networks have a close and stringent coupling between the modules of neurons in the network. This coupling or locking imposes upon the network a strict and inflexible structure that prevent layers in the network from updating their weights until a full feed-forward and backward pass has occurred. Such a constraint though may have sufficed for a while, is now no longer feasible in the era of very-large-scale machine learning, coupled with the increased desire for parallelization of the learning process across multiple computing infrastructures. To solve this problem, synthetic gradients (SG) with decoupled neural interfaces (DNI) are introduced as a viable alternative to the backpropagation algorithm. This paper performs a speed benchmark to compare the speed and accuracy capabilities of SG-DNI as over to a standard neural interface using multilayer perceptron MLP. SG-DNI shows good promise, in that it not only captures the learning problem, it is also over 3-fold faster due to it asynchronous learning capabilities.}
 }
+
+@article{RefWorks:RefID:22-jain1996artificial,
+	author={A. K. Jain and Jianchang Mao and K. M. Mohiuddin},
+	year={1996},
+	month={March},
+	title={Artificial neural networks: a tutorial},
+	journal={Computer},
+	volume={29},
+	number={3},
+	pages={31-44},
+	abstract={Artificial neural nets (ANNs) are massively parallel systems with large numbers of interconnected simple processors. The article discusses the motivations behind the development of ANNs and describes the basic biological neuron and the artificial computational model. It outlines network architectures and learning processes, and presents some of the most commonly used ANN models. It concludes with character recognition, a successful ANN application.},
+	isbn={1558-0814},
+	doi={10.1109/2.485891}
+}
+
+@inproceedings{10.5555/2969442.2969588,
+author = {Courbariaux, Matthieu and Bengio, Yoshua and David, Jean-Pierre},
+title = {BinaryConnect: Training Deep Neural Networks with Binary Weights during Propagations},
+year = {2015},
+publisher = {MIT Press},
+address = {Cambridge, MA, USA},
+abstract = {Deep Neural Networks (DNN) have achieved state-of-the-art results in a wide range of tasks, with the best results obtained with large training sets and large models. In the past, GPUs enabled these breakthroughs because of their greater computational speed. In the future, faster computation at both training and test time is likely to be crucial for further progress and for consumer applications on low-power devices. As a result, there is much interest in research and development of dedicated hardware for Deep Learning (DL). Binary weights, i.e., weights which are constrained to only two possible values (e.g. -1 or 1), would bring great benefits to specialized DL hardware by replacing many multiply-accumulate operations by simple accumulations, as multipliers are the most space and power-hungry components of the digital implementation of neural networks. We introduce BinaryConnect, a method which consists in training a DNN with binary weights during the forward and backward propagations, while retaining precision of the stored weights in which gradients are accumulated. Like other dropout schemes, we show that BinaryConnect acts as regularizer and we obtain near state-of-the-art results with BinaryConnect on the permutation-invariant MNIST, CIFAR-10 and SVHN.},
+booktitle = {Proceedings of the 28th International Conference on Neural Information Processing Systems - Volume 2},
+pages = {3123–3131},
+numpages = {9},
+location = {Montreal, Canada},
+series = {NIPS'15}
+}
+
+@inproceedings{Rastegari2016XNORNetIC,
+  title={XNOR-Net: ImageNet Classification Using Binary Convolutional Neural Networks},
+  author={Mohammad Rastegari and Vicente Ordonez and Joseph Redmon and Ali Farhadi},
+  booktitle={ECCV},
+  year={2016}
+}
+
+@inproceedings{DBLP:journals/corr/HanMD15,
+  author    = {Song Han and
+               Huizi Mao and
+               William J. Dally},
+  editor    = {Yoshua Bengio and
+               Yann LeCun},
+  title     = {Deep Compression: Compressing Deep Neural Network with Pruning, Trained
+               Quantization and Huffman Coding},
+  booktitle = {4th International Conference on Learning Representations, {ICLR} 2016,
+               San Juan, Puerto Rico, May 2-4, 2016, Conference Track Proceedings},
+  year      = {2016},
+  url       = {http://arxiv.org/abs/1510.00149},
+  timestamp = {Fri, 20 Nov 2020 16:16:06 +0100},
+  biburl    = {https://dblp.org/rec/journals/corr/HanMD15.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{DBLP:conf/iclr/ChoiEL17,
+  author    = {Yoojin Choi and
+               Mostafa El{-}Khamy and
+               Jungwon Lee},
+  title     = {Towards the Limit of Network Quantization},
+  booktitle = {5th International Conference on Learning Representations, {ICLR} 2017,
+               Toulon, France, April 24-26, 2017, Conference Track Proceedings},
+  publisher = {OpenReview.net},
+  year      = {2017},
+  url       = {https://openreview.net/forum?id=rJ8uNptgl},
+  timestamp = {Thu, 25 Jul 2019 14:25:57 +0200},
+  biburl    = {https://dblp.org/rec/conf/iclr/ChoiEL17.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{DBLP:journals/corr/ZhouYGXC17,
+  author    = {Aojun Zhou and
+               Anbang Yao and
+               Yiwen Guo and
+               Lin Xu and
+               Yurong Chen},
+  title     = {Incremental Network Quantization: Towards Lossless CNNs with Low-Precision
+               Weights},
+  journal   = {CoRR},
+  volume    = {abs/1702.03044},
+  year      = {2017},
+  url       = {http://arxiv.org/abs/1702.03044},
+  eprinttype = {arXiv},
+  eprint    = {1702.03044},
+  timestamp = {Wed, 01 Sep 2021 08:15:50 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/ZhouYGXC17.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{DBLP:journals/corr/SchumanPPBDRP17,
+  author    = {Catherine D. Schuman and
+               Thomas E. Potok and
+               Robert M. Patton and
+               J. Douglas Birdwell and
+               Mark E. Dean and
+               Garrett S. Rose and
+               James S. Plank},
+  title     = {A Survey of Neuromorphic Computing and Neural Networks in Hardware},
+  journal   = {CoRR},
+  volume    = {abs/1705.06963},
+  year      = {2017},
+  url       = {http://arxiv.org/abs/1705.06963},
+  eprinttype = {arXiv},
+  eprint    = {1705.06963},
+  timestamp = {Sat, 23 Jan 2021 01:11:47 +0100},
+  biburl    = {https://dblp.org/rec/journals/corr/SchumanPPBDRP17.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@misc{https://doi.org/10.48550/arxiv.1705.06963,
+  doi = {10.48550/ARXIV.1705.06963},
+  
+  url = {https://arxiv.org/abs/1705.06963},
+  
+  author = {Schuman, Catherine D. and Potok, Thomas E. and Patton, Robert M. and Birdwell, J. Douglas and Dean, Mark E. and Rose, Garrett S. and Plank, James S.},
+  
+  keywords = {Neural and Evolutionary Computing (cs.NE), FOS: Computer and information sciences, FOS: Computer and information sciences},
+  
+  title = {A Survey of Neuromorphic Computing and Neural Networks in Hardware},
+  
+  publisher = {arXiv},
+  
+  year = {2017},
+  
+  copyright = {arXiv.org perpetual, non-exclusive license}
+}
+
+@misc{https://doi.org/10.48550/arxiv.1808.04752,
+  doi = {10.48550/ARXIV.1808.04752},
+  
+  url = {https://arxiv.org/abs/1808.04752},
+  
+  author = {Guo, Yunhui},
+  
+  keywords = {Machine Learning (cs.LG), Neural and Evolutionary Computing (cs.NE), Machine Learning (stat.ML), FOS: Computer and information sciences, FOS: Computer and information sciences},
+  
+  title = {A Survey on Methods and Theories of Quantized Neural Networks},
+  
+  publisher = {arXiv},
+  
+  year = {2018},
+  
+  copyright = {arXiv.org perpetual, non-exclusive license}
+}
+
+@misc{https://doi.org/10.48550/arxiv.1212.5701,
+  doi = {10.48550/ARXIV.1212.5701},
+  
+  url = {https://arxiv.org/abs/1212.5701},
+  
+  author = {Zeiler, Matthew D.},
+  
+  keywords = {Machine Learning (cs.LG), FOS: Computer and information sciences, FOS: Computer and information sciences},
+  
+  title = {ADADELTA: An Adaptive Learning Rate Method},
+  
+  publisher = {arXiv},
+  
+  year = {2012},
+  
+  copyright = {arXiv.org perpetual, non-exclusive license}
+}
+
+@article{yu2011levenberg,
+  title={Levenberg-marquardt training},
+  author={Yu, Hao and Wilamowski, Bogdan M},
+  journal={Industrial electronics handbook},
+  volume={5},
+  number={12},
+  pages={1},
+  year={2011},
+  publisher={CRC Press Boca Raton, FL, USA}
+}
+
+@inproceedings{ma2020hsic,
+  title={The HSIC bottleneck: Deep learning without back-propagation},
+  author={Ma, Wan-Duo Kurt and Lewis, JP and Kleijn, W Bastiaan},
+  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+  volume={34},
+  number={04},
+  pages={5085--5092},
+  year={2020}
+}
+
+@inproceedings{jaderberg2017decoupled,
+  title={Decoupled neural interfaces using synthetic gradients},
+  author={Jaderberg, Max and Czarnecki, Wojciech Marian and Osindero, Simon and Vinyals, Oriol and Graves, Alex and Silver, David and Kavukcuoglu, Koray},
+  booktitle={International conference on machine learning},
+  pages={1627--1635},
+  year={2017},
+  organization={PMLR}
+}
+
+@article{doi:10.1142/S0129065709002002,
+author = {GHOSH-DASTIDAR, SAMANWOY and ADELI, HOJJAT},
+title = {SPIKING NEURAL NETWORKS},
+journal = {International Journal of Neural Systems},
+volume = {19},
+number = {04},
+pages = {295-308},
+year = {2009},
+doi = {10.1142/S0129065709002002},
+    note ={PMID: 19731402},
+
+URL = { 
+        https://doi.org/10.1142/S0129065709002002
+    
+},
+eprint = { 
+        https://doi.org/10.1142/S0129065709002002
+    
+}
+,
+    abstract = { Most current Artificial Neural Network (ANN) models are based on highly simplified brain dynamics. They have been used as powerful computational tools to solve complex pattern recognition, function estimation, and classification problems. ANNs have been evolving towards more powerful and more biologically realistic models. In the past decade, Spiking Neural Networks (SNNs) have been developed which comprise of spiking neurons. Information transfer in these neurons mimics the information transfer in biological neurons, i.e., via the precise timing of spikes or a sequence of spikes. To facilitate learning in such networks, new learning algorithms based on varying degrees of biological plausibility have also been developed recently. Addition of the temporal dimension for information encoding in SNNs yields new insight into the dynamics of the human brain and could result in compact representations of large neural networks. As such, SNNs have great potential for solving complicated time-dependent pattern recognition problems because of their inherent dynamic representation. This article presents a state-of-the-art review of the development of spiking neurons and SNNs, and provides insight into their evolution as the third generation neural networks. }
+}
+
+@ARTICLE{6750072,
+  author={Furber, Steve B. and Galluppi, Francesco and Temple, Steve and Plana, Luis A.},
+  journal={Proceedings of the IEEE}, 
+  title={The SpiNNaker Project}, 
+  year={2014},
+  volume={102},
+  number={5},
+  pages={652-665},
+  doi={10.1109/JPROC.2014.2304638}
+  }
+ 
+@ARTICLE{8259423,
+  author={Davies, Mike and Srinivasa, Narayan and Lin, Tsung-Han and Chinya, Gautham and Cao, Yongqiang and Choday, Sri Harsha and Dimou, Georgios and Joshi, Prasad and Imam, Nabil and Jain, Shweta and Liao, Yuyun and Lin, Chit-Kwan and Lines, Andrew and Liu, Ruokun and Mathaikutty, Deepak and McCoy, Steven and Paul, Arnab and Tse, Jonathan and Venkataramanan, Guruguhanathan and Weng, Yi-Hsin and Wild, Andreas and Yang, Yoonseok and Wang, Hong},
+  journal={IEEE Micro}, 
+  title={Loihi: A Neuromorphic Manycore Processor with On-Chip Learning}, 
+  year={2018},
+  volume={38},
+  number={1},
+  pages={82-99},
+  doi={10.1109/MM.2018.112130359}}
+  
+@misc{10481/72221,
+year = {2021},
+month = {12},
+url = {http://hdl.handle.net/10481/72221},
+abstract = {We have performed different simulation experiments in relation to hardware neural
+networks (NN) to analyze the role of the number of synapses for different NN architectures in
+the network accuracy, considering different datasets. A technology that stands upon 4-kbit 1T1R
+ReRAM arrays, where resistive switching devices based on HfO2 dielectrics are employed, is taken
+as a reference. In our study, fully dense (FdNN) and convolutional neural networks (CNN) were
+considered, where the NN size in terms of the number of synapses and of hidden layer neurons
+were varied. CNNs work better when the number of synapses to be used is limited. If quantized
+synaptic weights are included, we observed thatNNaccuracy decreases significantly as the number of
+synapses is reduced; in this respect, a trade-off between the number of synapses and the NN accuracy
+has to be achieved. Consequently, the CNN architecture must be carefully designed; in particular,
+it was noticed that different datasets need specific architectures according to their complexity to
+achieve good results. It was shown that due to the number of variables that can be changed in the
+optimization of a NN hardware implementation, a specific solution has to be worked in each case in
+terms of synaptic weight levels, NN architecture, etc.},
+organization = {German Research Foundation (DFG)
+under Project 434434223-SFB1461},
+organization = {Federal Ministry of Education and Research of Germany under
+Grant 16ME0092},
+organization = {Consejería de Conocimiento, Investigación y Universidad, Junta de Andalucía
+(Spain) and European Regional Development Fund (ERDF) under projects A-TIC-117-UGR18, B-TIC-
+624-UGR20 and IE2017-5414},
+organization = {Spanish Ministry of Science, Innovation and Universities
+and ERDF fund under projects RTI2018-098983-B-I00 and TEC2017-84321-C4-3-R},
+publisher = {MDPI},
+keywords = {Memristor},
+keywords = {Multilevel operation},
+keywords = {Hardware neural network},
+keywords = {Deep neural network (DNN)},
+keywords = {Convolutional neural network (CNN)},
+keywords = {Network architecture},
+keywords = {Synaptic weight},
+title = {An Analysis on the Architecture and the Size of Quantized Hardware Neural Networks Based on Memristors},
+doi = {10.3390/electronics10243141},
+author = {Romero Zaliz, Rocio Celeste and Cantudo, Antonio and Jiménez Molinos, Francisco and Roldán Aranda, Juan Bautista},
+}
+
+@ARTICLE{8705375,  
+author={Zhang, Yang and Cui, Menglin and Shen, Linlin and Zeng, Zhigang},  
+journal={IEEE Transactions on Cybernetics},   
+title={Memristive Quantized Neural Networks: A Novel Approach to Accelerate Deep Learning On-Chip},   
+year={2021},  
+volume={51},  
+number={4},  
+pages={1875-1887},  
+doi={10.1109/TCYB.2019.2912205}}

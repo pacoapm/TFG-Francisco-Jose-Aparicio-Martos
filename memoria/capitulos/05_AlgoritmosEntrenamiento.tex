@@ -1,28 +1,67 @@
 \chapter{Algoritmos de entrenamiento}
 
-En el campo del machine learning los algoritmos más usados son las redes neuronales. Con este tipo de algoritmos los ordenadores son capaces de realizar predicciones, encontrar patrones y replicar acciones que un ser humano puede hacer, como por ejemplo: el reconocimiento y la clasificación de objetos. Para que las redes neuronales puedan hacer estas tareas es necesario realizar un entrenamiento con grandes bases de datos. En el proceso de entrenamiento a la red neuronal (en el caso del aprendizaje supervisado) se le muestra ejemplos de los problemas que tiene que resolver junto a su solución y en función de si ha conseguido resolver o no el problema la red se actualizará. 
+Estructura (borrador):
+Revisión estado del arte: 
+    -Que es una red neuronal   
+    -Problemas que se resuelven  
+    -Algoritmos de entrenamiento: backprop y modificaciones no muy viables 
+    -Algoritmos seleccionados para el estudio  
+    -Estudios que se han realizado sobre redes neuronales cuantizadas, mencionar los de rocío y explicar que como los basados en memristores se centran en aplicar solo backrpop no se han estudiado como se comportarían otras alternativas, y que por eso se realiza este estudio. En este apartado mencionar el paper del survey y mencionar que las implementaciones que hay a día de hoy son alternativas del backprop adaptadas al propio circuito x, y que las alternativas a backprop no se aplican directamente sobre los chips, por ejemplo, algoritmos evolutivos. Recordar que estamos tratando el campo de redes feedforward con problemas de aprendizaje supervisado. Hay que dejarlo especificado.
 
-Los métodos que se usan para enseñar a la redes neuronales se conocen como algoritmos de entrenamiento. Un buen algoritmo de entrenamiento tiene que ser capaz de poder mejorar el desempeño de la red neuronal en la base de datos de entrenamiento.
+Preliminares (algoritmos comunes a los algoritmos explicados)
+Definición de los algoritmos
+Explicación breve sobre los memristores
+-¿Explicar qué es una red nueronal?En que consiste un problema de clasificacion y de regresión
+
+En el campo del machine learning los algoritmos más usados son las redes neuronales. Con este tipo de algoritmos los ordenadores son capaces de realizar predicciones, encontrar patrones y replicar acciones que un ser humano puede hacer, como por ejemplo: el reconocimiento y la clasificación de objetos. Para que las redes neuronales puedan hacer estas tareas es necesario realizar un entrenamiento con grandes bases de datos. En el proceso de entrenamiento a la red neuronal (en el caso del aprendizaje supervisado) se le muestra ejemplos de los problemas que tiene que resolver junto a su solución y en función de si ha conseguido resolver o no el problema la red se actualizará. Pero, ¿qué es una red neuronal?.
+
+Una red neuronal \cite{RefWorks:RefID:22-jain1996artificial} es un sistema de cómputo que consiste en un grafo dirigido ponderado en el que las neuronas artificiales son los nodos del grafo y los pesos de la red son las  aristas ponderadas que conectan la salida de las neuronas con las entradas. Estas neuronas están formadas por dendritas, las conexiones de entrada, y por los axones, las conexiones de salida. Dentro de cada una de estas neuronas se realiza una suma ponderada con los pesos de las dendritas y tras aplicarle una función de activación se transmite el resultado a las neuronas de la siguiente capa a través de los axones. El objetivo de entrenar una red neuronal es conseguir ajustar los pesos de la red para conseguir resolver problemas, ya sean de regresión, clasificación o una combinación de ambos. Los métodos que se usan para enseñar a la redes neuronales se conocen como algoritmos de entrenamiento. Un buen algoritmo de entrenamiento tiene que ser capaz de poder mejorar el desempeño de la red neuronal haciendo uso de la base de datos de entrenamiento de nuestro problema.
 
 Actualmente el algoritmo más usado es el backpropagation \cite{RefWorks:RefID:6-rumelhart1986learning} debido a su capacidad de encontrar buenos resultados y a su eficiencia. Desde que se inventó este algoritmo ha sido el más estudiado creándose numerosas variantes cuyo objetivo era el de mejorar los puntos débiles de este algoritmo, como son su inviabilidad biológica, el problema del transporte de pesos \cite{RefWorks:RefID:10-grossberg1987competitive} y el desvanecimiento de gradientes.
 
-Haciendo una revisión en la literatura actual nos podemos encontrar con algunos de los algoritmos más populares como son el grupo de los métodos quasi-newton, el método del gradiente conjugado y el algoritmo de levenberg marquardt.
+Haciendo una revisión en la literatura actual nos podemos encontrar con algunos de los algoritmos más populares como son el grupo de los métodos quasi-newton, el método del gradiente conjugado\cite{RefWorks:RefID:13-johansson1991backpropagation} y el algoritmo de levenberg-marquardt\cite{yu2011levenberg}.
 
 Los métodos quasi-newton son aproximaciones al método de newton. La motivación de estos algoritmos es conseguir aplicar de manera práctica el método de newton a problemas de deep learning. El gran problema que tiene el método de newton es su alto coste computacional debido a que hace uso de la derivada de segundo orden para la optimización de funciones, es decir, necesita realizar el cálculo de la matriz Hessiana. En problemas con un número de variables grande hace que sea imposible aplicar este algoritmo. Es por este motivo por lo que surgen los métodos quasi-newton los cuales abordan el problema del cálculo de la matriz Hessiana mediante aproximaciones. Dentro del conjunto de estos algoritmos uno de los más conocidos es el L-BFGS \cite{RefWorks:RefID:12-rafati2018improving} (Limited-Broyden–Fletcher–Goldfarb–Shanno), el cual aproxima la matriz Hessiana de manera iterativa creando un proceso mucho más eficiente. 
 
-El gradiente conjugado \cite{RefWorks:RefID:13-johansson1991backpropagation} se trata de un algoritmo que se encuentra entre el gradiente descendente y el método de newton. La motivación de este algoritmo es solucionar la convergencia lenta del gradiente descendente y evitar los requerimientos del cálculo de la matriz Hessiana como invertir la matriz, evaluarla y almacenarla. 
+Por su parte el gradiente conjugado  se trata de un algoritmo que se encuentra entre el gradiente descendente y el método de newton. La motivación de este algoritmo es solucionar la convergencia lenta del gradiente descendente y evitar los requerimientos del cálculo de la matriz Hessiana como invertir la matriz, evaluarla y almacenarla. 
 
-Por su parte el método del levenberg-marquardt esta diseñado para trabajar con la función de pérdida. No necesita calcular la matriz Hessiana, sino que calcula el vector gradiente y la matriz Jacobiana.
+Finalmente, el método del levenberg-marquardt esta diseñado para trabajar con la función de pérdida. No necesita calcular la matriz Hessiana, sino que calcula el vector gradiente y la matriz Jacobiana.
 
-Además de los métodos ya mencionados, existen alternativas que se centran en mejorar el propio backpropagation como puede ser el algoritmo Adadelta, el cual modifica el comportamiento del learning rate para mejorar la convergencia y los resultados que obtiene. 
+Además de los métodos ya mencionados, existen alternativas que se centran en mejorar el propio backpropagation como puede ser el algoritmo Adadelta \cite{https://doi.org/10.48550/arxiv.1212.5701}, el cual modifica el comportamiento del learning rate para mejorar la convergencia y los resultados que obtiene. 
+
+Hasta ahora hemos analizando alternativas que no son muy viables computacionalmente para los problemas de hoy en día o algoritmos que no son alternativas como tal, si no más bien mejoras del propio backpropagation. A pesar de que estos ejemplos son los más ampliamente usados existen alternativas que no son tan usadas pero si suponen una alternativa real para el backpropagation. Estos son los algoritmos en los que se van a centrar el proyecto, pues el objetivo es estudiar como distintos algoritmos de entrenamiento se comportan bajo las condiciones de la cuantización. Los algoritmos seleccionados para este estudio son:  el HSIC Bottleneck \cite{ma2020hsic}, el feedback alignment \cite{RefWorks:RefID:9-lillicrap2016random} y synthetic gradients \cite{jaderberg2017decoupled}. Se tratan de algoritmos muy recientes los cuales han conseguido resultados suficientes como para ser considerados alternativas. La descripción y análisis se realizará en los siguientes apartados.  
+
+Vista la actualidad del entrenamiento de redes neuronales nos toca centrarnos en los otros dos aspectos que involucran este proyecto: la cuantificación de redes neuronales y la aplicación de redes neuronales en la computación neuromórfica.
+
+La cuantificación de redes neuronales es un campo de estudio que se encuentra en auge debido a cuestiones como el tamaño que ocupan los modelos y las velocidades de inferencia. Hoy en día los modelos más punteros consisten en arquitecturas de varios gigas de tamaño, por lo que solo pueden ser ejecutadas en equipos que cuenten con la capacidad de almacenamiento y de cómputo necesarias para realizar las inferencias. Estas restricciones provoca que dispositivos móviles no puedan usar este tipo de redes de forma nativa. 
+
+Con el objetivo de reducir los tamaños y aumentar las velocidades de inferencia se crean los métodos de cuantificación. Estos técnicas consisten en reducir la precisión numérica de la red, cuantificando los pesos y en ocasiones las operaciones dentro de la red. El proceso de cuantificar consiste en transformar los números de alta precisión en enteros de 1-8 bits, para ello existen varios métodos que se pueden dividir en procesos determinísticos y probabilísticos. Los procesos determinísticos mapean los números de alta precisión en el espacio de los números enteros de baja precisión, existiendo una relación de 1 a 1, un ejemplo es el método de redondeo que se usa en el BinaryConnect \cite{10.5555/2969442.2969588}, donde se realiza una cuantificación binaria en función del signo. Por otro lado, los procesos probabilísticos usan distribuciones de probabilidad para realizar las cuantificaciones por lo que un número no siempre se cuantificará de la misma manera, ejemplo de este tipo de cuantificaciones se puede encontrar en el paper de BinaryConnect en el que la cuantificación estocásticas se realiza en base a una distribución de probabilidad, la intuición es que si el valor es positivo existe una alta probabilidad de que su valor final sea 1, pero también cabe la posibilidad de que se cuantifique como -1. 
+
+Otro elemento importante de la cuantificación de redes neuronales es el momento en el que se aplican dichas cuantificaciones, pudiendo realizarse la cuantificación durante el entrenamiento o después del entrenamiento. Durante el entrenamiento la cuantificación se aplica durante el feedforward pass y durante el backward pass mientras se realiza el entrenamiento. Implementaciones de este tipo de cuantificaciones nos lo podemos encontrar en estudios como el ya mencionado BinaryConnect, donde se entrena una red binaria y en XNOR-Net \cite{Rastegari2016XNORNetIC} que aplica redes binarias a problemas más grandes como ImageNet. Por su parte la redes que usan cuantificación después del entrenamiento no aplican ninguna cuantificación a su entrenamiento, la red una vez entrenada es cuantificada para reducir su tamaño y acelerar la inferencia. Ejemplos de este tipo de cuantificaciones son: DeepCompression \cite{DBLP:journals/corr/HanMD15}, reduce el tamaño de la red podando conexiones irrelevantes y los pesos restantes los cuantifica a valores discretos; Entropy-constrained scalar quantization \cite{DBLP:conf/iclr/ChoiEL17}, tiene en cuenta la información de la segunda derivada de la función de pérdida para medir la importancia de los distintos pesos, y la cuantificación se realiza a través de técnicas de clustering; e Incremental network quantization \cite{DBLP:journals/corr/ZhouYGXC17}, cuyo proceso de cuantificación se divide en tres partes: partición de pesos, cuantificación por grupo y reentreno. \cite{https://doi.org/10.48550/arxiv.1808.04752}
+
+El último campo que queda por revisar es el de la computación neuromórfica, centrando la atención al estudio de la aplicación de redes neuronales a este tipo de circuitos. 
+
+En la actualidad la computación neuromórfica se encuentra en auge debido a los problemas anteriormente mencionados: ralentizacion de la ley de Moore, el memory wall problem y la contaminación producida por los procesos de entrenamiento de redes neuronales; y a sus  grandes ventajas: alto nivel de paralelismo, escalabilidad inherente, computación dirigida por eventos y estocasticidad. Sin embargo, la computación neuromórfica se encuentra en una temprana edad y las numerosas investigaciones que se han realizado están lejos de la fase de producción. Dentro de estos estudios los frameworks más destacados son: TrueNorth \cite{doi:10.1142/S0129065709002002}, SpiNNaker \cite{6750072} y Loihi \cite{8259423}. En el estudio de TrueNorth se han centrado en la aplicación de spiking neural networks \cite{doi:10.1142/S0129065709002002}, esta red es entrenada off-chip, es decir, no se entrenaba en el propio circuito y después se transformaba para ejecutarse en el circuito neuromórfico. SpiNNaker también aplica spiking neurons teniendo como ventaja principal una mayor flexibilidad en la elección de la topología de la red y el tipo de neurona a usar. Loihi al igual que los anteriores aplica las spiking neurons pero tiene como novedad el entrenamiento on-chip. Las otras redes que se aplican en los circuitos neuromórficos son las fully connected y las convolutional neural networks, investigado como afecta la cuantificación a las redes una vez ya entrenadas. En este estudio \cite{10481/72221} se ve como afecta la reducción de la precisión numérica de los pesos al rendimiento final de la red. Por otro lado, existen investigaciones que además estudian como afecta la cuantificación si se introduce en el entrenamiento \cite{8705375}. Cabe destacar que para las redes fully connected solo se usan redes binarias mientras que la cuantificación de varios niveles solo se estudia en las redes convolucionales.
+
+En los estudios actuales estas redes son entrenadas con el backpropagation, existiendo estudios como \cite{10481/72221}, en el que se estudia como afecta la cuantificación aplicada en el post-training, y otras investigaciones que exploran como afecta la cuantificación durante el training, como es el caso de \cite{8705375}, donde se estudian como afecta la cuantización binaria a redes fully connected y como afecta la cuantificación a redes convolucionales. 
+
+hablar de que se centran en el backprop es el unico que se aplica y que no se estudian alternativas además no se estudia las fully connected como tal si no que se usan redes binarias.
+
+TrueNorth ASIC: no tiene on-chip learning, se usa para spiking nn
+SpiNNaker ASIC: más flexible en el tipo de red y algoritmo de entrenamiento, pero consume más
+(preguntar si es necesario ponerlo)
+Para tener una idea general del estado del arte he usado el paper A Survey of Neuromorphic Computing and Neural Networks in Hardware \cite{DBLP:journals/corr/SchumanPPBDRP17}
+
+En lo que a estudios de redes neuronales cuantizadas se refiere:
+hablar sobre que se estudia el post-training: ejemplo paper cuantizaciones que dio rocío
+hablar sobre los tipos de cuantizacion estocastica y deterministica, yo he usado deterministica
+hablar sobre que las redes neuronales cuantizadas se usan para alus y que se suele hacer post-training mas que training
+explicar que los estudios de cuantización durante el entrenamiento se hacen sobre todo en redes binarias de gran tamaño, nosotros debido a las limitaciones del tamaño de las redes no podemos tener arquitecturas tan grandes. Mencionar que las redes binarias encuentran que tamaño es más importante que bit-width (mencionar el paper de redes binarias que me dio rocío)
 
 
+pequeña introducción de los algoritmos que he seleccionado y los motivos
 
-
-Hablar sobre la actualidad de la computacion neuromórfica
-
-
-
+Hablar sobre la actualidad de la computación neuromórfica
 Terminar de introducir el estado del arte...
 
 
@@ -70,7 +109,6 @@ La ejecución del algoritmo se inicia desde un punto aleatorio de la función. P
         $w = w - \eta f'(w)$
    } 
 \end{algorithm}
-\newpage 
 \section{Algoritmos}
 
 A continuación presento los algoritmos de entrenamiento que se van a estudiar para este proyecto.
@@ -209,7 +247,7 @@ Como apunte final cabe mencionar que se trata del algoritmo más costoso computa
 
 \subsection{Feedback alignment}
 
-El algoritmo de feedback alignment \cite{RefWorks:RefID:9-lillicrap2016random} se trata de una alternativa a backpropagation que propone como mejora el uso de matrices aleatorias fijadas de antemano para la retropropagación de valores, en vez de usar la matriz traspuesta de los pesos de la red. Esta idea surge debido a que el algoritmo de backpropagation no es posible biológicamente ya que el cerebro debería de tener las mismas conexiones para las fases hacia delante y hacia atrás, cosa que no ocurre. El hecho de usar las mismas matrices de pesos en ambas fases acarrea el problema del transporte de pesos \cite{RefWorks:RefID:10-grossberg1987competitive}, cuyo nombre se debe a que para poder actualizar los pesos correctamente los pesos se ``transportan" hacia detrás al propagar el error. 
+El algoritmo de feedback alignment se trata de una alternativa a backpropagation que propone como mejora el uso de matrices aleatorias fijadas de antemano para la retropropagación de valores, en vez de usar la matriz traspuesta de los pesos de la red. Esta idea surge debido a que el algoritmo de backpropagation no es posible biológicamente ya que el cerebro debería de tener las mismas conexiones para las fases hacia delante y hacia atrás, cosa que no ocurre. El hecho de usar las mismas matrices de pesos en ambas fases acarrea el problema del transporte de pesos \cite{RefWorks:RefID:10-grossberg1987competitive}, cuyo nombre se debe a que para poder actualizar los pesos correctamente los pesos se ``transportan" hacia detrás al propagar el error. 
 
 El algoritmo a pesar de usar pesos aleatorios fijados consigue encontrar las soluciones debido a la siguiente propiedad: cualquier matriz $B$ de pesos aleatorias es válida para el aprendizaje si cumple $e^{T}WBe>0$, es decir, que la señal de enseñanza de la matiz $Be$ no difiera en más de 90º a la usada por el backpropagation $W^{T}e$, por lo tanto B empuja a la red prácticamente en la misma dirección en la que lo haría $W$. Para acelerar el aprendizaje se tendría que estrechar la diferencia entre las direcciones de ambas matrices, pero esto no es necesario ya que se realiza automáticamente por el alineamiento. Este fenómeno se produce debido a que $B$ influye en $W$ en el proceso de aprendizaje pues este se actualiza en base a $B$ lo que produce dicho alineamiento.
 
@@ -232,3 +270,4 @@ El resto de procesos se realiza de manera idéntica al algoritmo de backpropagat
 \subsubsection{Eficiencia}
 
 Al realizar las mismas operaciones que el algoritmo de Backpropagation tiene la misma eficiencia, es decir, $O(n^{5})$
+
