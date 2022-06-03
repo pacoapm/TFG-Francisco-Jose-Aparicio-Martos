@@ -12,7 +12,7 @@ do
 		do
 			for z in "${global[@]}"
 			do
-				python $programa --dataset $k --modo $i --n-bits $j --global-quantization $z --epochs 30 --n-layers 5 --hidden-width 20
+				python $programa --dataset $k --modo $i --n-bits $j --global-quantization $z --epochs 30 --n-layers $1 --hidden-width $2
 			done
 		done
 	done

@@ -140,7 +140,8 @@ def main():
     final_model = ModelEnsemble(model,final_layer)
     final_model = final_model.to(device)
 
-    final_model.load_state_dict(torch.load('/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/'+args.dataset+"_HSIC.pt"))
+    final_model.load_state_dict(torch.load('/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/'+args.dataset+"_HSIC_n_layers"+str(args.n_layers)+"_hidden_width"+str(args.hidden_width)+".pt"))
+    
     acc,loss = test(final_model,device,test_loader)
 
 

@@ -89,7 +89,7 @@ def dibujar_loss_acc(loss,acc,epochs):
 
 
     #plt.savefig("images/"+nombre)
-    plt.show()
+    #plt.show()
 
 def main():
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -194,9 +194,9 @@ def main():
         scheduler.step()
 
     if args.save_model:
-        torch.save(final_model.state_dict(),"/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/"+args.dataset+"_HSIC.pt")
+        torch.save(final_model.state_dict(),'/home/francisco/Documentos/ingenieria_informatica/cuarto_informatica/segundo_cuatri/TFG/TFG-Francisco-Jose-Aparicio-Martos/codigo/pesosModelos/'+args.dataset+"_HSIC_n_layers"+str(args.n_layers)+"_hidden_width"+str(args.hidden_width)+".pt")
 
-    #dibujar_loss_acc(vloss,vacc,epochs)
+    dibujar_loss_acc(vloss,vacc,epochs)
 
 if __name__ == '__main__':
     main()

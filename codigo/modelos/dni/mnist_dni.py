@@ -149,7 +149,7 @@ def main():
     loss, acc = train_loop_dni(model,args,device,train_loader,test_loader)
 
     if args.save_model:
-        torch.save(model.state_dict(), "../../pesosModelos/"+args.dataset+"_dni.pt")
+        torch.save(model.state_dict(), "../../pesosModelos/"+args.dataset+"_dni_n_layers"+str(args.n_layers)+"_hidden_width"+str(args.hidden_width)+".pt")
 
 
 if __name__ == '__main__':

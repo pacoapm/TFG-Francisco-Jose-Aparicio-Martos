@@ -99,7 +99,7 @@ def main():
     #cargamos el modelo preentrenado
     model = Net(args.n_layers,args.hidden_width,args.input_width,args.output_width)
     model = model.to(device)
-    model.load_state_dict(torch.load("../../pesosModelos/"+args.dataset+"_backprop.pt"))
+    model.load_state_dict(torch.load("../../pesosModelos/"+args.dataset+"_backprop_n_layers"+str(args.n_layers)+"_hidden_width"+str(args.hidden_width)+".pt"))
     loss,acc = test(model,device,test_loader)
     
     

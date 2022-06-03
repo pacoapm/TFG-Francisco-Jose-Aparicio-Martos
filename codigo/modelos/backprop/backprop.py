@@ -65,7 +65,7 @@ def main():
     train_loop(model, args, device, train_loader, test_loader)
 
     if args.save_model:
-        torch.save(model.state_dict(), "../../pesosModelos/"+args.dataset+"_backprop.pt")
+        torch.save(model.state_dict(), "../../pesosModelos/"+args.dataset+"_backprop_n_layers"+str(args.n_layers)+"_hidden_width"+str(args.hidden_width)+".pt")
     
     
 
