@@ -153,7 +153,9 @@ pdfproducer = {pdflatex}
 
 
 \newcommand{\bigrule}{\titlerule[0.5mm]}
-
+%defino el operador
+\DeclareMathOperator{\round}{round}
+\newcommand{\myround}[1]{\round(#1)}
 
 %Para conseguir que en las páginas en blanco no ponga cabecerass
 \makeatletter

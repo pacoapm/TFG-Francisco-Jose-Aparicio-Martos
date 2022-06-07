@@ -1,18 +1,4 @@
-\chapter{Algoritmos de entrenamiento}
-
-Estructura (borrador):
-Revisión estado del arte: 
-    -Que es una red neuronal   
-    -Problemas que se resuelven  
-    -Algoritmos de entrenamiento: backprop y modificaciones no muy viables 
-    -Algoritmos seleccionados para el estudio  
-    -Estudios que se han realizado sobre redes neuronales cuantizadas, mencionar los de rocío y explicar que como los basados en memristores se centran en aplicar solo backrpop no se han estudiado como se comportarían otras alternativas, y que por eso se realiza este estudio. En este apartado mencionar el paper del survey y mencionar que las implementaciones que hay a día de hoy son alternativas del backprop adaptadas al propio circuito x, y que las alternativas a backprop no se aplican directamente sobre los chips, por ejemplo, algoritmos evolutivos. Recordar que estamos tratando el campo de redes feedforward con problemas de aprendizaje supervisado. Hay que dejarlo especificado.
-
-Preliminares (algoritmos comunes a los algoritmos explicados)
-Definición de los algoritmos
-Explicación breve sobre los memristores
--¿Explicar qué es una red nueronal?En que consiste un problema de clasificacion y de regresión
-
+\chapter{Preliminares}
 En el campo del machine learning los algoritmos más usados son las redes neuronales. Con este tipo de algoritmos los ordenadores son capaces de realizar predicciones, encontrar patrones y replicar acciones que un ser humano puede hacer, como por ejemplo: el reconocimiento y la clasificación de objetos. Para que las redes neuronales puedan hacer estas tareas es necesario realizar un entrenamiento con grandes bases de datos. En el proceso de entrenamiento a la red neuronal (en el caso del aprendizaje supervisado) se le muestra ejemplos de los problemas que tiene que resolver junto a su solución y en función de si ha conseguido resolver o no el problema la red se actualizará. Pero, ¿qué es una red neuronal?.
 
 Una red neuronal \cite{RefWorks:RefID:22-jain1996artificial} es un sistema de cómputo que consiste en un grafo dirigido ponderado en el que las neuronas artificiales son los nodos del grafo y los pesos de la red son las  aristas ponderadas que conectan la salida de las neuronas con las entradas. Estas neuronas están formadas por dendritas, las conexiones de entrada, y por los axones, las conexiones de salida. Dentro de cada una de estas neuronas se realiza una suma ponderada con los pesos de las dendritas y tras aplicarle una función de activación se transmite el resultado a las neuronas de la siguiente capa a través de los axones. El objetivo de entrenar una red neuronal es conseguir ajustar los pesos de la red para conseguir resolver problemas, ya sean de regresión, clasificación o una combinación de ambos. Los métodos que se usan para enseñar a la redes neuronales se conocen como algoritmos de entrenamiento. Un buen algoritmo de entrenamiento tiene que ser capaz de poder mejorar el desempeño de la red neuronal haciendo uso de la base de datos de entrenamiento de nuestro problema.
@@ -41,34 +27,11 @@ Otro elemento importante de la cuantificación de redes neuronales es el momento
 
 El último campo que queda por revisar es el de la computación neuromórfica, centrando la atención al estudio de la aplicación de redes neuronales a este tipo de circuitos. 
 
-En la actualidad la computación neuromórfica se encuentra en auge debido a los problemas anteriormente mencionados: ralentizacion de la ley de Moore, el memory wall problem y la contaminación producida por los procesos de entrenamiento de redes neuronales; y a sus  grandes ventajas: alto nivel de paralelismo, escalabilidad inherente, computación dirigida por eventos y estocasticidad. Sin embargo, la computación neuromórfica se encuentra en una temprana edad y las numerosas investigaciones que se han realizado están lejos de la fase de producción. Dentro de estos estudios los frameworks más destacados son: TrueNorth \cite{doi:10.1142/S0129065709002002}, SpiNNaker \cite{6750072} y Loihi \cite{8259423}. En el estudio de TrueNorth se han centrado en la aplicación de spiking neural networks \cite{doi:10.1142/S0129065709002002}, esta red es entrenada off-chip, es decir, no se entrenaba en el propio circuito y después se transformaba para ejecutarse en el circuito neuromórfico. SpiNNaker también aplica spiking neurons teniendo como ventaja principal una mayor flexibilidad en la elección de la topología de la red y el tipo de neurona a usar. Loihi al igual que los anteriores aplica las spiking neurons pero tiene como novedad el entrenamiento on-chip. Las otras redes que se aplican en los circuitos neuromórficos son las fully connected y las convolutional neural networks, investigado como afecta la cuantificación a las redes una vez ya entrenadas. En este estudio \cite{10481/72221} se ve como afecta la reducción de la precisión numérica de los pesos al rendimiento final de la red. Por otro lado, existen investigaciones que además estudian como afecta la cuantificación si se introduce en el entrenamiento \cite{8705375}. Cabe destacar que para las redes fully connected solo se usan redes binarias mientras que la cuantificación de varios niveles solo se estudia en las redes convolucionales.
+En la actualidad la computación neuromórfica se encuentra en auge debido a los problemas anteriormente mencionados: ralentizacion de la ley de Moore, el memory wall problem y la contaminación producida por los procesos de entrenamiento de redes neuronales; y a sus  grandes ventajas: alto nivel de paralelismo, escalabilidad inherente, computación dirigida por eventos y estocasticidad. Sin embargo, la computación neuromórfica se encuentra en una temprana edad y las numerosas investigaciones que se han realizado están lejos de la fase de producción. Dentro de estos estudios los frameworks más destacados son: TrueNorth \cite{doi:10.1142/S0129065709002002}, SpiNNaker \cite{6750072} y Loihi \cite{8259423}. En el estudio de TrueNorth se han centrado en la aplicación de spiking neural networks \cite{doi:10.1142/S0129065709002002}, esta red es entrenada off-chip, es decir, no se entrenaba en el propio circuito y después se transformaba para ejecutarse en el circuito neuromórfico. SpiNNaker también aplica spiking neurons teniendo como ventaja principal una mayor flexibilidad en la elección de la topología de la red y el tipo de neurona a usar. Loihi al igual que los anteriores aplica las spiking neurons pero tiene como novedad el entrenamiento on-chip. Las otras redes que se aplican en los circuitos neuromórficos son las fully connected y las convolutional neural networks, investigado como afecta la cuantificación a las redes una vez ya entrenadas. En este estudio \cite{10481/72221} se ve como afecta la reducción de la precisión numérica de los pesos al rendimiento final de la red. Por otro lado, existen investigaciones que además estudian como afecta la cuantificación si se introduce en el entrenamiento \cite{8705375}. Cabe destacar que para las redes fully connected solo se usan redes binarias mientras que la cuantificación de varios niveles solo se estudia en las redes convolucionales. \cite{DBLP:journals/corr/SchumanPPBDRP17}
 
-En los estudios actuales estas redes son entrenadas con el backpropagation, existiendo estudios como \cite{10481/72221}, en el que se estudia como afecta la cuantificación aplicada en el post-training, y otras investigaciones que exploran como afecta la cuantificación durante el training, como es el caso de \cite{8705375}, donde se estudian como afecta la cuantización binaria a redes fully connected y como afecta la cuantificación a redes convolucionales. 
-
-hablar de que se centran en el backprop es el unico que se aplica y que no se estudian alternativas además no se estudia las fully connected como tal si no que se usan redes binarias.
-
-TrueNorth ASIC: no tiene on-chip learning, se usa para spiking nn
-SpiNNaker ASIC: más flexible en el tipo de red y algoritmo de entrenamiento, pero consume más
-(preguntar si es necesario ponerlo)
-Para tener una idea general del estado del arte he usado el paper A Survey of Neuromorphic Computing and Neural Networks in Hardware \cite{DBLP:journals/corr/SchumanPPBDRP17}
-
-En lo que a estudios de redes neuronales cuantizadas se refiere:
-hablar sobre que se estudia el post-training: ejemplo paper cuantizaciones que dio rocío
-hablar sobre los tipos de cuantizacion estocastica y deterministica, yo he usado deterministica
-hablar sobre que las redes neuronales cuantizadas se usan para alus y que se suele hacer post-training mas que training
-explicar que los estudios de cuantización durante el entrenamiento se hacen sobre todo en redes binarias de gran tamaño, nosotros debido a las limitaciones del tamaño de las redes no podemos tener arquitecturas tan grandes. Mencionar que las redes binarias encuentran que tamaño es más importante que bit-width (mencionar el paper de redes binarias que me dio rocío)
-
-
-pequeña introducción de los algoritmos que he seleccionado y los motivos
-
-Hablar sobre la actualidad de la computación neuromórfica
-Terminar de introducir el estado del arte...
-
-
-\section{Preliminar}
+\section{Algoritmos preliminares}
 
 Este apartado esta destinado a explicar los métodos, algoritmos o herramientas que se van a utilizar en los algoritmos a estudiar con el objetivo de no tener que repetir su significado o funcionamiento.
-
 
 \subsection{Propagación hacia delante}
 
@@ -270,4 +233,22 @@ El resto de procesos se realiza de manera idéntica al algoritmo de backpropagat
 \subsubsection{Eficiencia}
 
 Al realizar las mismas operaciones que el algoritmo de Backpropagation tiene la misma eficiencia, es decir, $O(n^{5})$
+
+\section{Funciones de cuantificación}
+Las funciones que se van a aplicar en este estudio están sacadas del siguiente paper \cite{nayak2019bit}. Se han elegido estas funciones debido a que consiguen disminuir la precisión numérica de manera efectiva y además son una aproximación data-free, es decir, no necesitan de una base de datos para calibrar los modelos.
+
+\subsection{Uniform-ASYMM}
+Mapea los pesos en coma flotante al rango de los enteros tomando como rango el máximo y el mínimo del conjunto a cuantificar. 
+\begin{equation}
+x_{q} = \myround{(x_f - min_{xf})\frac{2^n-1}{max_{xf}-min_{xf}}}
+\end{equation}
+Siendo $x_f$ el tensor original y $x_q$ el vector cuantificado.
+
+\subsection{Uniform-SYMM}
+Al igual que el anterior se mapea al rango cuantificado, esta vez tomando un rango simétrico entorno al 0 y tomando como extremos el máximo valor absoluto del tensor a cuantificar.
+
+\begin{equation}
+    x_q = \myround{x_f\frac{2^{n-1}-1}{max|x_f|}}
+\end{equation}
+
 

@@ -9,11 +9,11 @@ Las metodologías ágiles, a diferencia de las tradicionales, son flexibles ante
 
 Al estar ante un trabajo de investigación cuyos objetivos principales se conocen desde un inicio, pero sus fases de desarrollo están sujetas a cambios debido a la naturaleza de las investigaciones, la familia de metodología que mejor se adapta a este trabajo es la de desarrollos ágiles. Dentro de esta categoría he seleccionado la metodología scrum debido a su popularidad y a los buenos resultados que se consiguen con su aplicación.
 \section{Scrum}
-Scrum es un marco de trabajo ligero que ayuda a la gente, equipos y organizaciones a generar valor a través de soluciones adaptativas a problemas complejos. Se basa en el empirismo y en el lean thinking. El empirismo defiende que el conocimiento viene de la experiencia y en hacer decisiones en función de lo que se observa, mientras que el lean thinking es una filosofía que se centra en lo importante y no en los desperdicios, entendiendo por desperdicio aquellos procesos que consumen más recursos de los necesarios. Scrum usa una aproximación iterativa e incremental cuyo objetivo es el de optimizar la predecibilidad y el control de riesgos. 
+Scrum \cite{book} es un marco de trabajo ligero que ayuda a la gente, equipos y organizaciones a generar valor a través de soluciones adaptativas a problemas complejos. Se basa en el empirismo y en el lean thinking. El empirismo defiende que el conocimiento viene de la experiencia y en hacer decisiones en función de lo que se observa, mientras que el lean thinking es una filosofía que se centra en lo importante y no en los desperdicios, entendiendo por desperdicio aquellos procesos que consumen más recursos de los necesarios. Scrum usa una aproximación iterativa e incremental cuyo objetivo es el de optimizar la predecibilidad y el control de riesgos. 
 
 El desarrollo de proyectos con Scrum se basa en los sprints: ciclos de trabajos cortos con una duración de entre 2 y 4 semanas. En cada uno de estos sprints se trabaja para completar una funcionalidad del producto o servicio a desarrollar. Las funcionalidades son definidas en lo que se conoce como Product Backlog.  
 
-El Product Backlog es una lista con los requisitos de nuestro proyecto ordenados por prioridad, estando los elementos más valiosos al principio de la lista. Tanto prioridades como requerimientos evolucionan a lo largo del ciclo de desarrollo y se someten a revisión durante las reuniones de análisis. (COMPROBAR ESTE TRIPLAZO)
+El Product Backlog es una lista con los requisitos de nuestro proyecto ordenados por prioridad, estando los elementos más valiosos al principio de la lista. Tanto prioridades como requerimientos evolucionan a lo largo del ciclo de desarrollo y se someten a revisión durante las reuniones de análisis.
 
 Dentro del marco scrum a las personas se les asigna un rol que tendrán que cumplir. Dichos roles son los siguientes: 
 \begin{itemize}
@@ -53,8 +53,38 @@ Tras haber realizado las estimaciones de el tiempo que puede durar cada una de l
     \item \textbf{Sprint 5, Análisis de resultados y valoraciones}: Se ejecutan los modelos sobre 1 o 2 bases de datos y se estudia como afecta la cuantización a su comportamiento, sacando finalmente las conclusiones y valoraciones del trabajo realizado.
 \end{itemize}
 
+\section{Gestión de recursos}
+En este sección se presentan los recursos tanto humanos, hardware y software que se han empleado para la elaboración del proyecto. 
+\subsection{Recursos humanos}
+
+\begin{itemize}
+    \item \textbf{Tutora del proyecto}: Dña. Rocío Celeste Romero Zaliz, profesora de la Universidad de Granada del departamento de Ciencias de la Computación e Inteligencia Artificial
+    \item \textbf{Alumno:} Francisco José Aparicio Martos, alumno de Ingeniería Informática de la especialidad de Computación y Sistema Inteligentes.
+\end{itemize}
+
+\subsection{Recursos hardware}
+Para la realización de este proyecto no se ha necesitado de recursos adicionales a los ya poseídos por el alumno. Todo el hardware ha sido aportado por el alumno siendo este:
+\begin{itemize}
+    \item \textbf{Portátil}: MSI GE63 Raider con un procesador intel core i7 de séptima generación y una tarjeta gráfica geforce gtx 1050 ti. Se ha usado en las labores de programación del proyecto, ejecución de pruebas y redacción de memoria.
+    
+    \item \textbf{Pantallas}: Dos pantallas, ASUS y SAMSUNG, de 24 pulgadas cada una.
+\end{itemize}
+
+\subsection{Recursos Software}
+Todo el software empleado durante este proyecto es de uso gratuito englobándose gran parte en la categoría de software libre. A continuación se listan todo el software usado en el proyecto:
+
+\begin{itemize}
+    \item \textbf{Sistema Operativo}: Ubuntu Linux, versión 18.04.
+    \item \textbf{Python}: más concretamente la versión 3.8.13, junto a python se usarán librerías incluidas en el propio python como por ejemplo: numpy y matplotlib, y librerías de uso libre que se encuentran subidas en la plataforma github. Más detalles sobre las librerías empleadas se puede encontrar en la sección de metodología.
+    \item \textbf{Conda}: gestor de paquetes y de entornos para python.
+    \item \textbf{Google Meet}: plataforma usada para realizar las reuniones por videollamada con la tutora.
+    \item \textbf{Overleaf}: plataforma online para la redacción de documentos en \LaTeX.
+    \item \textbf{Git}: software para el control de versiones. 
+    \item \textbf{Github}: plataforma donde se alojará la memoria y el código del proyecto.
+\end{itemize}
+
 \section{Presupuesto}
-A continuación se presentan las estimaciones de los costes del proyecto teniendo en cuenta los recursos humanos, software y hardware.
+A continuación se presentan las estimaciones de los costes del proyecto teniendo en cuenta los recursos humanos, software y hardware presentados anteriormente. 
 
 \subsection{Costes de recursos humanos}
 Decir que se han empleado 300 horas en el proyecto lo que equivale a x euros de trabajo
@@ -68,17 +98,84 @@ Decir que he usado mi ordenador y que
 Durante el desarrollo de cualquier proyecto siempre surgen imprevistos que alteran la programación inicial. Todos estos acontecimiento inesperados se conocen como riesgos. Para evitar que dichos riesgos afecten a la consecución de los objetivos, se deben de establecer una serie de protocolos a seguir con el objetivo de mitigar dichos problemas lo antes posible y conseguir que no afecten al trascurso del proyecto. Es por ello que antes de comenzar cualquier proyecto se debe de realizar una estimación acerca de los riesgos que pueden surgir y establecer planes de actuación. A continuación se presentan los riesgos que se han estudiado junto a sus causas y planes de actuación.
 
 
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|l|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+{\color[HTML]{000000} \textbf{Código}} & {\color[HTML]{000000} \textbf{Riesgo}}                       \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 1} & {\color[HTML]{000000} No existe implementación de los algoritmos}           \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 2}               & {\color[HTML]{000000} No se encuentran alternativas viables} \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 3} & {\color[HTML]{000000} Las herramientas software no funcionan correctamente} \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 4}               & {\color[HTML]{000000} Incompatibilidad de librerías}         \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 5}               & {\color[HTML]{000000} No hay feed back del tutor}            \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 6}               & {\color[HTML]{000000} Pérdidas de código o datos}            \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 7}               & {\color[HTML]{000000} Se estropea el ordenador de trabajo}   \\ \hline
+\end{tabular}
+\end{table}
 
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|l|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+{\color[HTML]{000000} \textbf{Riesgo}} & {\color[HTML]{000000} \textbf{Causa}}                                \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 1}               & {\color[HTML]{000000} Los autores no han hecho públicos sus códigos} \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 2} & {\color[HTML]{000000} No se han realizado estudios que consigan resultados buenos}    \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 3}               & {\color[HTML]{000000} Bugs propios de los producto software}         \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 4} & {\color[HTML]{000000} Librerías que no se tenían pensadas para trabajar juntas}       \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 5} & {\color[HTML]{000000} No ha podido asistir a la reunión por incompatibilidad horaria} \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 6}               & {\color[HTML]{000000} Apagón repentino, fallo del almacenamiento}    \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 7}               & {\color[HTML]{000000} Sobrecalentamiento o golpe fortuito}           \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|l|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+{\color[HTML]{000000} \textbf{Riesgo}} & {\color[HTML]{000000} \textbf{Plan de actuación}}                         \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 1} & {\color[HTML]{000000} Implementar el algoritmo a mano o de no ser posible buscar otra alternativa} \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 2}               & {\color[HTML]{000000} Probar con alternativas del propio backpropagation} \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 3}               & {\color[HTML]{000000} Buscar alternativa o corregir el error a mano}      \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 4}               & {\color[HTML]{000000} Buscar otro conjunto de librerías compatibles}      \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 5} & {\color[HTML]{000000} Planificar la reunión para otro día o mandar duda por correo}                \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 6}               & {\color[HTML]{000000} Recuperar datos a través del control de versiones}  \\ \hline
+\rowcolor[HTML]{EFEFEF} 
+{\color[HTML]{000000} 7}               & {\color[HTML]{000000} Comprar otro ordenador}                             \\ \hline
+\end{tabular}
+\end{table}
 
 Riesgos:
 \begin{itemize}
-    \item No exista implementación de los algoritmos
+    \item No existe implementación de los algoritmos
     \item No se encuentran alternativas viables
-    \item Herramientas que no funcionan correctamente
+    \item Las herramientas software no funcionan correctamente
     \item Incompatibilidad de librerías
     \item No hay feed back del tutor
     \item Pérdidas de código o datos
-    \item Que se rompa el ordenador de trabajo
+    \item Que se estropee el ordenador de trabajo
 \end{itemize}
 
 Causas:
