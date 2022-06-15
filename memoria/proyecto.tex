@@ -2,13 +2,21 @@
 %\documentclass[a4paper,twoside,11pt,titlepage]{book}
 \usepackage{listings}
 \usepackage[utf8]{inputenc}
-\usepackage[spanish]{babel}
+\usepackage[spanish, activeacute]{babel}
 \usepackage{dsfont} %paquete para leras matemáticas
 \usepackage{amsmath} %paquete para las matrices
+\usepackage{slashbox}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+
 % \usepackage[style=list, number=none]{glossary} %
 %\usepackage{titlesec}
 %\usepackage{pailatino}
 \usepackage[table,xcdraw]{xcolor}
+\usepackage{float}
+
 \decimalpoint
 \usepackage{dcolumn}
 \newcolumntype{.}{D{.}{\esperiod}{-1}}
@@ -33,7 +41,7 @@
 % ********************************************************************
 % Re-usable information
 % ********************************************************************
-\newcommand{\myTitle}{Título del proyecto\xspace}
+\newcommand{\myTitle}{Estudio de algoritmos de entrenamiento en redes neuronales cuantificadas\xspace}
 \newcommand{\myDegree}{Grado en ...\xspace}
 \newcommand{\myName}{Nombre Apllido1 Apellido2 (alumno)\xspace}
 \newcommand{\myProf}{Nombre Apllido1 Apellido2 (tutor1)\xspace}
@@ -186,7 +194,6 @@ pdfproducer = {pdflatex}
 %
 \mainmatter
 \setlength{\parskip}{5pt}
-
 \input{capitulos/01_Introduccion}
 %
 %\input{capitulos/02_EspecificacionRequisitos}
@@ -199,6 +206,9 @@ pdfproducer = {pdflatex}
 %
 \input{capitulos/05_AlgoritmosEntrenamiento}
 \input{capitulos/03_Planificacion}
+\input{capitulos/04_Metodologia}
+\input{capitulos/implementacion}
+\input{capitulos/conclusion}
 %
 %\input{capitulos/05_Diseno}
 %
@@ -213,7 +223,7 @@ pdfproducer = {pdflatex}
 %
 \nocite{*}
 \bibliography{bibliografia/bibliografia}\addcontentsline{toc}{chapter}{Bibliografía}
-\bibliographystyle{plain}
+\bibliographystyle{IEEEtran}
 %
 %\appendix
 %\input{apendices/manual_usuario/manual_usuario}

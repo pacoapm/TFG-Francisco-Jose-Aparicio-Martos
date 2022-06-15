@@ -1,4 +1,4 @@
-\chapter{Planificación}
+\chapter{Planificación} \label{planificacion}
 Una vez definidas las tarea y los objetivos del proyecto se debe de elegir la metodología de desarrollo que se va a usar. El objetivo de seguir una metodología es el de crear una planificación para asegurar que el proyecto se elabora correctamente y se siguen una serie de procedimientos que garanticen la calidad del producto o servicio que se va a producir. 
 
 Actualmente existen varias alternativas las cuales se pueden englobar en dos grandes categorías: tradicionales y ágiles. 
@@ -46,12 +46,18 @@ En el esquema inicial se estableció que las fases que componen este trabajo son
 Tras haber realizado las estimaciones de el tiempo que puede durar cada una de las fases se han definido los siguientes sprints:
 
 \begin{itemize}
+    \item \textbf{Sprint 0, Redacción memoria}: Esta fase consiste en ir redactando la memoria del proyecto, realizando todas la explicaciones teóricas y prácticas, mostrar resultados de experimentación, etc. Este sprint durará la misma cantidad que el proyecto ya que este sprint se verá afectado por el resto. 
     \item \textbf{Sprint 1, Búsqueda de algoritmos}: Primera fase del proyecto en la que se buscará alternativas al backpropagation para poder realizar el estudio.
     \item \textbf{Sprint 2, Análisis de la complejidad algorítmica}: Seleccionado los algoritmos a estudiar es interesante conocer cuales son sus propiedades a niveles de eficiencia.
     \item \textbf{Sprint 3, Comparación de los 3 algoritmos}: En esta fase se implementan todos los algoritmos y se ejecutan para comparar sus resultados.
     \item \textbf{Sprint 4, Adaptación de los algoritmos}: Con una implementación funcional ahora se deberá de realizar las cuantizaciones pertinentes para poder realizar el estudio deseado.
     \item \textbf{Sprint 5, Análisis de resultados y valoraciones}: Se ejecutan los modelos sobre 1 o 2 bases de datos y se estudia como afecta la cuantización a su comportamiento, sacando finalmente las conclusiones y valoraciones del trabajo realizado.
+    
 \end{itemize}
+
+\begin{center}
+\includegraphics[width=1\textwidth]{imagenes/diagrama gantt.png} 
+\end{center}
 
 \section{Gestión de recursos}
 En este sección se presentan los recursos tanto humanos, hardware y software que se han empleado para la elaboración del proyecto. 
@@ -59,7 +65,7 @@ En este sección se presentan los recursos tanto humanos, hardware y software qu
 
 \begin{itemize}
     \item \textbf{Tutora del proyecto}: Dña. Rocío Celeste Romero Zaliz, profesora de la Universidad de Granada del departamento de Ciencias de la Computación e Inteligencia Artificial
-    \item \textbf{Alumno:} Francisco José Aparicio Martos, alumno de Ingeniería Informática de la especialidad de Computación y Sistema Inteligentes.
+    \item \textbf{Alumno:} Francisco José Aparicio Martos, alumno de Ingeniería Informática de la Escuela Técnica Superior de Ingenierías Informática y Telecomunicaciones de la especialidad de Computación y Sistema Inteligentes.
 \end{itemize}
 
 \subsection{Recursos hardware}
@@ -71,7 +77,7 @@ Para la realización de este proyecto no se ha necesitado de recursos adicionale
 \end{itemize}
 
 \subsection{Recursos Software}
-Todo el software empleado durante este proyecto es de uso gratuito englobándose gran parte en la categoría de software libre. A continuación se listan todo el software usado en el proyecto:
+Todo el software empleado durante este proyecto es de uso gratuito englobándose gran parte en la categoría de software libre. A continuación se lista todo el software usado en el proyecto:
 
 \begin{itemize}
     \item \textbf{Sistema Operativo}: Ubuntu Linux, versión 18.04.
@@ -81,24 +87,85 @@ Todo el software empleado durante este proyecto es de uso gratuito englobándose
     \item \textbf{Overleaf}: plataforma online para la redacción de documentos en \LaTeX.
     \item \textbf{Git}: software para el control de versiones. 
     \item \textbf{Github}: plataforma donde se alojará la memoria y el código del proyecto.
+    \item \textbf{TimeCamp}: aplicación online para contabilizar cantidad de horas trabajadas.
 \end{itemize}
 
 \section{Presupuesto}
-A continuación se presentan las estimaciones de los costes del proyecto teniendo en cuenta los recursos humanos, software y hardware presentados anteriormente. 
+A continuación se presenta la estimación de los costes del proyecto teniendo en cuenta los recursos humanos, software y hardware presentados anteriormente. 
 
 \subsection{Costes de recursos humanos}
-Decir que se han empleado 300 horas en el proyecto lo que equivale a x euros de trabajo
+En este apartado tenemos que incluir el coste del trabajo que he realizado.
+
+Para realizar una estimación de cuanto costaría el trabajo realizado tenemos que ver cuál es el sueldo medio de un recién graduado en ingeniería informática. Según el portal jobted \footnote{\href{https://www.jobted.es/salario/ingeniero-informático}{Jobted}} el sueldo de un recién graduado en ingeniería informática gira entorno a los 20400 euros al año, por lo que si lo dividimos entre 12 meses, 20 días laborales por mes aproximadamente y 8 horas de jornada diaria, da como resultado un sueldo de 10.63 €/h. Teniendo en cuenta que las horas empleadas en el proyecto han sido 300 horas. Obtenemos que el coste de mi trabajo es de 3189 euros.
+
+
 \subsection{Costes Software}
-Todo el software empleado es gratuito
+Como he comentado en el apartado de los recursos, todo el software que se ha usado en la elaboración de este proyecto es de uso gratuito por lo tanto estos recursos no añaden ningún tipo de coste al proyecto.
+
 \subsection{Coste Hardware}
-Decir que he usado mi ordenador y que 
+Los recursos hardware usados han sido mi ordenador y las pantallas que se han mencionado en la sección de recursos. Para calcular su valor hay que tener en cuenta que los productos electrónicos se devalúan con el paso de los años, para realizar este cálculo haremos uso del método de depreciación lineal, el cual nos indica cuanto valor pierde nuestro dispositivo por año.
+
+\begin{equation}
+    Depreciacion = \frac{valor\ inicial - valor\ residual}{vida\ util\ en\ a\tilde{n}os}
+\end{equation}
+
+Siendo el valor residual:
+\begin{equation}
+    Valor\ residual = \frac{valor\ inicial}{vida\ util\ en\ a\tilde{n}os}
+\end{equation}
+
+Este valor indica el valor final que tendrá el producto una vez llegue al fin de su vida útil. Para el caso de los dispositivos electrónicos la vida útil según la agencia tributaria española \footnote{\href{https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-practicos/irpf-2019/capitulo-7-rendimientos-actividades-economicas-directa/fase-1-determinacion-rendimiento-neto/amortizaciones-dotaciones-ejercicio-fiscalmente-deducibles/requisitos-generales/coeficientes-amortizacion-lineal.html}{web agencia tributaria}} es de 10 años. Por lo tanto los valores actuales de cada uno de los dispositivos es de:
+
+\begin{table}[H]
+    \renewcommand{\arraystretch}{1.5}
+    \centering
+    \begin{tabular}{lcccc}
+        \toprule[0.75mm]
+        {\textbf{Recurso}} & \textbf{Valor inicial} & \textbf{Valor residual} & \textbf{Antigüedad} & \textbf{Valor actual}\\
+        \hline
+        Portátil & 1200€ & 120€ & 4 & 768€\\
+        \hline
+        Monitor Samsung & 190€ & 19€ & 2 & 155.8€\\
+        \hline
+        Monitor ASUS & 120€ & 12€ & 4 & 76.8€\\
+        \bottomrule[0.75mm]
+    \end{tabular}
+    \caption{Tabla con los precios de los recursos hardware}
+    %\label{tab:my_label}
+\end{table}
+
+\subsection{Presupuesto total}
+
+Teniendo en cuenta todos los costes previamente calculados presento la siguiente tabla con el coste total del proyecto:
+\begin{table}[H]
+    \renewcommand{\arraystretch}{1.5}
+    \centering
+    \begin{tabular}{w{l}{6cm}w{r}{6cm}}
+        \toprule[0.75mm]
+        \textbf{Concepto} & \textbf{Importe}\\
+        \hline
+        \textbf{Recursos Hardware} & \\
+        Portátil & 768€\\
+        Monitor Samsung & 155.8€\\
+        Monitor ASUS & 76.8€\\
+        \hline
+        \textbf{Recursos Humanos} & \\
+        Trabajo individual & 3189€ \\
+        \hline
+        & \textbf{Total: 4189.6€} \\
+        \bottomrule[0.75mm]
+    \end{tabular}
+    \caption{Presupuesto total del proyecto}
+    %\label{tab:my_label}
+\end{table}
+
 
 \section{Análisis de riesgos}
 
-Durante el desarrollo de cualquier proyecto siempre surgen imprevistos que alteran la programación inicial. Todos estos acontecimiento inesperados se conocen como riesgos. Para evitar que dichos riesgos afecten a la consecución de los objetivos, se deben de establecer una serie de protocolos a seguir con el objetivo de mitigar dichos problemas lo antes posible y conseguir que no afecten al trascurso del proyecto. Es por ello que antes de comenzar cualquier proyecto se debe de realizar una estimación acerca de los riesgos que pueden surgir y establecer planes de actuación. A continuación se presentan los riesgos que se han estudiado junto a sus causas y planes de actuación.
+Durante el desarrollo de cualquier proyecto siempre surgen imprevistos que alteran la programación inicial. Todos estos acontecimientos inesperados se conocen como riesgos. Para evitar que dichos riesgos afecten a la consecución de los objetivos, se deben de establecer una serie de protocolos a seguir con el objetivo de mitigar dichos problemas lo antes posible y conseguir que no afecten al trascurso del proyecto. Es por ello que antes de comenzar cualquier proyecto se debe de realizar una estimación acerca de los riesgos que pueden surgir y establecer planes de actuación. A continuación se presentan los riesgos que se han estudiado junto a sus causas y planes de actuación.
 
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \begin{tabular}{|c|l|}
 \hline
@@ -119,9 +186,10 @@ Durante el desarrollo de cualquier proyecto siempre surgen imprevistos que alter
 \rowcolor[HTML]{EFEFEF} 
 {\color[HTML]{000000} 7}               & {\color[HTML]{000000} Se estropea el ordenador de trabajo}   \\ \hline
 \end{tabular}
+\caption{Tabla con los riesgos del proyecto}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \begin{tabular}{|c|l|}
 \hline
@@ -142,9 +210,10 @@ Durante el desarrollo de cualquier proyecto siempre surgen imprevistos que alter
 \rowcolor[HTML]{EFEFEF} 
 {\color[HTML]{000000} 7}               & {\color[HTML]{000000} Sobrecalentamiento o golpe fortuito}           \\ \hline
 \end{tabular}
+\caption{Tabla con las causas de los riesgos}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \begin{tabular}{|c|l|}
 \hline
@@ -165,84 +234,52 @@ Durante el desarrollo de cualquier proyecto siempre surgen imprevistos que alter
 \rowcolor[HTML]{EFEFEF} 
 {\color[HTML]{000000} 7}               & {\color[HTML]{000000} Comprar otro ordenador}                             \\ \hline
 \end{tabular}
+\caption{Tabla con los planes de actuación para cada riesgo}
 \end{table}
 
-Riesgos:
-\begin{itemize}
-    \item No existe implementación de los algoritmos
-    \item No se encuentran alternativas viables
-    \item Las herramientas software no funcionan correctamente
-    \item Incompatibilidad de librerías
-    \item No hay feed back del tutor
-    \item Pérdidas de código o datos
-    \item Que se estropee el ordenador de trabajo
-\end{itemize}
-
-Causas:
-\begin{itemize}
-    \item Los autores no han hecho públicos sus códigos
-    \item No se han realizado estudios que consigan resultados buenos
-    \item Bugs propios de los producto software
-    \item Librerías que no se tenían pensadas para trabajar juntas
-    \item No ha podido asistir a la reunión por incompatibilidad horaria
-    \item Apagón repentino, fallo del almacenamiento
-    \item Sobrecalentamiento o un mal golpe
-\end{itemize}
-
-Plan de actuación:
-\begin{itemize}
-    \item Implementar el algoritmo a mano o de no ser posible buscar otra alternativa
-    \item Probar entonces con alternativas del propio backprop
-    \item Buscar alternativas de no haberla, modificar código para que no sea necesario su uso
-    \item Buscar alternativas
-    \item Planificar la reunión para otro día o mandar duda por correo
-    \item Usar control de versiones
-    \item Comprar otro ordenador
-\end{itemize}
-
-% Please add the following required packages to your document preamble:
-% \usepackage[table,xcdraw]{xcolor}
-% If you use beamer only pass "xcolor=table" option, i.e. \documentclass[xcolor=table]{beamer}
-
-\begin{table}[h]
+\begin{table}[H]
 \centering
-\scalebox{0.75}[1]{
-\begin{tabular}{|llll|}
+\begin{tabular}{|
+>{\columncolor[HTML]{EFEFEF}}l |
+>{\columncolor[HTML]{67FD9A}}l |l|l|l|l|}
 \hline
-\rowcolor[HTML]{9B9B9B} 
-\multicolumn{4}{|c|}{\cellcolor[HTML]{9B9B9B}Riesgos del Proyecto} \\ \hline
-\rowcolor[HTML]{C0C0C0} 
-\multicolumn{1}{|l|}{\cellcolor[HTML]{C0C0C0}{\color[HTML]{000000} Nº}} &
-  \multicolumn{1}{l|}{\cellcolor[HTML]{C0C0C0}{\color[HTML]{000000} Riesgo}} &
-  \multicolumn{1}{l|}{\cellcolor[HTML]{C0C0C0}{\color[HTML]{000000} Causa}} &
-  {\color[HTML]{000000} Plan de actuación} \\ \hline
-\multicolumn{1}{|l|}{1} &
-  \multicolumn{1}{l|}{Algoritmo no implementado} &
-  \multicolumn{1}{l|}{Código privado} &
-  \begin{tabular}[c]{@{}l@{}}Implementarlo a mano o \\ Buscar alternativa\end{tabular} \\ \hline
-\multicolumn{1}{|l|}{2} &
-  \multicolumn{1}{l|}{Alternativa no viable} &
-  \multicolumn{1}{l|}{No hay estudios} &
-  Probar modificaciones del propio backprop \\ \hline
-\multicolumn{1}{|l|}{3} &
-  \multicolumn{1}{l|}{Herramienta defectuosa} &
-  \multicolumn{1}{l|}{Bugs propios de los producto software} &
-  Arreglarlo o buscar alternativa \\ \hline
-\multicolumn{1}{|l|}{4} &
-  \multicolumn{1}{l|}{Incompatibilidad de librerías} &
-  \multicolumn{1}{l|}{Versiones software incompatibles} &
-  Buscar alternativas \\ \hline
-\multicolumn{1}{|l|}{5} &
-  \multicolumn{1}{l|}{No hay feed back del tutor} &
-  \multicolumn{1}{l|}{Ausencia del tutor} &
-  Replanificar reunión \\ \hline
-\multicolumn{1}{|l|}{6} &
-  \multicolumn{1}{l|}{Pérdidas de código o datos} &
-  \multicolumn{1}{l|}{Fallo del sistema} &
-  Usar control de versiones \\ \hline
-\multicolumn{1}{|l|}{7} &
-  \multicolumn{1}{l|}{Que se rompa el ordenador de trabajo} &
-  \multicolumn{1}{l|}{Sobrecalentamiento o un mal golpe} &
-  Comprar otro ordenador \\ \hline
-\end{tabular}}
+  \backslashbox{Impacto}{Probabilidad} &
+  \cellcolor[HTML]{EFEFEF}0.1 &
+  \cellcolor[HTML]{EFEFEF}0.3 &
+  \cellcolor[HTML]{EFEFEF}0.5 &
+  \cellcolor[HTML]{EFEFEF}0.7 &
+  \cellcolor[HTML]{EFEFEF}0.9 \\ \hline
+Muy bajo &
+  {\color[HTML]{000000} } &
+  \cellcolor[HTML]{67FD9A}{\color[HTML]{000000} R5} &
+  \cellcolor[HTML]{67FD9A}{\color[HTML]{000000} } &
+  \cellcolor[HTML]{FCFF2F}{\color[HTML]{000000} } &
+  \cellcolor[HTML]{FCFF2F}{\color[HTML]{000000} } \\ \hline
+Bajo &
+  {\color[HTML]{000000} } &
+  \cellcolor[HTML]{67FD9A}{\color[HTML]{000000} } &
+  \cellcolor[HTML]{FCFF2F}{\color[HTML]{000000} } &
+  \cellcolor[HTML]{FCFF2F}{\color[HTML]{000000} } &
+  \cellcolor[HTML]{FFC702}{\color[HTML]{000000} } \\ \hline
+Medio &
+  {\color[HTML]{000000} } &
+  \cellcolor[HTML]{FCFF2F}{\color[HTML]{000000} R3} &
+  \cellcolor[HTML]{FCFF2F}{\color[HTML]{000000} R4} &
+  \cellcolor[HTML]{FFC702}{\color[HTML]{000000} } &
+  \cellcolor[HTML]{FFC702}{\color[HTML]{000000} } \\ \hline
+Alto &
+  \cellcolor[HTML]{FCFF2F}{\color[HTML]{000000} } &
+  \cellcolor[HTML]{FCFF2F}{\color[HTML]{000000} R6} &
+  \cellcolor[HTML]{FFC702}{\color[HTML]{000000} } &
+  \cellcolor[HTML]{FFC702}{\color[HTML]{000000} } &
+  \cellcolor[HTML]{FE0000}{\color[HTML]{000000} } \\ \hline
+Muy alto &
+  \cellcolor[HTML]{FCFF2F}{\color[HTML]{000000} R7} &
+  \cellcolor[HTML]{FFC702}{\color[HTML]{000000} R2} &
+  \cellcolor[HTML]{FFC702}{\color[HTML]{000000} R1} &
+  \cellcolor[HTML]{FE0000}{\color[HTML]{000000} } &
+  \cellcolor[HTML]{FE0000}{\color[HTML]{000000} } \\ \hline
+\end{tabular}
+\caption{Matriz probabilidad-impacto de riesgos}
 \end{table}
+
