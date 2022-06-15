@@ -618,14 +618,14 @@ def visualizar_caracteristicas(model, imagen):
 
 def dibujar_loss_acc(loss,acc,epochs,nombre):
     fig, ax = plt.subplots(1,2, figsize=(10,4))
-    
     x = np.arange(0,epochs)
-    ax[0].plot(x,loss,'*-')
-    ax[0].set_title("Test loss")
-    ax[0].set_xlabel("epochs")
-    ax[0].set_ylabel("Loss")
-    ax[0].set_ylim(0,max(loss)+1)
-    #ax[0].set_xlim(0,epochs-1)
+    if max(loss) == nan:
+        ax[0].plot(x,loss,'*-')
+        ax[0].set_title("Test loss")
+        ax[0].set_xlabel("epochs")
+        ax[0].set_ylabel("Loss")
+        ax[0].set_ylim(0,max(loss)+1)
+        #ax[0].set_xlim(0,epochs-1)
 
     ax[1].plot(x,acc,'*-')
     ax[1].set_title("Test acc")

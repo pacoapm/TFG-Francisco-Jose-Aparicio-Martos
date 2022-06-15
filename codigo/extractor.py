@@ -8,19 +8,9 @@ Created on Wed May 18 10:19:57 2022
 
 from __future__ import print_function
 import argparse
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torchvision import datasets, transforms
-from torch.optim.lr_scheduler import StepLR
-import sys
-from custom_funcs import extraerInfo
+
 import numpy as np
 import matplotlib.pyplot as plt
-from glob import glob
-
-from custom_funcs import load_dataset
 
 def substring(string, ini, fin):
     return string[string.find(ini)+len(ini):string.find(fin)]
@@ -138,8 +128,27 @@ def datosPesos(archivo):
         print("Peso maximo medio: %.4f Peso minimo medio: %.4f" % (np.mean(info[:,0]), np.mean(info[:,1])))
         print("Peso maximo varianza: %.4f Peso minimo varianza: %.4f" % (np.var(info[:,0]),np.var(info[:,1])))
         
+def datosPesosJunto(archivo):
+    f = open(archivo,"r")
+    Lines = f.readlines()
+    f.close()
+    datos = []
     
+    for line in Lines:
+        datos.append(list(map(float,line.split(" ")[:-1])))
+        
+    datos = np.array(datos)
+    datos = np.array([np.max(datos[:,[0,2]],axis=1),np.min(datos[:,[1,3]],axis=1)]).T
     
+
+    info = datos
+
+    print("Peso maximo: %.4f Peso minimo: %.4f" % (np.max(info[:,0]), np.min(info[:,1])))
+    print("Peso maximo medio: %.4f Peso minimo medio: %.4f" % (np.mean(info[:,0]), np.mean(info[:,1])))
+    print("Peso maximo varianza: %.4f Peso minimo varianza: %.4f" % (np.var(info[:,0]),np.var(info[:,1])))
+        
+    plt.boxplot(datos[:,0])
+    plt.show()
     
     
     
@@ -224,6 +233,16 @@ def mostrarInfoPesos(ruta,var):
                 for glbl in var["globl"]:
                     print("Dataset: ", dataset, " n_bits: ", bits, " funcion: ", dicc[func], " global: ", glbl)
                     datosPesos(ruta+"/sinq_"+dataset+"_nbits"+str(bits)+"_epochs"+str(var["epochs"][0])+"_global"+str(glbl)+"_modo"+str(func)+"_n_layers0_hidden_width4")
+                    print("\n\n")
+
+def mostrarInfoPesosv2(ruta,var):
+    dicc = {0:"ASYMM",1:"SYMM"}
+    for dataset in var["dataset"]:
+        for bits in var["n_bits"]:
+            for func in var["func"]:
+                for glbl in var["globl"]:
+                    print("Dataset: ", dataset, " n_bits: ", bits, " funcion: ", dicc[func], " global: ", glbl)
+                    datosPesosJunto(ruta+"/sinq_"+dataset+"_nbits"+str(bits)+"_epochs"+str(var["epochs"][0])+"_global"+str(glbl)+"_modo"+str(func)+"_n_layers0_hidden_width4")
                     print("\n\n")
 
 def graficarInfoPesos(ruta,var):
@@ -331,9 +350,9 @@ def main():
             print("NO es correcto")"""
         #hol = input()
     #graficarACC("modelos/feedbackAlignment/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[1],"globl":[0]})
-    graficarInfoPesos("modelos/HSIC/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[1],"globl":[1]})
+    #graficarInfoPesos("modelos/HSIC/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[1],"globl":[1]})
     #graficarEvaluacion("modelos/HSIC/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[0],"globl":[0]})
-    mostrarInfoPesos("modelos/HSIC/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[0],"globl":[1]})
+    mostrarInfoPesosv2("modelos/backprop/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[8],"func":[0],"globl":[0]})
     
     
 if __name__=="__main__":
