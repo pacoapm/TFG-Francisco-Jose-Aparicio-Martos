@@ -120,6 +120,8 @@ def main():
         
     #cuantizamos los pesos
     actualizar_pesos_fa(modelq,args.n_bits,minimo,maximo, global_quantization)
+    with open("infoPesos/"+generarNombre(args,True),"w") as f:
+        f.write("\n")
     #entrenamiento cuantizado
     lossq, accq = train_loop_fa(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization,"infoPesos/"+generarNombre(args,True))
     

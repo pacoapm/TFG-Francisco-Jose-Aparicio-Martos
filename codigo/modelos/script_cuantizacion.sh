@@ -1,14 +1,12 @@
 #!/bin/bash
-cd backprop
-./pruebas.sh $1 $2
-cd ..
+
 cd dni
-./pruebas.sh $1 $2
+./script.sh
 cd ..
 
 cd feedbackAlignment 
-./pruebas.sh $1 $2
+./script.sh
 cd ..
 cd HSIC
 source env.sh
-./pruebas.sh $1 $2
+./script.sh

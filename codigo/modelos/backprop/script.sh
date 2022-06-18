@@ -1,22 +1,12 @@
 #!/bin/bash
-epocas=30
-programa=backprop_qtp.py
-python $programa --epochs $epocas --dataset MNIST --n-bits 8 --global-quantization 0
-python $programa --epochs $epocas --dataset MNIST --n-bits 8 --global-quantization 1
+experimento(){
+	echo Arquitectura $1 capas $2 unidades capa >> datos/MNIST.csv
+	echo Arquitectura $1 capas $2 unidades capa >> datos/FMNIST.csv
+	./pruebas.sh $1 $2
+}
 
-python $programa --epochs $epocas --dataset MNIST --n-bits 6 --global-quantization 0
-python $programa --epochs $epocas --dataset MNIST --n-bits 6 --global-quantization 1
-
-python $programa --epochs $epocas --dataset MNIST --n-bits 4 --global-quantization 0
-python $programa --epochs $epocas --dataset MNIST --n-bits 4 --global-quantization 1
-
-python $programa --epochs $epocas --dataset FMNIST --n-bits 8 --global-quantization 0
-python $programa --epochs $epocas --dataset FMNIST --n-bits 8 --global-quantization 1
-
-python $programa --epochs $epocas --dataset FMNIST --n-bits 6 --global-quantization 0
-python $programa --epochs $epocas --dataset FMNIST --n-bits 6 --global-quantization 1
-
-python $programa --epochs $epocas --dataset FMNIST --n-bits 4 --global-quantization 0
-python $programa --epochs $epocas --dataset FMNIST --n-bits 4 --global-quantization 1
-
-./script1.sh
+experimento 5 20
+experimento 2 100
+experimento 1 100
+experimento 1 50
+experimento 2 50

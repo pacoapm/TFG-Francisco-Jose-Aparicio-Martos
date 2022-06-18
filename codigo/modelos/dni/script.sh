@@ -1,21 +1,12 @@
 #!/bin/bash
-epocas=30
-python mnist_dni_qtp.py --epochs $epocas --dataset MNIST --n-bits 8 --global-quantization 0
-python mnist_dni_qtp.py --epochs $epocas --dataset MNIST --n-bits 8 --global-quantization 1
+experimento(){
+	echo Arquitectura $1 capas $2 unidades capa >> datos/MNIST.csv
+	echo Arquitectura $1 capas $2 unidades capa >> datos/FMNIST.csv
+	./pruebas.sh $1 $2
+}
 
-python mnist_dni_qtp.py --epochs $epocas --dataset MNIST --n-bits 6 --global-quantization 0
-python mnist_dni_qtp.py --epochs $epocas --dataset MNIST --n-bits 6 --global-quantization 1
-
-python mnist_dni_qtp.py --epochs $epocas --dataset MNIST --n-bits 4 --global-quantization 0
-python mnist_dni_qtp.py --epochs $epocas --dataset MNIST --n-bits 4 --global-quantization 1
-
-python mnist_dni_qtp.py --epochs $epocas --dataset FMNIST --n-bits 8 --global-quantization 0
-python mnist_dni_qtp.py --epochs $epocas --dataset FMNIST --n-bits 8 --global-quantization 1
-
-python mnist_dni_qtp.py --epochs $epocas --dataset FMNIST --n-bits 6 --global-quantization 0
-python mnist_dni_qtp.py --epochs $epocas --dataset FMNIST --n-bits 6 --global-quantization 1
-
-python mnist_dni_qtp.py --epochs $epocas --dataset FMNIST --n-bits 4 --global-quantization 0
-python mnist_dni_qtp.py --epochs $epocas --dataset FMNIST --n-bits 4 --global-quantization 1
-
-./script1.sh
+experimento 5 20
+experimento 2 100
+experimento 1 100
+experimento 1 50
+experimento 2 50

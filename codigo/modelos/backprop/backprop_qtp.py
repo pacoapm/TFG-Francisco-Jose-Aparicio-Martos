@@ -119,6 +119,10 @@ def main():
         
     #cuantizamos los pesos
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
+    
+    #limpiamos archivo de pesos si existe
+    with open("infoPesos/"+generarNombre(args,True),"w") as f:
+        f.write("\n")
     #entrenamiento 
     lossq, accq = train_loop(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization, "infoPesos/"+generarNombre(args,True))
         

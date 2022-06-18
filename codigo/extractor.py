@@ -128,7 +128,7 @@ def datosPesos(archivo):
         print("Peso maximo medio: %.4f Peso minimo medio: %.4f" % (np.mean(info[:,0]), np.mean(info[:,1])))
         print("Peso maximo varianza: %.4f Peso minimo varianza: %.4f" % (np.var(info[:,0]),np.var(info[:,1])))
         
-def datosPesosJunto(archivo):
+def datosPesosJuntos(archivo, tabla):
     f = open(archivo,"r")
     Lines = f.readlines()
     f.close()
@@ -146,7 +146,8 @@ def datosPesosJunto(archivo):
     print("Peso maximo: %.4f Peso minimo: %.4f" % (np.max(info[:,0]), np.min(info[:,1])))
     print("Peso maximo medio: %.4f Peso minimo medio: %.4f" % (np.mean(info[:,0]), np.mean(info[:,1])))
     print("Peso maximo varianza: %.4f Peso minimo varianza: %.4f" % (np.var(info[:,0]),np.var(info[:,1])))
-        
+    
+    tabla[-1] = tabla[-1]+str(np.var(info[:,1]))+","+str(np.var(info[:,]))+","+str(np.min(info[:,1]))+","+str(np.max(info[:,0]))
     plt.boxplot(datos[:,0])
     plt.show()
     
@@ -237,13 +238,21 @@ def mostrarInfoPesos(ruta,var):
 
 def mostrarInfoPesosv2(ruta,var):
     dicc = {0:"ASYMM",1:"SYMM"}
+    info = []
     for dataset in var["dataset"]:
         for bits in var["n_bits"]:
             for func in var["func"]:
                 for glbl in var["globl"]:
                     print("Dataset: ", dataset, " n_bits: ", bits, " funcion: ", dicc[func], " global: ", glbl)
-                    datosPesosJunto(ruta+"/sinq_"+dataset+"_nbits"+str(bits)+"_epochs"+str(var["epochs"][0])+"_global"+str(glbl)+"_modo"+str(func)+"_n_layers0_hidden_width4")
+                    info.append(str(bits)+",")
+                    datosPesosJuntos(ruta+"/sinq_"+dataset+"_nbits"+str(bits)+"_epochs"+str(var["epochs"][0])+"_global"+str(glbl)+"_modo"+str(func)+"_n_layers0_hidden_width4", info)
                     print("\n\n")
+                    
+        print("nbits,vmin,vmax,pmin,pmax")
+        for i in info:
+            print(i)
+        
+        
 
 def graficarInfoPesos(ruta,var):
     dicc = {0:"ASYMM",1:"SYMM"}
@@ -277,9 +286,11 @@ def graficarEvaluacion(ruta,var):
             for func in var["func"]:
                 for glbl in var["globl"]:
                     loss, acc = extraerLossAcc(ruta+"/sinq_"+dataset+"_nbits"+str(bits)+"_epochs"+str(var["epochs"][0])+"_global"+str(glbl)+"_modo"+str(func)+"_n_layers0_hidden_width4")
-                    x = np.arange(0,len(loss))
+                    x = np.arange(1,len(loss)+1)
                     ax[0].plot(x,loss,'*-',label="n_bits"+str(bits))
                     ax[1].plot(x,acc,'*-', label="n_bits"+str(bits))
+                    ax[0].grid()
+                    ax[1].grid()
     
     
     ax[0].legend(bbox_to_anchor=(1.04,1),borderaxespad=0)
@@ -298,7 +309,7 @@ def graficarEvaluacion(ruta,var):
     plt.show()
     
 def graficarACC(ruta,var):
-    fig = plt.figure(figsize=(8,6))
+    fig = plt.figure()
     x = np.arange(1,var["epochs"][0]+1)
     dicc = {0:"global",1:"local"}
     colores = ["r","b","g","y","c","m","y"]
@@ -312,7 +323,7 @@ def graficarACC(ruta,var):
                     print(len(acc))
                     #plt.plot(x,loss,'*-',label="n_bits"+str(bits))
                     if len(var["n_bits"]) > 1:
-                        plt.plot(x,acc,'*-', label="n_bits"+str(bits))
+                        plt.plot(x,acc,'*-', label=str(bits)+" bits")
                     if len(var["globl"]) > 1:
                         plt.plot(x,acc,'*-', label=dicc[glbl])
                         
@@ -327,10 +338,13 @@ def graficarACC(ruta,var):
     
     
     plt.legend(bbox_to_anchor=(1.04,1))
-    plt.title("Test acc")
-    plt.xlabel("epochs")
-    plt.ylabel("Accuracy")
+    plt.title("Precisión en el Test")
+    plt.xlabel("Épocas")
+    plt.ylabel("Precisión")
     plt.ylim(0,100)
+    plt.yticks(range(0,100,10))
+    plt.grid()
+    
     fig.tight_layout()
 
     plt.show()
@@ -352,7 +366,9 @@ def main():
     #graficarACC("modelos/feedbackAlignment/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[1],"globl":[0]})
     #graficarInfoPesos("modelos/HSIC/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[1],"globl":[1]})
     #graficarEvaluacion("modelos/HSIC/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[0],"globl":[0]})
-    mostrarInfoPesosv2("modelos/backprop/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[8],"func":[0],"globl":[0]})
+    #graficarACC("modelos/backprop/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[6,7,8],"func":[0],"globl":[0]})
+    mostrarInfoPesosv2("modelos/HSIC/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[6,7,8],"func":[0],"globl":[1]})
+    mostrarInfoPesosv2("modelos/HSIC/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[6,7,8],"func":[0],"globl":[0]})
     
     
 if __name__=="__main__":

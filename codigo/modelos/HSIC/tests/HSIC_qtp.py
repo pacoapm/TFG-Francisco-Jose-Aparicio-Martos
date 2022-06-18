@@ -171,6 +171,8 @@ def main():
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)
     #UNFORMATED TRAINING: entrenamiento de la red con HSIC
     epochs = 30
+    with open("infoPesos/"+generarNombre(args,True),"w") as f:
+        f.write("\n")
     for cepoch in range(epochs):
         quant_hsic_train(cepoch, modelq, train_loader, config_dict, args, minimo, maximo, global_quantization, "infoPesos/"+generarNombre(args,True))
 

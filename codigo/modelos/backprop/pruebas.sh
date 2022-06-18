@@ -1,4 +1,4 @@
-funciones=(0)
+funciones=(1)
 bits=(2 3 4 5 6 7 8)
 global=(0 1)
 database=(MNIST FMNIST)
