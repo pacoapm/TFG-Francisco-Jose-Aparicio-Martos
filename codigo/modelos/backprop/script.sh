@@ -5,6 +5,7 @@ experimento(){
 	./pruebas.sh $1 $2
 }
 
+experimento 0 4
 experimento 5 20
 experimento 2 100
 experimento 1 100

@@ -275,14 +275,19 @@ def train_loop(model, args, device, train_loader, test_loader, cuantizacion = Fa
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
     loss_list = []
     acc_list = []
+    loss_list_train = []
+    acc_list_train = []
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob, archivo)
         loss, acc = test(model, device, test_loader)
+        loss_train, acc_train = test(model, device, train_loader)
         loss_list.append(loss)
         acc_list.append(acc)
+        loss_list_train.append(loss_train)
+        acc_list_train.append(acc_train)
         scheduler.step()
     
-    return loss_list, acc_list
+    return loss_list, acc_list, loss_list_train, acc_list_train
 
 def train_loop_fa(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True, archivo = None):
     
@@ -291,14 +296,19 @@ def train_loop_fa(model, args, device, train_loader, test_loader, cuantizacion =
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
     loss_list = []
     acc_list = []
+    loss_list_train = []
+    acc_list_train = []
     for epoch in range(1, args.epochs + 1):
         train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob, archivo)
         loss, acc = test(model, device, test_loader)
+        loss_train, acc_train = test(model, device, train_loader)
         loss_list.append(loss)
         acc_list.append(acc)
+        loss_list_train.append(loss_train)
+        acc_list_train.append(acc_train)
         scheduler.step()
     
-    return loss_list, acc_list
+    return loss_list, acc_list, loss_list_train, acc_list_train
 
 def train_loop_dni(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True, archivo = None):
     
@@ -307,14 +317,19 @@ def train_loop_dni(model, args, device, train_loader, test_loader, cuantizacion 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
     loss_list = []
     acc_list = []
+    loss_list_train = []
+    acc_list_train = []
     for epoch in range(1, args.epochs + 1):
         train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion, minimo, maximo, glob, archivo)
         loss, acc = test(model, device, test_loader)
+        loss_train, acc_train = test(model, device, train_loader)
         loss_list.append(loss)
         acc_list.append(acc)
+        loss_list_train.append(loss_train)
+        acc_list_train.append(acc_train)
         scheduler.step()
     
-    return loss_list, acc_list
+    return loss_list, acc_list, loss_list_train, acc_list_train
 
 
 def hook(grad):

@@ -191,6 +191,7 @@ def main():
     epochs = 20
     vacc = []
     vloss = []
+    
     for cepoch in range(epochs):
         quant_standard_train(cepoch, final_modelq, train_loader, optimizer,config_dict, args, minimo, maximo, global_quantization, "infoPesos/"+generarNombre(args,True))
         accq, lossq = test(final_modelq,device,test_loader)

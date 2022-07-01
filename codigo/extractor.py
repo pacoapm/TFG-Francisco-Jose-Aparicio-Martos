@@ -319,8 +319,9 @@ def graficarACC(ruta,var):
             for func in var["func"]:
                 for glbl in var["globl"]:
                     
-                    loss, acc = extraerLossAcc(ruta+"/sinq_"+dataset+"_nbits"+str(bits)+"_epochs"+str(var["epochs"][0])+"_global"+str(glbl)+"_modo"+str(func)+"_n_layers0_hidden_width4")
+                    loss, acc = extraerLossAcc(ruta+"sinq_"+dataset+"_nbits"+str(bits)+"_epochs"+str(var["epochs"][0])+"_global"+str(glbl)+"_modo"+str(func)+"_n_layers"+str(var["nlayers"])+"_hidden_width"+str(var["nunits"]))
                     print(len(acc))
+                    x = np.arange(1,len(acc)+1)
                     #plt.plot(x,loss,'*-',label="n_bits"+str(bits))
                     if len(var["n_bits"]) > 1:
                         plt.plot(x,acc,'*-', label=str(bits)+" bits")
@@ -366,9 +367,9 @@ def main():
     #graficarACC("modelos/feedbackAlignment/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[1],"globl":[0]})
     #graficarInfoPesos("modelos/HSIC/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[1],"globl":[1]})
     #graficarEvaluacion("modelos/HSIC/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[2,3,4,5,6,7,8],"func":[0],"globl":[0]})
-    #graficarACC("modelos/backprop/historial/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[6,7,8],"func":[0],"globl":[0]})
-    mostrarInfoPesosv2("modelos/HSIC/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[6,7,8],"func":[0],"globl":[1]})
-    mostrarInfoPesosv2("modelos/HSIC/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[6,7,8],"func":[0],"globl":[0]})
+    graficarACC("modelos/feedbackAlignment/historial/",{"epochs":[30],"dataset":["FMNIST"],"n_bits":[6,7,8],"func":[1],"globl":[1], "nlayers":5,"nunits":20})
+    #mostrarInfoPesosv2("modelos/HSIC/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[6,7,8],"func":[0],"globl":[1]})
+    #mostrarInfoPesosv2("modelos/HSIC/infoPesos/",{"epochs":[30],"dataset":["MNIST"],"n_bits":[6,7,8],"func":[0],"globl":[1]})
     
     
 if __name__=="__main__":

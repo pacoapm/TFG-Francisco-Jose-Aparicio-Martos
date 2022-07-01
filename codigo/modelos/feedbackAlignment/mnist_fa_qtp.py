@@ -29,6 +29,7 @@ import custom_funcs
 
 
 def main():
+    #hola = input()
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
     parser.add_argument('--batch-size', type=int, default=64, metavar='N',
@@ -123,7 +124,7 @@ def main():
     with open("infoPesos/"+generarNombre(args,True),"w") as f:
         f.write("\n")
     #entrenamiento cuantizado
-    lossq, accq = train_loop_fa(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization,"infoPesos/"+generarNombre(args,True))
+    lossq, accq, lossq_train, accq_train = train_loop_fa(modelq, args, device, train_loader, test_loader, True, minimo, maximo, global_quantization,"infoPesos/"+generarNombre(args,True))
     
     #visualizar_caracteristicas(model, imagen)
     #visualizar_caracteristicas(modelq, imagen)
@@ -134,6 +135,7 @@ def main():
     
     guardarDatos("datos/"+args.dataset+".csv",generarInformacion(args,acc,loss,accq[-1],lossq[-1]))
     guardarHistorial("historial/"+generarNombre(args,True),lossq,accq)
+    guardarHistorial("historial_train/"+generarNombre(args,True),lossq_train,accq_train)
 
 
 if __name__ == '__main__':

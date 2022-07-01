@@ -1,0 +1,55 @@
+#!/bin/bash
+echo Arquitectura 1 capas 50 unidades capa >> datos/MNIST.csv
+python backprop_qtp.py --dataset MNIST --modo 0 --n-bits 7 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 0 --n-bits 7 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 0 --n-bits 8 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 0 --n-bits 8 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 2 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 2 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 3 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 3 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 4 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 4 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 5 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 5 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 6 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 6 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 7 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 7 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 8 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 1 --n-bits 8 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+echo Arquitectura 1 capas 50 unidades capa >> datos/FMNIST.csv
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 2 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 2 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 3 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 3 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 4 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 4 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 5 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 5 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 6 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 6 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 7 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 7 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 8 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 0 --n-bits 8 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 2 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 2 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 3 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 3 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 4 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 4 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 5 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 5 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 6 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 6 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 7 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 7 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 8 --global-quantization 0 --epochs 30 --n-layers 1 --hidden-width 50
+python backprop_qtp.py --dataset FMNIST --modo 1 --n-bits 8 --global-quantization 1 --epochs 30 --n-layers 1 --hidden-width 50
+echo Arquitectura 2 capas 50 unidades capa >> datos/MNIST.csv
+python backprop_qtp.py --dataset MNIST --modo 0 --n-bits 2 --global-quantization 0 --epochs 30 --n-layers 2 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 0 --n-bits 2 --global-quantization 1 --epochs 30 --n-layers 2 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 0 --n-bits 3 --global-quantization 0 --epochs 30 --n-layers 2 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 0 --n-bits 3 --global-quantization 1 --epochs 30 --n-layers 2 --hidden-width 50
+python backprop_qtp.py --dataset MNIST --modo 0 --n-bits 4 --global-quantization 0 --epochs 30 --n-layers 2 --hidden-width 50

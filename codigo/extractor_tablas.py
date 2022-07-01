@@ -63,11 +63,16 @@ def graficarPrec(datos,titulo,ruta):
 def graficarPrec2(datos_mnist,datos_fmnist,funcion,titulo,ruta):
     fig = plt.figure()
     for datos, dataset, linea in zip([datos_mnist,datos_fmnist],["MNIST","FMNIST"],["*-","*--"]):
-        x_local = datos[np.where(datos[:,1] == "local" & datos[:,2] == funcion)[0],0]
-        x_global = datos[np.where(datos[:,1] == "global" & datos[:,2] == funcion)[0],0]
-        datos = np.array(datos)
-        y_local = np.array(datos[np.where(datos[:,1] == "local" & datos[:,2] == funcion)[0],5],dtype=float)
-        y_global = np.array(datos[np.where(datos[:,1] == "global" & datos[:,2] == funcion)[0],5],dtype=float)
+        print((datos[:,1] == "global"))
+        print((datos[:,2] == funcion))
+        x_local = datos[np.where((datos[:,1] == "local") & (datos[:,2] == funcion))[0],0]
+        x_global = datos[np.where((datos[:,1] == "global") & (datos[:,2] == funcion))[0],0]
+        #datos = np.array(datos)
+        print(datos)
+        y_local = np.array(datos[np.where((datos[:,1] == "local") & (datos[:,2] == funcion))[0],5],dtype=float)
+        y_global = np.array(datos[np.where((datos[:,1] == "global") & (datos[:,2] == funcion))[0],5],dtype=float)
+        print(x_local)
+        print(y_local)
         plt.plot(x_local,y_local,linea+"b",label="local "+dataset)
         plt.plot(x_global,y_global,linea+"r",label="global "+dataset)
         
@@ -110,7 +115,7 @@ def graficarFQuant(datos_mnist,datos_fmnist,titulo,ruta):
             
             x_local = datos[np.where((datos[:,1] == "local") & (datos[:,2] == nombre))[0],0]
             x_global = datos[np.where((datos[:,1] == "global") & (datos[:,2] == nombre))[0],0]
-            datos = np.array(datos)
+            #datos = np.array(datos)
             y_local = np.array(datos[np.where((datos[:,1] == "local") & (datos[:,2] == nombre))[0],5],dtype=float)
             y_global = np.array(datos[np.where((datos[:,1] == "global") & (datos[:,2] == nombre))[0],5],dtype=float)
             ax[grafica].plot(x_local,y_local,linea+"b",label="local "+dataset)
@@ -154,13 +159,12 @@ if __name__=="__main__":
     unidades = [20,100,100,50,50]
     for alg in ["feedbackAlignment"]:
         for i,j in zip(capas,unidades):
-            datos_fmnist_s = extraerDatosArquitectura("modelos/"+alg+"/datos/FMNIST_v2.csv",i,j)
-            datos_mnist_s = extraerDatosArquitectura("modelos/"+alg+"/datos/MNIST_v2.csv",i,j)
-            datos_fmnist_a = extraerDatosArquitectura("modelos/"+alg+"/datos/FMNIST.csv",i,j)
-            datos_mnist_a = extraerDatosArquitectura("modelos/"+alg+"/datos/MNIST.csv",i,j)
+            datos_fmnist= extraerDatosArquitectura("modelos/"+alg+"/datos/FMNIST.csv",i,j)
+            datos_mnist= extraerDatosArquitectura("modelos/"+alg+"/datos/MNIST.csv",i,j)
             
             #print(datos)
-            graficarPrec2(datos_mnist_s,datos_fmnist_s,"ASYMM","Precision con arquitectura: {} capas {} unidades. Función {}".format(i,j,"ASYMM"),"modelos/"+alg+"/graficas/")
+            graficarPrec2(datos_mnist,datos_fmnist,"SYMM","Precision con arquitectura: {} capas {} unidades Funcion {}".format(i,j,"SYMM"),"modelos/"+alg+"/graficas/")
+            graficarPrec2(datos_mnist,datos_fmnist,"ASYMM","Precision con arquitectura: {} capas {} unidades Funcion {}".format(i,j,"ASYMM"),"modelos/"+alg+"/graficas/")
 
     """capas = [5,2,1,1,2]
     unidades = [20,100,100,50,50]
