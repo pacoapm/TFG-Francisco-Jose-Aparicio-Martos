@@ -85,6 +85,28 @@ def graficarPrec2(datos_mnist,datos_fmnist,funcion,titulo,ruta):
     plt.savefig(ruta+titulo)
     #plt.show()
     
+def precSinCuantificacion():
+    tabla_fmnist = tabla_mnist = "Arquitectura,BP,HSIC,FA,SG\n"
+    
+    capas = [1,5,2,1,1,2]
+    unidades = [4,20,100,100,50,50]
+    
+    for i,j in zip(capas,unidades):
+        tabla_fmnist += "{} capas {} unidades".format(i+1,j)+","
+        tabla_mnist += "{} capas {} unidades".format(i+1,j)+","
+        for alg in ["backprop","HSIC","feedbackAlignment","dni"]:
+            datos_fmnist= extraerDatosArquitectura("modelos/"+alg+"/datos/FMNIST.csv",i,j)
+            datos_mnist= extraerDatosArquitectura("modelos/"+alg+"/datos/MNIST.csv",i,j)
+            
+            tabla_fmnist += str(datos_fmnist[0,3])+","
+            tabla_mnist += str(datos_mnist[0,3])+","
+            
+            
+        tabla_fmnist += "\n"
+        tabla_mnist += "\n"
+        
+    return tabla_mnist, tabla_fmnist
+    
 def graficarPrec3(datos_mnist,datos_fmnist,titulo,ruta):
     fig, ax = plt.subplots(1,2, figsize=(12,4))
     
@@ -137,43 +159,21 @@ if __name__=="__main__":
     parser.add_argument('--ruta',type=str, default=None, metavar="archivo")
     args = parser.parse_args()
     
-    #capas = [5,2,1,1,2]
-    #unidades = [20,100,100,50,50]
-    capas = [1]
-    unidades = [4]
     
-    """for i,j in zip(capas,unidades):
-        datos = extraerDatosArquitectura("modelos/HSIC/datos/FMNIST.csv",i,j)
-        print(datos)
-        graficarPrec(datos,"{} capa {} unidades".format(i,j),"modelos/HSIC/graficas/FMNIST/")"""
-        
-    """for dataset in ["feedbackAlignment","backprop","dni","HSIC"]:
-        for i,j in zip(capas,unidades):
-            datos_fmnist = extraerDatosArquitectura("modelos/"+dataset+"/datos/FMNIST.csv",i,j)
-            datos_mnist = extraerDatosArquitectura("modelos/"+dataset+"/datos/MNIST.csv",i,j)
-            
-            #print(datos)
-            graficarFQuant(datos_mnist,datos_fmnist,"Precision con arquitectura: {} capa {} unidades".format(i,j),"modelos/"+dataset+"/graficas/")
-"""
-    capas = [5,2,1,1,2]
-    unidades = [20,100,100,50,50]
-    for alg in ["feedbackAlignment"]:
+    
+    a,b = precSinCuantificacion()
+    print(a,b)
+
+    """capas = [1,5,2,1,1,2]
+    unidades = [4,20,100,100,50,50]
+    for alg in ["feedbackAlignment","backprop","HSIC","dni"]:
         for i,j in zip(capas,unidades):
             datos_fmnist= extraerDatosArquitectura("modelos/"+alg+"/datos/FMNIST.csv",i,j)
             datos_mnist= extraerDatosArquitectura("modelos/"+alg+"/datos/MNIST.csv",i,j)
             
             #print(datos)
-            graficarPrec2(datos_mnist,datos_fmnist,"SYMM","Precision con arquitectura: {} capas {} unidades Funcion {}".format(i,j,"SYMM"),"modelos/"+alg+"/graficas/")
-            graficarPrec2(datos_mnist,datos_fmnist,"ASYMM","Precision con arquitectura: {} capas {} unidades Funcion {}".format(i,j,"ASYMM"),"modelos/"+alg+"/graficas/")
+            graficarPrec2(datos_mnist,datos_fmnist,"SYMM","Precision con arquitectura: {} capas {} unidades Funcion {}".format(i+1,j,"SYMM"),"modelos/"+alg+"/graficas/")
+            graficarPrec2(datos_mnist,datos_fmnist,"ASYMM","Precision con arquitectura: {} capas {} unidades Funcion {}".format(i+1,j,"ASYMM"),"modelos/"+alg+"/graficas/")
 
-    """capas = [5,2,1,1,2]
-    unidades = [20,100,100,50,50]
-    for dataset in ["feedbackAlignment","backprop","dni","HSIC"]:
-        for i,j in zip(capas,unidades):
-            datos_fmnist = extraerDatosArquitectura("modelos/"+dataset+"/datos/FMNIST.csv",i,j)
-            datos_mnist = extraerDatosArquitectura("modelos/"+dataset+"/datos/MNIST.csv",i,j)
-            
-            #print(datos)
-            graficarPrec2(datos_mnist,datos_fmnist,"Precision con arquitectura: {} capa {} unidades".format(i,j),"modelos/"+dataset+"/graficas/")
-"""
+    """
     

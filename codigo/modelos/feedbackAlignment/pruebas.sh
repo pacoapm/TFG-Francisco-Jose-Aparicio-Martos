@@ -2,7 +2,7 @@ funciones=(0 1)
 bits=(2 3 4 5 6 7 8)
 global=(1 0)
 database=(MNIST FMNIST)
-programa=mnist_fa_qtp.py
+programa=fa_qtp.py
 
 for k in "${database[@]}"
 do
