@@ -1,2 +1,0 @@
-* TESTS
-This is just the temporary code for convenience.

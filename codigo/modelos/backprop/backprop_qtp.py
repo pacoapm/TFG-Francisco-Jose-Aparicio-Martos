@@ -80,17 +80,7 @@ def main():
 
     device = torch.device("cuda" if use_cuda else "cpu")
     
-    """with open("datos/"+args.dataset+".csv",'r') as f:
-        dicc = {'ASYMM':0,'SYMM':1}
-        info = generarInformacion(args,0,0,0,0)
-        info = info.split(';')
-        lines = f.readlines()
-        
-        for line in lines:
-            linea = line.split(';')
-            if linea[0:3] == info[0:3]:
-                print("ya existe")
-                return 0"""
+    
     #cargamos la base de datos
     train_loader,test_loader = load_dataset(args.dataset, args, device, use_cuda)
     
@@ -111,13 +101,10 @@ def main():
     #modelq = create_backward_hooks(modelq)
     modelq = modelq.to(device)
     
-    #cogemos los valores minimos y maximos de la red anterior
-    if custom_funcs.modo == 0:
-        minimo = -1
-        maximo = 1
-    else:
-        minimo = 0
-        maximo = 1
+    
+        
+    maximo = 1
+    minimo = -1
         
     #cuantizamos los pesos
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)

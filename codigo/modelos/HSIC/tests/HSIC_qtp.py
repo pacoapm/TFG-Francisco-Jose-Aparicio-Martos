@@ -110,17 +110,7 @@ def main():
     config_dict['log_batch_interval'] = 10
     config_dict['epochs'] = 5
 
-    """with open("datos/"+args.dataset+".csv",'r') as f:
-        dicc = {'ASYMM':0,'SYMM':1}
-        info = generarInformacion(args,0,0,0,0)
-        info = info.split(';')
-        lines = f.readlines()
-        
-        for line in lines:
-            linea = line.split(';')
-            if linea[0:3] == info[0:3]:
-                print("ya existe")
-                return 0"""
+    
 
     # # # data prepreation
     train_loader, test_loader = get_dataset_from_code(args.dataset.lower(), args.batch_size)
@@ -153,19 +143,12 @@ def main():
                         model_type='simple-dense',
                         data_code=args.dataset.lower())
     
-    #añadimos los hooks para la cuantización en la actualización de pesos
-    #modelq = create_backward_hooks(modelq)
+    
     modelq = modelq.to(device)
 
-    #buscamos los máximos y mínimos del modelo entrenado sin cuantización
-    if custom_funcs.modo == 0:
-        minimo, maximo = minmax(final_model, global_quantization)
-        maximo = 1
-        minimo = -1
-    else:
-        maximo = maximof(final_model, global_quantization)
-        minimo = 0
-        maximo = 1
+        
+    maximo = 1
+    minimo = -1
 
     #cuantizamos los pesos del modelo
     actualizar_pesos(modelq,args.n_bits,minimo,maximo, global_quantization)

@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 def substring(string, ini, fin):
     return string[string.find(ini)+len(ini):string.find(fin)]
 
+#chequea que los pesos de los archivos esten entre -1 y 1
 def comprobarPesos(archivo):
     f = open(archivo,"r")
     Lines = f.readlines()
@@ -34,6 +35,7 @@ def comprobarPesos(archivo):
     
     return np.all(abs(datos) <= 1)
 
+#grafica la evolucion de los pesos en los experimentos
 def graficarPesos(archivo):
     fig = plt.figure(figsize=(8,6))
     f = open(archivo,"r")
@@ -65,7 +67,7 @@ def graficarPesos(archivo):
     
     
     
-    
+#grafica la evolucion de los pesos del algorimto synthetic gradient
 def graficarPesosDNI(archivo):
     f = open(archivo,"r")
     Lines = f.readlines()
@@ -96,7 +98,7 @@ def graficarPesosDNI(archivo):
     plt.show()
     
     
-    
+#extrea valores maximos, minimos, media y varianza de los pesos por capa
 def datosPesos(archivo):
     f = open(archivo,"r")
     Lines = f.readlines()
@@ -128,6 +130,7 @@ def datosPesos(archivo):
         print("Peso maximo medio: %.4f Peso minimo medio: %.4f" % (np.mean(info[:,0]), np.mean(info[:,1])))
         print("Peso maximo varianza: %.4f Peso minimo varianza: %.4f" % (np.var(info[:,0]),np.var(info[:,1])))
         
+#extrea valores maximos, minimos, media y varianza de los pesos a nivel global 
 def datosPesosJuntos(archivo, tabla):
     f = open(archivo,"r")
     Lines = f.readlines()
@@ -152,7 +155,7 @@ def datosPesosJuntos(archivo, tabla):
     plt.show()
     
     
-    
+#igual que datosPesos pero para el algoritmo Feedback Alignment
 def datosPesosFA(archivo):
     f = open(archivo,"r")
     Lines = f.readlines()
@@ -188,7 +191,7 @@ def datosPesosFA(archivo):
     #print("Los pesos son correctos: ", np.all(abs(datos) <= 1.1))
     
     
-    
+#igual que datosPesos pero para el algoritmo Feedback synthetic gradients
 def datosPesosDNI(archivo):
     f = open(archivo,"r")
     Lines = f.readlines()
@@ -224,7 +227,7 @@ def datosPesosDNI(archivo):
     
     
     
-    
+#funciones para mostrar la informacion de los experimentos especificados   
     
 def mostrarInfoPesos(ruta,var):
     dicc = {0:"ASYMM",1:"SYMM"}
@@ -265,7 +268,7 @@ def graficarInfoPesos(ruta,var):
                     print("\n\n")
     
     
-    
+#extrae la informacion de la precision y la funcion de perdida de cada experimento
 def extraerLossAcc(archivo):
     print(archivo)
     datos = []
@@ -277,6 +280,7 @@ def extraerLossAcc(archivo):
     
     return datos[:,0],datos[:,1]
 
+#grafica la evolucion de la funcion de perdida y precision del experimento especificado
 def graficarEvaluacion(ruta,var):
     fig, ax = plt.subplots(1,2, figsize=(12,4))
     
@@ -307,7 +311,8 @@ def graficarEvaluacion(ruta,var):
 
     fig.tight_layout()
     plt.show()
-    
+
+#grafica la evolucion de los experimentos especificados
 def graficarACC(ruta,var):
     fig = plt.figure()
     x = np.arange(1,var["epochs"][0]+1)

@@ -29,6 +29,7 @@ import csv
 n_bits = 8
 modo = 0
 
+#formatea la entrada para synthetic gradient
 def one_hot(indexes, n_classes, args):
     result = torch.FloatTensor(indexes.size() + (n_classes,))
     if args.no_cuda == False:
@@ -41,7 +42,8 @@ def one_hot(indexes, n_classes, args):
         value=1
     )
     return Variable(result)
-    
+
+#aplica la función de cuantificacion seleccionada
 class my_round_func(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input):
@@ -62,6 +64,7 @@ class my_round_func(torch.autograd.Function):
         grad_input = grad_output.clone()
         return grad_input
     
+#capa lineal que aplica cuantificacion (no se usa finalmente)
 class QuantLayer(nn.Module):
     def __init__(self):
         super(QuantLayer,self).__init__()
@@ -69,7 +72,8 @@ class QuantLayer(nn.Module):
     def forward(self,input):
         return my_round_func.apply(input)
 
-    
+
+#crea un conjunto capa lineal capa de salida (relu)
 def linearStack(input_width,output_width):
     linear = nn.Linear(input_width,output_width)
     relu = nn.ReLU()
@@ -82,7 +86,7 @@ def quantLinearStack(input_width,output_width):
     return nn.Sequential(*[linear,quant,relu,quant])
 
 
-
+#clase para crear la redes neuronales
 class Net(nn.Module):
     def __init__(self, n_layers, hidden_width, input_width, output_width):
         super(Net, self).__init__()
@@ -105,6 +109,7 @@ class Net(nn.Module):
         x = F.log_softmax(x, dim=1)
         return x
     
+#clase para crear las redes neuronales con cuantificacin en la inferencia y en los gradientes (no se aplica finalmente)
 class QuantNet(nn.Module):
     def __init__(self, n_layers, hidden_width, input_width, output_width):
         super(QuantNet, self).__init__()
@@ -130,6 +135,7 @@ class QuantNet(nn.Module):
         x = my_round_func.apply(x)
         return x
 
+#carga la base de datos especificada MNIST o FMNIST
 def load_dataset(dataset, args, device, use_cuda):
     if dataset == "MNIST":
         train_kwargs = {'batch_size': args.batch_size}
@@ -177,6 +183,7 @@ def load_dataset(dataset, args, device, use_cuda):
         
         return train_loader,test_loader
     
+#funcion que realiza el entrenamiento de la red con backprop
 def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True, archivo = None):
     model.train()
     output = 0
@@ -200,6 +207,8 @@ def train(args, model, device, train_loader, optimizer, epoch, cuantizacion = Fa
     
     if archivo != None:
         guardarMaxMin(archivo, info)
+        
+#funcion que realiza el entrenamiento de la red con synthetic gradient
 def train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True, archivo = None):
     model.train()
     output = 0
@@ -224,7 +233,7 @@ def train_DNI(args, model, device, train_loader, optimizer, epoch, cuantizacion 
     if archivo != None:
         guardarMaxMin(archivo, info)
             
-            
+#funcion que realiza el entrenamiento de la red con feedback alignment  
 def train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion = False, minimo = None, maximo = None, glob = True, archivo = None):
     model.train()
     output = 0
@@ -248,6 +257,7 @@ def train_fa(args, model, device, train_loader, optimizer, epoch, cuantizacion =
     if archivo != None:
         guardarMaxMin(archivo, info)
 
+#funcion para medir la precision de los modelos en el conjunto que se pase como argumento
 def test(model, device, test_loader):
     model.eval()
     test_loss = 0
@@ -256,8 +266,8 @@ def test(model, device, test_loader):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
-            pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+            test_loss += F.nll_loss(output, target, reduction='sum').item()  
+            pred = output.argmax(dim=1, keepdim=True)  
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
@@ -268,6 +278,7 @@ def test(model, device, test_loader):
 
     return test_loss, 100. * correct / len(test_loader.dataset)
     
+#funcion que realiza el bucle de entrenamiento para backprop
 def train_loop(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True, archivo = None):
     
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
@@ -289,6 +300,7 @@ def train_loop(model, args, device, train_loader, test_loader, cuantizacion = Fa
     
     return loss_list, acc_list, loss_list_train, acc_list_train
 
+#funcion que realiza el bucle de entrenamiento para feedback alignment
 def train_loop_fa(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True, archivo = None):
     
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
@@ -310,6 +322,7 @@ def train_loop_fa(model, args, device, train_loader, test_loader, cuantizacion =
     
     return loss_list, acc_list, loss_list_train, acc_list_train
 
+#funcion que realiza el bucle de entrenamiento para synthetic gradient
 def train_loop_dni(model, args, device, train_loader, test_loader, cuantizacion = False, minimo = None, maximo = None,  glob = True, archivo = None):
     
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
@@ -331,7 +344,7 @@ def train_loop_dni(model, args, device, train_loader, test_loader, cuantizacion 
     
     return loss_list, acc_list, loss_list_train, acc_list_train
 
-
+#hook usado para cuantificar los gradientes (no se usa)
 def hook(grad):
     if modo == 0:
         minimo = torch.min(grad)
@@ -343,6 +356,7 @@ def hook(grad):
     else:
         return my_round_func.apply(grad)
     
+#hook para imprimir los gradientes (se uso en su momento para depurar)
 def hook_print(grad):
     if modo == 0:
         minimo = torch.min(grad)
@@ -356,13 +370,14 @@ def hook_print(grad):
         return my_round_func.apply(grad)
         
 
-
+#funcion para aplicar los hooks(en desuso)
 def create_backward_hooks( model :nn.Module) -> nn.Module:
     for parameter in model.parameters():
             if parameter.requires_grad:
                 parameter.register_hook(hook)
     return model
 
+#funcion para aplicar los hooks(en desuso)
 def create_backward_hooks_print( model :nn.Module) -> nn.Module:
     for parameter in model.parameters():
             if parameter.requires_grad:
@@ -386,8 +401,10 @@ def ASYMMf(t,mini,maxi,n):
            
     return dASYMM(res,mini,maxi,n)
 
+#comprobacion de que los pesos del tensor se encuentran entre -1 y 1 (se uso en fase de depuracion)
 def correcto(tensor):
     return torch.all(torch.abs(tensor)<=1).numpy()
+
 
 def SYMM(t,maxi,n):
     return torch.round(t*((2**(n-1)-1)/maxi))
@@ -402,6 +419,8 @@ def SYMMf(t,maxi,n):
     res = SYMM(t,maxi,n)
     return dSYMM(res,maxi,n)
 
+
+#encuentra minimos y maximos de los pesos de los modelos (en desuso)
 def minmax(modelo,glob = True):
     minimo = 100
     maximo = 0
@@ -424,6 +443,7 @@ def minmax(modelo,glob = True):
     else:
         return minimos,maximos
     
+#encuentra el maximo de los pesos de un modelo (en desuso)
 def maximof(modelo,glob = True):
     maxi = 0
     maximos = []
@@ -444,6 +464,7 @@ def maximof(modelo,glob = True):
     else:
         return maximos
 
+#funcion que aplica la funcion de cuantificacion a la matriz de pesos, backprop
 def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
     
     max_bias = []
@@ -511,6 +532,7 @@ def actualizar_pesos(modelo,n_bits,minimo=None,maximo=None, glob = True):
     
     return max_bias, min_bias, max_weight, min_weight
                     
+#funcion que aplica la funcion de cuantificacion a la matriz de pesos, feedback alignment
 def actualizar_pesos_fa(modelo,n_bits,minimo=None,maximo=None, glob = True):
     max_bias = []
     min_bias = []
@@ -603,7 +625,7 @@ def actualizar_pesos_fa(modelo,n_bits,minimo=None,maximo=None, glob = True):
                     
     return max_bias, min_bias, max_weight, min_weight, max_bias_back, min_bias_back, max_weight_back, min_weight_back        
         
-
+#funcion que dada una imagen muestra en que zonas se fija nuestro modelo (no se ha usado finalmente, pero es funcional)
 def visualizar_caracteristicas(model, imagen):
     model.to(torch.device("cpu"))
     integrated_gradients = IntegratedGradients(model)
@@ -631,6 +653,7 @@ def visualizar_caracteristicas(model, imagen):
                                  sign='positive',
                                  title='Integrated Gradients')
 
+#grafica la evolucion de la precison y de la funcion de perdida del modelo entrenado
 def dibujar_loss_acc(loss,acc,epochs,nombre):
     fig, ax = plt.subplots(1,2, figsize=(10,4))
     x = np.arange(0,epochs)
@@ -653,6 +676,7 @@ def dibujar_loss_acc(loss,acc,epochs,nombre):
     plt.savefig("images/"+nombre)
     #plt.show()
     
+#genera el nombre del archivo segun los parametros de la experimentacion
 def generarNombre(args, quantize):
     
     if quantize:
@@ -662,6 +686,7 @@ def generarNombre(args, quantize):
     
     return nombre + args.dataset+"_nbits"+str(args.n_bits)+"_epochs"+str(args.epochs)+"_global"+str(args.global_quantization)+"_modo"+str(args.modo)+"_n_layers"+str(args.n_layers)+"_hidden_width"+str(args.hidden_width)
 
+#genera la linea a insertar en el directorio datos
 def generarInformacion(args, acc, loss, accq, lossq):
     if args.modo == 0:
         modo = "ASYMM"
@@ -675,17 +700,19 @@ def generarInformacion(args, acc, loss, accq, lossq):
     
     return str(args.n_bits)+";"+globalq+";"+modo+";"+str(acc)+";"+str(loss)+";"+str(accq)+";"+str(lossq)+";"+str(accq-acc)+"\n"
             
-    
+#guarda los resultados en el archivo especificado
 def guardarDatos(archivo, informacion):
     with open(archivo,'a') as f:
         f.write(informacion)
         #writer.writerow(informacion)
-        
+  
+#guarda la evolucion del entrenamiento en archivo
 def guardarHistorial(archivo,loss,acc):
     with open(archivo,'w') as f:
         for i,j in zip(loss,acc):
             f.write(str(i)+" "+str(j)+"\n")
             
+#guarda la informacion de los pesos en archivo
 def guardarMaxMin(archivo,informacion):
     with open(archivo,"a") as f:
         for info in informacion:
@@ -693,32 +720,9 @@ def guardarMaxMin(archivo,informacion):
                 for j in range(0,len(info)):
                     f.write(str(info[j][i].item()) + " ")
                 f.write("\n")
-                
-def extraerInfo(archivo):
-    f = open(archivo,"r")
-    Lines = f.readlines()
-    datos = []
-    
-    pos1 = archivo.find("n_layers")
-    pos2 = archivo.find("_hidden")
-    
-    n_layers = int(archivo[pos1+len("n_layers"):pos2])+3
-    for line in Lines:
-        #creo una lista numerica apartir del archivo de entrada
-        datos.append(list(map(float,line.split(" ")[:-1])))
-        
-    #transformo la información a numpy array
-    datos = np.array(datos)
-    for i in range(n_layers):
-        print(np.mean(datos[i::n_layers,:],axis=0)) 
-        plt.plot(list(range(len(datos[i::n_layers,3]))),datos[i::n_layers,3], label = "capa "+str(i+1))
-        plt.legend()
-        plt.show()
-        
-    for i in range(n_layers):
-        print(np.var(datos[i::n_layers,:],axis=0))
-        
-    f.close()
+ 
+
+
         
     
     
