@@ -23,28 +23,25 @@ from custom_funcs import load_dataset, dibujar_loss_acc, maximof, generarInforma
 import custom_funcs
 
 def main():
-    #exit()
-    # Training settings
-    #hola = input()
-    parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
+    parser = argparse.ArgumentParser(description='Backprop cuantificado')
     parser.add_argument('--batch-size', type=int, default=64, metavar='N',
-                        help='input batch size for training (default: 64)')
+                        help='tamaño del batch de entrenamiento (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
-                        help='input batch size for testing (default: 1000)')
+                        help='tamaño del batch de test (default: 1000)')
     parser.add_argument('--epochs', type=int, default=10, metavar='N',
-                        help='number of epochs to train (default: 14)')
+                        help='numero de epocas (default: 14)')
     parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
                         help='learning rate (default: 1.0)')
     parser.add_argument('--gamma', type=float, default=0.7, metavar='M',
                         help='Learning rate step gamma (default: 0.7)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
-                        help='disables CUDA training')
+                        help='inhabilita CUDA training')
     parser.add_argument('--dry-run', action='store_true', default=False,
                         help='quickly check a single pass')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                        help='how many batches to wait before logging training status')
+                        help='frecuencia de iteraciones con las que mostrar info de entrenamiento')
     parser.add_argument('--save-model', action='store_true', default=False,
                         help='For Saving the current Model')
     parser.add_argument('--global-quantization', type=int, default=1, metavar='G',

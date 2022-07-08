@@ -31,25 +31,25 @@ import custom_funcs
 def main():
     #hola = input()
     # Training settings
-    parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
+    parser = argparse.ArgumentParser(description='Feedback Alignment cuantificado')
     parser.add_argument('--batch-size', type=int, default=64, metavar='N',
-                        help='input batch size for training (default: 64)')
+                        help='tamaño del batch de entrenamiento (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
-                        help='input batch size for testing (default: 1000)')
+                        help='tamaño del batch de test (default: 1000)')
     parser.add_argument('--epochs', type=int, default=10, metavar='N',
-                        help='number of epochs to train (default: 14)')
+                        help='numero de epocas (default: 14)')
     parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
                         help='learning rate (default: 1.0)')
     parser.add_argument('--gamma', type=float, default=0.7, metavar='M',
                         help='Learning rate step gamma (default: 0.7)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
-                        help='disables CUDA training')
+                        help='inhabilita CUDA training')
     parser.add_argument('--dry-run', action='store_true', default=False,
                         help='quickly check a single pass')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                        help='how many batches to wait before logging training status')
+                        help='frecuencia de iteraciones con las que mostrar info de entrenamiento')
     parser.add_argument('--save-model', action='store_true', default=False,
                         help='For Saving the current Model')
     parser.add_argument('--global-quantization', type=int, default=1, metavar='G',
@@ -57,14 +57,14 @@ def main():
     parser.add_argument('--n-bits', type=int, default=8, metavar='N',
                         help="numero de bits usados para la cuantizacion")
     parser.add_argument('--dataset', type=str, default='MNIST', metavar='d',
-                        help="indica la base de datos a usar: MNIST o FMNIST")
+                        help="indica la base de datos a usar: MNIST O FMNIST")
     parser.add_argument('--modo', type=int, default=0, metavar='n',
                         help="indica la cuantizacion a usar: ASYMM(0) o SYMM(1)")
     parser.add_argument('--n-layers',type=int, default= 0, metavar = 'n', help = "indica la cantidad de capas ocultas de la red (sin contar la de salida)")
     parser.add_argument('--hidden-width', type=int, default = 4, metavar = 'n', help = "numero de unidades de las capas ocultas ")
     parser.add_argument('--input-width',type=int, default = 784, metavar = 'n', help = "numero de unidades de la capa de entrada")
     parser.add_argument('--output-width',type=int, default = 10, metavar = 'n', help = "numero de unidades de la capa de salida")
-
+    
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     if args.global_quantization == 1:
