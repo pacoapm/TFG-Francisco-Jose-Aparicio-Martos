@@ -60,7 +60,7 @@ experimento 1 50 #se especifica 1 porque los modelos bases tienen 1 capa oculta 
 Ahora editamos el script pruebas.sh. Para ello escribimos en cada uno de los parámetros los experimentos que queramos realizar. Por ejemplo queremos pruebas con:
 - 5, 6 y 7 bits
 - cuantificación a nivel global y local
-- usar la función de cuantificación ASYMM
+- usar la función de cuantificación ASYMM  
 Entonces tendremos que editar las opciones de la siguiente forma:
 
 ```
@@ -84,7 +84,7 @@ Para ello ejecutamos el archivo script_cuantizacion.sh.
 
 ### Gráficas
 
-Para sacar las gráficas se deben de usar los scripts de python: [extractor.py](https://github.com/pacoapm/TFG-Francisco-Jose-Aparicio-Martos/blob/main/codigo/extractor.py) y [extractor_tablas.py](https://github.com/pacoapm/TFG-Francisco-Jose-Aparicio-Martos/blob/main/codigo/extractor_tablas.py). Estos archivos son sencillos de editar. Simplemente en cada uno de los argumentos se especifican los experimentos a graficar. Dentro de cada archivo hay ejemplos de uso. 
+Para sacar las gráficas se deben de usar los scripts de python: [extractor.py](https://github.com/pacoapm/TFG-Francisco-Jose-Aparicio-Martos/blob/main/codigo/extractor.py) y [extractor_tablas.py](https://github.com/pacoapm/TFG-Francisco-Jose-Aparicio-Martos/blob/main/codigo/extractor_tablas.py). Estos archivos son sencillos de editar. En cada uno de los argumentos se especifican los experimentos a graficar. Dentro de cada archivo hay ejemplos de uso. 
 
 
 
